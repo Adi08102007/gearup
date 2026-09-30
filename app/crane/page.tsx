@@ -5,8 +5,9 @@ import { useApp } from "@/lib/app-context";
 import { formatCurrency, formatDistance } from "@/lib/utils";
 import { Truck, Navigation, Camera, ShieldCheck, MapPin, CheckCircle, Clock, Phone, AlertTriangle, Key } from "lucide-react";
 import { CraneTowDispatch } from "@/lib/types";
+import AuthGuard from "@/components/AuthGuard";
 
-export default function CraneFleetDashboard() {
+function CraneFleetDashboardContent() {
   const { towDispatches, updateTowStatus, toggleTowPhoto, verifyTowOtp } = useApp();
   const [dutyStatus, setDutyStatus] = useState<"available" | "towing" | "offduty">("available");
   const [otpInputs, setOtpInputs] = useState<Record<string, string>>({});
@@ -326,5 +327,13 @@ export default function CraneFleetDashboard() {
         ))}
       </div>
     </div>
+  );
+}
+
+export default function CraneFleetDashboard() {
+  return (
+    <AuthGuard allowedRoles={["crane", "mechanic"]}>
+      <CraneFleetDashboardContent />
+    </AuthGuard>
   );
 }

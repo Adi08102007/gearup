@@ -1,330 +1,350 @@
 "use client";
 
-import { useState } from "react";
-import { useRouter } from "next/navigation";
+import { useState, Suspense } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { useApp } from "@/lib/app-context";
 import { UserRole } from "@/lib/types";
-import { Car, Wrench, Truck, ShieldCheck, ArrowRight, Phone, Lock, Sparkles, CheckCircle2 } from "lucide-react";
 
-export default function LoginPage() {
+function LoginForm() {
   const router = useRouter();
-  const { login, currentUser } = useApp();
+  const searchParams = useSearchParams();
 
-  const [activeRole, setActiveRole] = useState<UserRole>("customer");
-  const [authMode, setAuthMode] = useState<"otp" | "password">("otp");
-  const [identifier, setIdentifier] = useState("+91 98950 12345");
-  const [password, setPassword] = useState("••••••••");
-  const [otpSent, setOtpSent] = useState(false);
+  const roleParam = (searchParams.get("role") as UserRole) || "customer";
+  const redirectParam = searchParams.get("redirect") || (roleParam === "mechanic" ? "/mechanic" : "/customer");
+  const messageParam = searchParams.get("message") || "";
+
+  const { login } = useApp();
+
+  const [activeRole, setActiveRole] = useState<UserRole>(roleParam);
+  const [authMode, setAuthMode] = useState<"password" | "otp">("password");
+  const [identifier, setIdentifier] = useState("");
+  const [password, setPassword] = useState("");
   const [otpCode, setOtpCode] = useState("");
+  const [otpSent, setOtpSent] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [errorMsg, setErrorMsg] = useState("");
 
-  const roles = [
-    {
-      id: "customer" as UserRole,
-      title: "Vehicle Owner",
-      subtitle: "Customer Space",
-      icon: Car,
-      accent: "from-blue-600 to-indigo-600",
-      pill: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-      defaultContact: "+91 98950 12345",
-      dest: "/customer",
-      desc: "Manage car health, track km schedules, book verified garages & request highway tows.",
-    },
-    {
-      id: "mechanic" as UserRole,
-      title: "Certified Garage",
-      subtitle: "Mechanic Portal",
-      icon: Wrench,
-      accent: "from-emerald-600 to-teal-600",
-      pill: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-      defaultContact: "+91 98470 11223",
-      dest: "/mechanic",
-      desc: "Receive incoming 2-min bookings, assign repair bays & log odometer readings.",
-    },
-    {
-      id: "crane" as UserRole,
-      title: "Recovery Fleet",
-      subtitle: "Crane Operator",
-      icon: Truck,
-      accent: "from-amber-600 to-orange-600",
-      pill: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-      defaultContact: "+91 98460 77112",
-      dest: "/crane",
-      desc: "Highway flatbed dispatches, 4-angle photo damage inspections & OTP drop-offs.",
-    },
-  ];
+  const isMechanic = activeRole === "mechanic";
 
-  const currentRoleConfig = roles.find((r) => r.id === activeRole) || roles[0];
-
-  const handleRoleChange = (role: UserRole) => {
-    setActiveRole(role);
+  const handleRoleToggle = (newRole: UserRole) => {
+    setActiveRole(newRole);
     setOtpSent(false);
     setErrorMsg("");
-    const cfg = roles.find((r) => r.id === role);
-    if (cfg) setIdentifier(cfg.defaultContact);
   };
 
   const handleSendOtp = () => {
     if (!identifier) {
-      setErrorMsg("Please enter your phone number or email");
+      setErrorMsg("Please enter your registered email or phone number.");
       return;
     }
     setErrorMsg("");
-    setIsLoading(true);
-    setTimeout(() => {
-      setIsLoading(false);
-      setOtpSent(true);
-      setOtpCode("4821"); // Simulated OTP
-    }, 500);
+    setOtpSent(true);
+    setOtpCode("4821"); // Simulated OTP
   };
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (!identifier) {
+      setErrorMsg("Please enter your email or phone number.");
+      return;
+    }
+
     setIsLoading(true);
     setErrorMsg("");
 
     setTimeout(() => {
-      const success = login(activeRole, identifier, otpSent ? otpCode : password);
+      login(activeRole, identifier, authMode === "otp" ? otpCode : password);
       setIsLoading(false);
-      if (success) {
-        router.push(currentRoleConfig.dest);
-      } else {
-        setErrorMsg("Authentication failed. Please verify credentials.");
-      }
-    }, 600);
-  };
-
-  const handleQuickDemoLogin = (role: UserRole) => {
-    const cfg = roles.find((r) => r.id === role);
-    if (!cfg) return;
-    setIsLoading(true);
-    setTimeout(() => {
-      login(role, cfg.defaultContact, "demo-pass");
-      setIsLoading(false);
-      router.push(cfg.dest);
-    }, 300);
+      router.push(redirectParam);
+    }, 400);
   };
 
   return (
-    <div className="max-w-2xl mx-auto py-6 space-y-8">
-      {/* Header */}
-      <div className="text-center space-y-2">
-        <div className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-slate-800/90 border border-slate-700 text-xs font-medium text-slate-300">
-          <ShieldCheck className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Role-Based Authentication System</span>
+    <div className="max-w-4xl mx-auto py-6 sm:py-12">
+      {/* Informational Message Banner (e.g. "Please log in to continue") */}
+      {messageParam && (
+        <div className="mb-6 p-3.5 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 text-xs text-center font-medium">
+          🔒 {messageParam}
         </div>
-        <h1 className="text-3xl font-extrabold text-white">Sign In to GearUp</h1>
-        <p className="text-sm text-slate-400">
-          Choose your account type to access your dedicated automotive operations workspace
-        </p>
-      </div>
+      )}
 
-      {/* Role Selector Tabs */}
-      <div className="grid grid-cols-3 gap-3">
-        {roles.map((r) => {
-          const Icon = r.icon;
-          const isSelected = activeRole === r.id;
-          return (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => handleRoleChange(r.id)}
-              className={`p-4 rounded-2xl border text-left transition-all ${
-                isSelected
-                  ? "bg-[#141b2d] border-slate-600 shadow-xl ring-2 ring-emerald-500/30"
-                  : "bg-[#0d121f] border-slate-800/80 hover:border-slate-700 opacity-70 hover:opacity-100"
-              }`}
-            >
-              <div className="flex items-center justify-between">
-                <div
-                  className={`w-9 h-9 rounded-xl flex items-center justify-center ${
-                    isSelected ? "bg-emerald-500/20 text-emerald-400" : "bg-slate-800 text-slate-400"
-                  }`}
-                >
-                  <Icon className="w-5 h-5" />
-                </div>
-                <span className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full border ${r.pill}`}>
-                  {r.subtitle}
-                </span>
+      {errorMsg && (
+        <div className="mb-6 p-3.5 rounded-lg bg-red-50 border border-red-300 text-red-700 text-xs text-center font-medium">
+          {errorMsg}
+        </div>
+      )}
+
+      {isMechanic ? (
+        /* =================================================================== */
+        /* MECHANIC PRO PORTAL LOGIN (Matching mechanic_index.html Screen 1)   */
+        /* =================================================================== */
+        <div className="w-full grid md:grid-cols-12 border border-wire-300 dark:border-wire-700 rounded-xl overflow-hidden shadow-sm bg-white dark:bg-wire-900">
+          {/* Left: Partner Perks */}
+          <div className="md:col-span-5 bg-wire-50 dark:bg-wire-850 p-6 md:p-8 border-b md:border-b-0 md:border-r border-wire-300 dark:border-wire-700 flex flex-col justify-between text-xs">
+            <div>
+              <div className="inline-flex items-center gap-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 px-2.5 py-1 rounded text-xs font-mono font-bold uppercase mb-4">
+                <span>🛠️ Mechanic Partner Portal</span>
               </div>
-              <div className="mt-3 font-bold text-sm text-white">{r.title}</div>
-            </button>
-          );
-        })}
-      </div>
+              <h2 className="text-xl font-bold text-wire-900 dark:text-white mb-2">
+                Grow your garage business with GearUp
+              </h2>
+              <p className="text-xs text-wire-600 dark:text-wire-400 mb-6 leading-relaxed">
+                Direct customer breakdown alerts, transparent labor payouts, digital service history logging, and instant roadside dispatch.
+              </p>
 
-      {/* Login Card */}
-      <div className="p-6 sm:p-8 rounded-2xl bg-[#0f1422] border border-slate-800 shadow-xl space-y-6">
-        <div className="flex items-center justify-between border-b border-slate-800/80 pb-4">
-          <div>
-            <h2 className="text-lg font-bold text-white flex items-center gap-2">
-              <span>Login as {currentRoleConfig.title}</span>
-            </h2>
-            <p className="text-xs text-slate-400 mt-0.5">{currentRoleConfig.desc}</p>
+              <div className="space-y-3 text-xs">
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[11px] shrink-0">✓</span>
+                  <span><strong>Instant Onsite & Offsite Jobs:</strong> Accept requests nearby within 2 minutes.</span>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[11px] shrink-0">✓</span>
+                  <span><strong>Transparent Pricing:</strong> Publish your own labor rates and parts catalog.</span>
+                </div>
+                <div className="flex items-start gap-2.5">
+                  <span className="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center font-bold text-[11px] shrink-0">✓</span>
+                  <span><strong>Verified Badge:</strong> Build customer trust with genuine review badges.</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-wire-200 dark:border-wire-800 mt-6 text-wire-500">
+              Need help? Partner Helpline: <strong className="font-mono text-wire-800 dark:text-wire-200">1800-GEAR-PRO</strong>
+            </div>
           </div>
 
-          {/* Toggle between OTP and Password */}
-          <div className="flex bg-slate-900 p-1 rounded-xl border border-slate-800 text-xs">
-            <button
-              type="button"
-              onClick={() => setAuthMode("otp")}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
-                authMode === "otp" ? "bg-slate-800 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              Phone OTP
-            </button>
-            <button
-              type="button"
-              onClick={() => setAuthMode("password")}
-              className={`px-3 py-1.5 rounded-lg font-medium transition-all ${
-                authMode === "password" ? "bg-slate-800 text-white shadow-sm" : "text-slate-400 hover:text-slate-200"
-              }`}
-            >
-              Password
-            </button>
+          {/* Right: Partner Login Form */}
+          <div className="md:col-span-7 p-6 md:p-8 flex flex-col justify-center text-xs">
+            <div className="mb-6">
+              <h3 className="text-lg font-bold text-wire-900 dark:text-white">Mechanic Login</h3>
+              <p className="text-wire-500">Access your workshop dashboard, jobs, and earnings</p>
+            </div>
+
+            {/* Password vs OTP Switcher */}
+            <div className="flex border border-wire-300 dark:border-wire-700 rounded-lg p-1 mb-4 font-medium bg-wire-50 dark:bg-wire-800">
+              <button
+                type="button"
+                onClick={() => setAuthMode("password")}
+                className={`flex-1 py-1.5 text-center rounded transition ${
+                  authMode === "password"
+                    ? "bg-white dark:bg-wire-700 shadow-sm font-bold text-wire-900 dark:text-white"
+                    : "text-wire-600 dark:text-wire-400"
+                }`}
+              >
+                Password Login
+              </button>
+              <button
+                type="button"
+                onClick={() => setAuthMode("otp")}
+                className={`flex-1 py-1.5 text-center rounded transition ${
+                  authMode === "otp"
+                    ? "bg-white dark:bg-wire-700 shadow-sm font-bold text-wire-900 dark:text-white"
+                    : "text-wire-600 dark:text-wire-400"
+                }`}
+              >
+                OTP Login
+              </button>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="block font-medium text-wire-700 dark:text-wire-300 mb-1">
+                  Registered Email or Phone Number
+                </label>
+                <input
+                  type="text"
+                  required
+                  value={identifier}
+                  onChange={(e) => setIdentifier(e.target.value)}
+                  placeholder="e.g. mechanic@workshop.com or +91 9876543210"
+                  className="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800 text-wire-900 dark:text-white"
+                />
+              </div>
+
+              {authMode === "password" ? (
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="font-medium text-wire-700 dark:text-wire-300">Password</label>
+                    <button type="button" className="text-wire-600 underline">Forgot password?</button>
+                  </div>
+                  <input
+                    type="password"
+                    required
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    placeholder="Enter password"
+                    className="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800"
+                  />
+                </div>
+              ) : (
+                <div>
+                  <div className="flex justify-between items-center mb-1">
+                    <label className="font-medium">Enter 6-digit OTP</label>
+                    <button type="button" onClick={handleSendOtp} className="text-wire-600 underline">
+                      {otpSent ? "Resend OTP" : "Send OTP"}
+                    </button>
+                  </div>
+                  <input
+                    type="text"
+                    required
+                    value={otpCode}
+                    onChange={(e) => setOtpCode(e.target.value)}
+                    placeholder="• • • •"
+                    className="w-full px-3 py-2 border border-wire-300 rounded text-center font-mono tracking-widest text-sm"
+                  />
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={isLoading}
+                className="w-full py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 font-bold rounded-lg hover:opacity-90 transition text-sm shadow-sm"
+              >
+                {isLoading ? "Signing in..." : "Sign In to Workshop Dashboard ➔"}
+              </button>
+            </form>
+
+            <div className="mt-6 pt-4 border-t border-wire-200 dark:border-wire-800 flex flex-col sm:flex-row items-center justify-between text-xs gap-2">
+              <span className="text-wire-500">
+                New mechanic or garage?{" "}
+                <Link href="/signup?role=mechanic" className="font-bold underline text-wire-900 dark:text-white">
+                  Register Shop
+                </Link>
+              </span>
+              <button
+                type="button"
+                onClick={() => handleRoleToggle("customer")}
+                className="text-wire-600 underline hover:text-wire-900"
+              >
+                Not a mechanic? Customer login ›
+              </button>
+            </div>
           </div>
         </div>
-
-        {errorMsg && (
-          <div className="p-3 rounded-xl bg-red-500/10 border border-red-500/20 text-xs text-red-400">
-            {errorMsg}
+      ) : (
+        /* =================================================================== */
+        /* CUSTOMER LOGIN (Matching index.html Screen 2)                       */
+        /* =================================================================== */
+        <div className="w-full max-w-md mx-auto border border-wire-300 dark:border-wire-700 rounded-xl p-6 sm:p-8 bg-white dark:bg-wire-850 shadow-sm space-y-5 text-xs">
+          <div className="text-center space-y-1">
+            <div className="text-2xl font-mono font-black text-wire-900 dark:text-white">⚙️ GEARUP</div>
+            <h2 className="text-xl font-bold text-wire-900 dark:text-white">Customer Login</h2>
+            <p className="text-wire-500">
+              Access your registered vehicles, maintenance alerts, and active bookings.
+            </p>
           </div>
-        )}
 
-        <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Phone or Email Input */}
-          <div className="space-y-1.5">
-            <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-              <Phone className="w-3.5 h-3.5 text-slate-400" />
-              <span>Registered Mobile Number or Email</span>
-            </label>
-            <div className="relative">
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div>
+              <label className="block font-medium mb-1 text-wire-700 dark:text-wire-300">
+                Email or Mobile Phone
+              </label>
               <input
                 type="text"
                 required
                 value={identifier}
                 onChange={(e) => setIdentifier(e.target.value)}
-                placeholder="+91 98000 00000 or email@domain.com"
-                className="w-full bg-[#131929] border border-slate-700 text-white text-sm rounded-xl px-4 py-3 outline-none focus:border-emerald-500"
+                placeholder="e.g. customer@example.com or phone number"
+                className="w-full border border-wire-300 dark:border-wire-600 rounded p-2.5 bg-transparent text-wire-900 dark:text-white"
               />
-              {authMode === "otp" && !otpSent && (
-                <button
-                  type="button"
-                  onClick={handleSendOtp}
-                  disabled={isLoading}
-                  className="absolute right-2 top-2 px-3 py-1.5 rounded-lg bg-emerald-600 hover:bg-emerald-500 text-white text-xs font-semibold"
-                >
-                  Send OTP
-                </button>
-              )}
             </div>
-          </div>
 
-          {/* OTP Input or Password Input */}
-          {authMode === "otp" ? (
-            otpSent && (
-              <div className="space-y-1.5">
-                <div className="flex items-center justify-between">
-                  <label className="text-xs font-semibold text-slate-300">Enter 4-Digit Verification Code</label>
-                  <button
-                    type="button"
-                    onClick={handleSendOtp}
-                    className="text-[11px] text-emerald-400 hover:underline"
-                  >
-                    Resend Code
+            {authMode === "password" ? (
+              <div>
+                <div className="flex justify-between mb-1">
+                  <label className="font-medium text-wire-700 dark:text-wire-300">Password</label>
+                  <Link href="/forgot" className="text-wire-500 hover:underline">Forgot password?</Link>
+                </div>
+                <input
+                  type="password"
+                  required
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  placeholder="Enter password"
+                  className="w-full border border-wire-300 dark:border-wire-600 rounded p-2.5 bg-transparent text-wire-900 dark:text-white"
+                />
+              </div>
+            ) : (
+              <div>
+                <div className="flex justify-between mb-1">
+                  <label className="font-medium text-wire-700 dark:text-wire-300">Enter OTP</label>
+                  <button type="button" onClick={handleSendOtp} className="text-wire-500 hover:underline">
+                    {otpSent ? "Resend" : "Send OTP"}
                   </button>
                 </div>
                 <input
                   type="text"
-                  maxLength={4}
                   required
                   value={otpCode}
                   onChange={(e) => setOtpCode(e.target.value)}
-                  placeholder="4-digit OTP"
-                  className="w-full bg-[#131929] border border-emerald-500/60 text-white text-lg tracking-widest font-mono text-center rounded-xl py-2.5 outline-none"
+                  placeholder="4-digit code"
+                  className="w-full border border-wire-300 dark:border-wire-600 rounded p-2.5 text-center font-mono tracking-widest text-sm"
                 />
-                <p className="text-[11px] text-emerald-400 text-center">
-                  ✓ Demo simulation: Verification code autofilled ({otpCode})
-                </p>
               </div>
-            )
-          ) : (
-            <div className="space-y-1.5">
-              <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                <Lock className="w-3.5 h-3.5 text-slate-400" />
-                <span>Account Password</span>
+            )}
+
+            <div className="flex items-center justify-between">
+              <label className="flex items-center gap-2 cursor-pointer text-wire-600 dark:text-wire-400">
+                <input type="checkbox" defaultChecked className="rounded border-wire-300" />
+                <span>Remember me on this browser</span>
               </label>
-              <input
-                type="password"
-                required
-                value={password}
-                onChange={(e) => setPassword(e.target.value)}
-                placeholder="Enter password"
-                className="w-full bg-[#131929] border border-slate-700 text-white text-sm rounded-xl px-4 py-3 outline-none focus:border-emerald-500 font-mono"
-              />
             </div>
-          )}
 
-          {/* Submit Button */}
-          <button
-            type="submit"
-            disabled={isLoading || (authMode === "otp" && !otpSent)}
-            className="w-full py-3.5 rounded-xl bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 disabled:opacity-50 text-white font-bold text-sm transition-all shadow-lg shadow-emerald-900/30 flex items-center justify-center gap-2"
-          >
-            <span>{isLoading ? "Authenticating..." : `Sign In as ${currentRoleConfig.title}`}</span>
-            <ArrowRight className="w-4 h-4" />
-          </button>
-        </form>
-
-        {/* 1-Tap Quick Demo Access */}
-        <div className="pt-4 border-t border-slate-800 space-y-3">
-          <div className="flex items-center gap-2 text-xs text-slate-400">
-            <Sparkles className="w-3.5 h-3.5 text-amber-400" />
-            <span className="font-semibold text-slate-300">Evaluator / Demo 1-Tap Quick Access:</span>
-          </div>
-
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-2">
             <button
-              type="button"
-              onClick={() => handleQuickDemoLogin("customer")}
-              className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left text-xs transition-all flex items-center justify-between"
+              type="submit"
+              disabled={isLoading}
+              className="w-full py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs uppercase tracking-wider hover:opacity-95 shadow-sm"
             >
-              <div>
-                <div className="font-semibold text-white">Owner Account</div>
-                <div className="text-[10px] text-slate-500">Amaljith (Polo GT)</div>
-              </div>
-              <Car className="w-4 h-4 text-blue-400" />
+              {isLoading ? "Signing in..." : "Sign In ➔"}
             </button>
+
+            <div className="relative flex items-center justify-center my-3">
+              <div className="border-t border-wire-300 dark:border-wire-700 w-full"></div>
+              <span className="bg-white dark:bg-wire-850 px-2 text-[11px] font-mono text-wire-400 uppercase">
+                OR
+              </span>
+            </div>
 
             <button
               type="button"
-              onClick={() => handleQuickDemoLogin("mechanic")}
-              className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left text-xs transition-all flex items-center justify-between"
+              onClick={() => {
+                setAuthMode(authMode === "password" ? "otp" : "password");
+                setOtpSent(false);
+              }}
+              className="w-full py-2.5 border border-wire-400 dark:border-wire-600 rounded font-medium text-xs hover:bg-wire-50 dark:hover:bg-wire-800"
             >
-              <div>
-                <div className="font-semibold text-white">Garage Manager</div>
-                <div className="text-[10px] text-slate-500">Apex Auto Precision</div>
-              </div>
-              <Wrench className="w-4 h-4 text-emerald-400" />
+              {authMode === "password" ? "📲 Sign In With OTP" : "🔑 Sign In With Password"}
             </button>
 
-            <button
-              type="button"
-              onClick={() => handleQuickDemoLogin("crane")}
-              className="p-2.5 rounded-xl bg-slate-900 hover:bg-slate-800 border border-slate-800 text-left text-xs transition-all flex items-center justify-between"
-            >
-              <div>
-                <div className="font-semibold text-white">Crane Fleet Driver</div>
-                <div className="text-[10px] text-slate-500">Unit #4 Flatbed</div>
-              </div>
-              <Truck className="w-4 h-4 text-amber-400" />
-            </button>
-          </div>
+            <div className="text-center pt-2 border-t border-wire-200 dark:border-wire-700">
+              <span>New here? </span>
+              <Link href="/signup" className="font-bold underline text-wire-900 dark:text-white">
+                Sign up
+              </Link>
+            </div>
+
+            <div className="bg-wire-100 dark:bg-wire-800 p-2.5 rounded text-center text-[11px] text-wire-600 dark:text-wire-400">
+              Are you a mechanic?{" "}
+              <button
+                type="button"
+                onClick={() => handleRoleToggle("mechanic")}
+                className="underline font-bold text-wire-900 dark:text-white"
+              >
+                Mechanic login ›
+              </button>
+            </div>
+          </form>
         </div>
-      </div>
+      )}
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<div className="py-12 text-center text-xs text-wire-500">Loading...</div>}>
+      <LoginForm />
+    </Suspense>
   );
 }

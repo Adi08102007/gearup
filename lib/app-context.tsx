@@ -2,15 +2,16 @@
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
 import { Vehicle, MechanicShop, ServiceBooking, CraneTowDispatch, MaintenanceTask, ServiceItem, User, UserRole } from "./types";
-import { initialVehicles, sampleMaintenanceTasks, sampleMechanicShops, sampleBookings, sampleCraneDispatches } from "./mock-data";
+import { sampleMechanicShops } from "./mock-data";
 import { supabase, isSupabaseConfigured } from "./supabase";
 
 interface AppContextType {
   currentUser: User | null;
-  login: (role: UserRole, phoneOrEmail: string, passwordOrOtp?: string) => boolean;
+  isLoadingAuth: boolean;
+  login: (role: UserRole, emailOrPhone: string, passwordOrOtp?: string) => Promise<boolean> | boolean;
   logout: () => void;
   vehicles: Vehicle[];
-  activeVehicle: Vehicle;
+  activeVehicle: Vehicle | null;
   setActiveVehicleId: (id: string) => void;
   maintenanceTasks: MaintenanceTask[];
   shops: MechanicShop[];
@@ -33,198 +34,93 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const isCloud = isSupabaseConfigured();
 
-  const [currentUser, setCurrentUser] = useState<User | null>(() => {
-    if (typeof window !== "undefined") {
-      const saved = localStorage.getItem("gearup_user");
-      if (saved) return JSON.parse(saved);
-    }
-    return {
-      id: "usr-demo-1",
-      name: "Amaljith (Owner)",
-      email: "amaljith@gearup.com",
-      phone: "+91 98950 12345",
-      role: "customer",
-      vehicleId: "veh-1",
-    };
-  });
+  // 1. NO AUTO SIGN-IN: Default to null on website load
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [isLoadingAuth, setIsLoadingAuth] = useState(true);
 
-  const login = (role: UserRole, phoneOrEmail: string, passwordOrOtp?: string): boolean => {
-    let user: User;
-    if (role === "customer") {
-      user = {
-        id: "usr-cust-1",
-        name: "Amaljith (Owner)",
-        email: phoneOrEmail.includes("@") ? phoneOrEmail : "owner@gearup.com",
-        phone: phoneOrEmail.includes("@") ? "+91 98950 12345" : phoneOrEmail,
-        role: "customer",
-        vehicleId: "veh-1",
-      };
-    } else if (role === "mechanic") {
-      user = {
-        id: "usr-mech-1",
-        name: "Apex Auto Master Tech",
-        email: phoneOrEmail.includes("@") ? phoneOrEmail : "service@apexauto.in",
-        phone: phoneOrEmail.includes("@") ? "+91 98470 11223" : phoneOrEmail,
-        role: "mechanic",
-        shopId: "shop-1",
-      };
-    } else {
-      user = {
-        id: "usr-crane-1",
-        name: "Highway Unit #4 Driver",
-        email: phoneOrEmail.includes("@") ? phoneOrEmail : "recovery4@keralatow.com",
-        phone: phoneOrEmail.includes("@") ? "+91 98460 77112" : phoneOrEmail,
-        role: "crane",
-        truckPlate: "KL 07 CW 9901",
-      };
-    }
-    setCurrentUser(user);
-    if (typeof window !== "undefined") {
-      localStorage.setItem("gearup_user", JSON.stringify(user));
-    }
-    return true;
-  };
-
-  const logout = () => {
-    setCurrentUser(null);
-    if (typeof window !== "undefined") {
-      localStorage.removeItem("gearup_user");
-    }
-  };
-
+  // Vehicles start empty by default (no pre-entered or seeded car data)
   const [vehicles, setVehicles] = useState<Vehicle[]>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("gearup_vehicles");
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          return [];
+        }
+      }
     }
-    return initialVehicles;
+    return [];
   });
 
-  const [activeVehicleId, setActiveVehicleId] = useState<string>(vehicles[0]?.id || "veh-1");
-  const [maintenanceTasks] = useState<MaintenanceTask[]>(sampleMaintenanceTasks);
+  const [activeVehicleId, setActiveVehicleId] = useState<string>(vehicles[0]?.id || "");
   const [shops] = useState<MechanicShop[]>(sampleMechanicShops);
 
+  // Bookings start empty
   const [bookings, setBookings] = useState<ServiceBooking[]>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("gearup_bookings");
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          return [];
+        }
+      }
     }
-    return sampleBookings;
+    return [];
   });
 
   const [towDispatches, setTowDispatches] = useState<CraneTowDispatch[]>(() => {
     if (typeof window !== "undefined") {
       const saved = localStorage.getItem("gearup_tow_dispatches");
-      if (saved) return JSON.parse(saved);
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          return [];
+        }
+      }
     }
-    return sampleCraneDispatches;
+    return [];
   });
 
-  // Fetch from Supabase on mount if cloud credentials configured
-  const syncWithSupabase = useCallback(async () => {
-    if (!supabase || !isCloud) return;
-
-    try {
-      // 1. Fetch vehicles
-      const { data: vehData } = await supabase.from("vehicles").select("*");
-      if (vehData && vehData.length > 0) {
-        const mappedVehicles: Vehicle[] = vehData.map((v) => ({
-          id: v.id,
-          make: v.make,
-          model: v.model,
-          year: v.year,
-          regNumber: v.reg_number,
-          fuelType: v.fuel_type,
-          currentKm: v.current_km,
-          lastServiceKm: v.last_service_km,
-          nextServiceDueKm: v.next_service_due_km,
-          healthScore: v.health_score,
-          insuranceExpiry: v.insurance_expiry,
-          pollutionExpiry: v.pollution_expiry,
-        }));
-        setVehicles(mappedVehicles);
-      }
-
-      // 2. Fetch bookings
-      const { data: bkData } = await supabase.from("bookings").select("*").order("created_at", { ascending: false });
-      if (bkData && bkData.length > 0) {
-        const mappedBookings: ServiceBooking[] = bkData.map((b) => ({
-          id: b.id,
-          bookingNumber: b.booking_number,
-          customerId: b.customer_id,
-          customerName: b.customer_name,
-          customerPhone: b.customer_phone,
-          vehicle: b.vehicle_info,
-          shopId: b.shop_id,
-          shopName: b.shop_name,
-          services: b.services,
-          status: b.status,
-          scheduledTime: b.scheduled_time,
-          loggedOdometer: b.logged_odometer,
-          partsReplaced: b.parts_replaced,
-          laborCharge: b.labor_charge,
-          notes: b.notes,
-          completionOtp: b.completion_otp,
-          createdAt: b.created_at,
-        }));
-        setBookings(mappedBookings);
-      }
-
-      // 3. Fetch tow dispatches
-      const { data: towData } = await supabase.from("tow_dispatches").select("*").order("created_at", { ascending: false });
-      if (towData && towData.length > 0) {
-        const mappedTows: CraneTowDispatch[] = towData.map((t) => ({
-          id: t.id,
-          dispatchNumber: t.dispatch_number,
-          customerId: t.customer_id,
-          customerPhone: t.customer_phone,
-          vehicleInfo: t.vehicle_info,
-          pickupAddress: t.pickup_address,
-          destinationShopId: t.destination_shop_id,
-          destinationShopName: t.destination_shop_name,
-          destinationAddress: t.destination_address,
-          distanceKm: t.distance_km,
-          baseFare: t.base_fare,
-          perKmRate: t.per_km_rate,
-          totalFare: t.total_fare,
-          status: t.status,
-          photos: t.photos || {},
-          handoverOtp: t.handover_otp,
-          driverName: t.driver_name,
-          driverPhone: t.driver_phone,
-          truckPlate: t.truck_plate,
-          createdAt: t.created_at,
-        }));
-        setTowDispatches(mappedTows);
-      }
-    } catch (err) {
-      console.warn("Supabase fetch notice: using local cached state.", err);
-    }
-  }, [isCloud]);
-
+  // Check real Supabase session on mount. User is logged out by default unless real session exists.
   useEffect(() => {
-    syncWithSupabase();
+    async function checkSession() {
+      if (supabase && isCloud) {
+        try {
+          const { data } = await supabase.auth.getSession();
+          if (data?.session?.user) {
+            const u = data.session.user;
+            const role = (u.user_metadata?.role as UserRole) || "customer";
+            setCurrentUser({
+              id: u.id,
+              name: u.user_metadata?.name || (role === "mechanic" ? "Workshop #1" : "Customer"),
+              email: u.email || "",
+              phone: u.phone || u.user_metadata?.phone || "",
+              role,
+            });
+            setIsLoadingAuth(false);
+            return;
+          }
+        } catch (e) {
+          console.warn("Session check fallback:", e);
+        }
+      }
 
-    if (!supabase || !isCloud) return;
+      // No real Supabase session exists: clear any test session data stored in localStorage or sessionStorage
+      if (typeof window !== "undefined") {
+        localStorage.removeItem("gearup_user");
+        sessionStorage.removeItem("gearup_user");
+        sessionStorage.clear();
+      }
+      setCurrentUser(null);
+      setIsLoadingAuth(false);
+    }
 
-    // Realtime WebSocket channel listening to PostgreSQL table changes
-    const channel = supabase
-      .channel("gearup-realtime-sync")
-      .on("postgres_changes", { event: "*", schema: "public", table: "bookings" }, () => {
-        syncWithSupabase();
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "vehicles" }, () => {
-        syncWithSupabase();
-      })
-      .on("postgres_changes", { event: "*", schema: "public", table: "tow_dispatches" }, () => {
-        syncWithSupabase();
-      })
-      .subscribe();
-
-    return () => {
-      supabase?.removeChannel(channel);
-    };
-  }, [syncWithSupabase, isCloud]);
+    checkSession();
+  }, [isCloud]);
 
   // Synchronize localStorage
   useEffect(() => {
@@ -245,14 +141,90 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     }
   }, [towDispatches]);
 
-  const activeVehicle = vehicles.find((v) => v.id === activeVehicleId) || vehicles[0] || initialVehicles[0];
+  // Active Vehicle is user's own saved vehicle or null
+  const activeVehicle = vehicles.find((v) => v.id === activeVehicleId) || vehicles[0] || null;
+
+  // Dynamic Maintenance Tasks calculated only from user's own saved vehicle km
+  const maintenanceTasks: MaintenanceTask[] = activeVehicle
+    ? [
+        {
+          id: "task-oil",
+          vehicleId: activeVehicle.id,
+          title: "Oil change & filter",
+          intervalKm: 10000,
+          lastDoneKm: activeVehicle.lastServiceKm,
+          dueKm: activeVehicle.nextServiceDueKm,
+          status:
+            activeVehicle.currentKm >= activeVehicle.nextServiceDueKm
+              ? "overdue"
+              : activeVehicle.nextServiceDueKm - activeVehicle.currentKm <= 300
+              ? "due_soon"
+              : "good",
+          estimatedCost: 1400,
+          description: "Engine oil flush, OEM cartridge filter and seal ring.",
+        },
+        {
+          id: "task-brakes",
+          vehicleId: activeVehicle.id,
+          title: "Brake pads inspection",
+          intervalKm: 20000,
+          lastDoneKm: Math.max(0, activeVehicle.currentKm - 5000),
+          dueKm: activeVehicle.currentKm + 4200,
+          status: "good",
+          estimatedCost: 850,
+          description: "Measure pad lining thickness and inspect disc rotor scoring.",
+        },
+        {
+          id: "task-fluid",
+          vehicleId: activeVehicle.id,
+          title: "Brake fluid flush (DOT 4)",
+          intervalKm: 30000,
+          lastDoneKm: Math.max(0, activeVehicle.currentKm - 28000),
+          dueKm: activeVehicle.currentKm + 2000,
+          status: activeVehicle.currentKm >= 40000 ? "due_soon" : "good",
+          estimatedCost: 650,
+          description: "Moisture content check and hydraulic bleeding.",
+        },
+      ]
+    : [];
+
+  const login = (role: UserRole, emailOrPhone: string, passwordOrOtp?: string): boolean => {
+    let name = "Customer";
+    if (role === "mechanic") name = "Workshop #1";
+    if (role === "crane") name = "Recovery Unit #1";
+
+    const user: User = {
+      id: `usr-${Date.now()}`,
+      name,
+      email: emailOrPhone.includes("@") ? emailOrPhone : `${role}@gearup.com`,
+      phone: emailOrPhone.includes("@") ? "+91 90000 00000" : emailOrPhone,
+      role,
+    };
+
+    setCurrentUser(user);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gearup_user", JSON.stringify(user));
+    }
+    return true;
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("gearup_user");
+      sessionStorage.clear();
+    }
+    if (supabase && isCloud) {
+      supabase.auth.signOut().catch(() => {});
+    }
+  };
 
   const addVehicle = async (newVeh: Omit<Vehicle, "id" | "healthScore" | "lastServiceKm" | "nextServiceDueKm">) => {
     const id = `veh-${Date.now()}`;
     const vehicle: Vehicle = {
       ...newVeh,
       id,
-      healthScore: 90,
+      healthScore: 92,
       lastServiceKm: Math.max(0, newVeh.currentKm - 2000),
       nextServiceDueKm: newVeh.currentKm + 8000,
     };
@@ -260,7 +232,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setVehicles((prev) => [vehicle, ...prev]);
     setActiveVehicleId(id);
 
-    if (supabase && isCloud) {
+    if (supabase && isCloud && currentUser) {
       try {
         await supabase.from("vehicles").insert({
           id,
@@ -273,11 +245,11 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           last_service_km: vehicle.lastServiceKm,
           next_service_due_km: vehicle.nextServiceDueKm,
           health_score: vehicle.healthScore,
-          insurance_expiry: vehicle.insuranceExpiry,
-          pollution_expiry: vehicle.pollutionExpiry,
+          insurance_expiry: vehicle.insuranceExpiry || null,
+          pollution_expiry: vehicle.pollutionExpiry || null,
         });
       } catch (e) {
-        console.warn("Cloud write fallback:", e);
+        console.warn("Cloud vehicle write notice:", e);
       }
     }
   };
@@ -296,14 +268,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     if (supabase && isCloud) {
       try {
-        const v = vehicles.find((v) => v.id === vehicleId);
-        if (v) {
-          const delta = newKm - v.lastServiceKm;
-          const score = Math.max(20, Math.min(100, Math.round(100 - (delta / 10000) * 40)));
-          await supabase.from("vehicles").update({ current_km: newKm, health_score: score }).eq("id", vehicleId);
-        }
+        await supabase.from("vehicles").update({ current_km: newKm }).eq("id", vehicleId);
       } catch (e) {
-        console.warn("Cloud write fallback:", e);
+        console.warn("Cloud km update notice:", e);
       }
     }
   };
@@ -314,17 +281,17 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const newBooking: ServiceBooking = {
       id: newId,
       bookingNumber: `GU-2026-${Math.floor(1000 + Math.random() * 9000)}`,
-      customerId: "cust-current",
-      customerName: "Vehicle Owner (You)",
-      customerPhone: "+91 98470 55443",
+      customerId: currentUser?.id || "cust-user",
+      customerName: currentUser?.name || "Customer",
+      customerPhone: currentUser?.phone || "+91 90000 00000",
       vehicle: {
-        make: activeVehicle.make,
-        model: activeVehicle.model,
-        regNumber: activeVehicle.regNumber,
-        currentKm: activeVehicle.currentKm,
+        make: activeVehicle?.make || "Vehicle",
+        model: activeVehicle?.model || "Model",
+        regNumber: activeVehicle?.regNumber || "REG-0000",
+        currentKm: activeVehicle?.currentKm || 0,
       },
       shopId,
-      shopName: shop?.name || "Auto Repair Centre",
+      shopName: shop?.name || "Workshop #1",
       services,
       status: "pending",
       scheduledTime,
@@ -355,7 +322,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
           completion_otp: newBooking.completionOtp,
         });
       } catch (e) {
-        console.warn("Cloud write fallback:", e);
+        console.warn("Cloud booking insert notice:", e);
       }
     }
 
@@ -369,9 +336,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
     if (supabase && isCloud) {
       try {
-        await supabase.from("bookings").update({ status, ...(notes ? { notes } : {}) }).eq("id", bookingId);
+        await supabase.from("bookings").update({ status }).eq("id", bookingId);
       } catch (e) {
-        console.warn("Cloud write fallback:", e);
+        console.warn("Cloud booking update notice:", e);
       }
     }
   };
@@ -402,32 +369,12 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
               currentKm: odometer,
               lastServiceKm: odometer,
               nextServiceDueKm: odometer + 10000,
-              healthScore: 98,
+              healthScore: 100,
             };
           }
           return v;
         })
       );
-
-      if (supabase && isCloud) {
-        try {
-          await supabase.from("bookings").update({
-            logged_odometer: odometer,
-            parts_replaced: parts,
-            labor_charge: labor,
-            status: "ready_for_pickup",
-          }).eq("id", bookingId);
-
-          await supabase.from("vehicles").update({
-            current_km: odometer,
-            last_service_km: odometer,
-            next_service_due_km: odometer + 10000,
-            health_score: 98,
-          }).eq("reg_number", booking.vehicle.regNumber);
-        } catch (e) {
-          console.warn("Cloud write fallback:", e);
-        }
-      }
     }
   };
 
@@ -446,13 +393,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     const newDispatch: CraneTowDispatch = {
       id,
       dispatchNumber: `TOW-2026-${Math.floor(100 + Math.random() * 900)}`,
-      customerId: "cust-current",
-      customerPhone: "+91 98470 55443",
+      customerId: currentUser?.id || "cust-user",
+      customerPhone: currentUser?.phone || "+91 90000 00000",
       vehicleInfo: data.vehicleInfo,
       pickupAddress: data.pickupAddress,
       destinationShopId: data.destinationShopId,
-      destinationShopName: shop?.name || "Partner Repair Yard",
-      destinationAddress: shop?.address || "Highway Service Depot",
+      destinationShopName: shop?.name || "Workshop #1",
+      destinationAddress: shop?.address || "Bypass Service Road",
       distanceKm: data.distanceKm,
       baseFare,
       perKmRate,
@@ -460,42 +407,13 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
       status: "dispatched",
       photos: {},
       handoverOtp: String(Math.floor(1000 + Math.random() * 9000)),
-      driverName: "Emergency Response Crane #3",
-      driverPhone: "+91 98460 11998",
-      truckPlate: "KL 07 DE 3311",
+      driverName: "Recovery Unit #1",
+      driverPhone: "+91 98460 00001",
+      truckPlate: "KL-07-EE-9090",
       createdAt: new Date().toISOString().replace("T", " ").substring(0, 16),
     };
 
     setTowDispatches((prev) => [newDispatch, ...prev]);
-
-    if (supabase && isCloud) {
-      try {
-        await supabase.from("tow_dispatches").insert({
-          id: newDispatch.id,
-          dispatch_number: newDispatch.dispatchNumber,
-          customer_id: newDispatch.customerId,
-          customer_phone: newDispatch.customerPhone,
-          vehicle_info: newDispatch.vehicleInfo,
-          pickup_address: newDispatch.pickupAddress,
-          destination_shop_id: newDispatch.destinationShopId,
-          destination_shop_name: newDispatch.destinationShopName,
-          destination_address: newDispatch.destinationAddress,
-          distance_km: newDispatch.distanceKm,
-          base_fare: newDispatch.baseFare,
-          per_km_rate: newDispatch.perKmRate,
-          total_fare: newDispatch.totalFare,
-          status: newDispatch.status,
-          photos: newDispatch.photos,
-          handover_otp: newDispatch.handoverOtp,
-          driver_name: newDispatch.driverName,
-          driver_phone: newDispatch.driverPhone,
-          truck_plate: newDispatch.truckPlate,
-        });
-      } catch (e) {
-        console.warn("Cloud write fallback:", e);
-      }
-    }
-
     return id;
   };
 
@@ -503,41 +421,23 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     setTowDispatches((prev) =>
       prev.map((t) => (t.id === dispatchId ? { ...t, status } : t))
     );
-
-    if (supabase && isCloud) {
-      try {
-        await supabase.from("tow_dispatches").update({ status }).eq("id", dispatchId);
-      } catch (e) {
-        console.warn("Cloud write fallback:", e);
-      }
-    }
   };
 
   const toggleTowPhoto = async (dispatchId: string, angle: "front" | "rear" | "left" | "right") => {
-    let updatedPhotos = {};
     setTowDispatches((prev) =>
       prev.map((t) => {
         if (t.id === dispatchId) {
-          updatedPhotos = {
-            ...t.photos,
-            [angle]: !t.photos[angle],
-          };
           return {
             ...t,
-            photos: updatedPhotos,
+            photos: {
+              ...t.photos,
+              [angle]: !t.photos[angle],
+            },
           };
         }
         return t;
       })
     );
-
-    if (supabase && isCloud) {
-      try {
-        await supabase.from("tow_dispatches").update({ photos: updatedPhotos }).eq("id", dispatchId);
-      } catch (e) {
-        console.warn("Cloud write fallback:", e);
-      }
-    }
   };
 
   const verifyTowOtp = (dispatchId: string, otp: string): boolean => {
@@ -553,6 +453,7 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     <AppContext.Provider
       value={{
         currentUser,
+        isLoadingAuth,
         login,
         logout,
         vehicles,

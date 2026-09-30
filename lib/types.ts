@@ -25,8 +25,8 @@ export interface Vehicle {
   lastServiceKm: number;
   nextServiceDueKm: number;
   healthScore: number; // 0 - 100
-  insuranceExpiry: string;
-  pollutionExpiry: string;
+  insuranceExpiry?: string;
+  pollutionExpiry?: string;
 }
 
 export interface MaintenanceTask {
@@ -83,6 +83,9 @@ export interface ServiceBooking {
   services: ServiceItem[];
   status: "pending" | "accepted" | "in_progress" | "ready_for_pickup" | "completed" | "declined";
   scheduledTime: string;
+  serviceType?: "onsite" | "offsite";
+  totalAmount?: number;
+  odometerAtService?: number;
   loggedOdometer?: number;
   partsReplaced?: { name: string; cost: number }[];
   laborCharge: number;

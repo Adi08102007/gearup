@@ -6,8 +6,9 @@ import { useRouter } from "next/navigation";
 import { useApp } from "@/lib/app-context";
 import { formatCurrency, formatDistance } from "@/lib/utils";
 import { Star, MapPin, Clock, Wrench, ArrowRight, ShieldCheck, Filter, ArrowLeft } from "lucide-react";
+import AuthGuard from "@/components/AuthGuard";
 
-export default function FindMechanicPage() {
+function FindMechanicContent() {
   const router = useRouter();
   const { shops } = useApp();
 
@@ -403,5 +404,13 @@ export default function FindMechanicPage() {
         </div>
       )}
     </div>
+  );
+}
+
+export default function FindMechanicPage() {
+  return (
+    <AuthGuard allowedRoles={["customer"]}>
+      <FindMechanicContent />
+    </AuthGuard>
   );
 }

@@ -4,8 +4,8 @@ import Navbar from "@/components/Navbar";
 import { AppProvider } from "@/lib/app-context";
 
 export const metadata: Metadata = {
-  title: "GearUp | Automotive Ecosystem Platform",
-  description: "Connected vehicle owner portal, certified garage operations, and 24/7 highway recovery crane fleet.",
+  title: "GearUp — Automotive Care & Roadside Assistance Platform",
+  description: "Find trusted rated mechanics, book onsite & offsite vehicle service, and request emergency highway towing.",
 };
 
 export default function RootLayout({
@@ -14,22 +14,22 @@ export default function RootLayout({
   children: React.ReactNode;
 }) {
   return (
-    <html lang="en" className="dark">
-      <body className="min-h-screen flex flex-col bg-[#090d16] text-slate-100 antialiased selection:bg-emerald-500 selection:text-white">
+    <html lang="en">
+      <body className="min-h-screen flex flex-col bg-wire-100 dark:bg-wire-950 text-wire-900 dark:text-wire-100 antialiased selection:bg-wire-900 selection:text-white transition-colors duration-200">
         <AppProvider>
           <Navbar />
           <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6">
             {children}
           </main>
-          <footer className="border-t border-slate-800/80 bg-[#070a12] py-6 text-center text-xs text-slate-500">
+          <footer className="border-t border-wire-300 dark:border-wire-800 bg-white dark:bg-wire-900 py-6 text-center text-xs text-wire-500">
             <div className="max-w-7xl mx-auto px-4 flex flex-col sm:flex-row items-center justify-between gap-3">
               <div className="flex items-center gap-2">
-                <span className="font-semibold text-slate-400">GearUp Platform</span>
+                <span className="font-bold text-wire-800 dark:text-wire-200">⚙️ GearUp Technologies Inc.</span>
                 <span>•</span>
-                <span>Customer • Mechanic • Crane Recovery</span>
+                <span>Customer • Workshop • Crane Fleet Network</span>
               </div>
-              <div className="text-slate-500">
-                Kerala Regional Fleet Network • Verified ISO 9001 Garages
+              <div className="text-wire-500">
+                Verified Certified Garages • 24/7 Roadside Assistance
               </div>
             </div>
           </footer>

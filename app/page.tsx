@@ -1,9 +1,54 @@
 "use client";
 
+import { useState } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { ArrowRight, Wrench, ShieldAlert, Truck, Star, Search, Clock, CheckCircle2 } from "lucide-react";
+import { ArrowRight, Wrench, ShieldAlert, Truck, Star, Search, Clock, CheckCircle2, Navigation, Loader2 } from "lucide-react";
+import { useApp } from "@/lib/app-context";
 
 export default function HomePage() {
+  const router = useRouter();
+  const { currentUser } = useApp();
+
+  // Search box state: empty location by default with geolocation button
+  const [location, setLocation] = useState("");
+  const [isLocating, setIsLocating] = useState(false);
+  const [serviceNeeded, setServiceNeeded] = useState("General Service & Oil Change");
+
+  const handleDetectLocation = () => {
+    if (!navigator.geolocation) {
+      alert("Geolocation is not supported by your browser.");
+      return;
+    }
+    setIsLocating(true);
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        const lat = position.coords.latitude.toFixed(4);
+        const lng = position.coords.longitude.toFixed(4);
+        setLocation(`GPS: ${lat}, ${lng} (Current Location)`);
+        setIsLocating(false);
+      },
+      (error) => {
+        console.warn("Geolocation error:", error);
+        setIsLocating(false);
+        alert("Location permission was denied or unavailable. Please type your location manually.");
+      },
+      { timeout: 10000 }
+    );
+  };
+
+  const handleProtectedAction = (targetPath: string) => {
+    if (!currentUser) {
+      router.push(
+        `/login?redirect=${encodeURIComponent(targetPath)}&message=${encodeURIComponent(
+          "Please log in to continue."
+        )}`
+      );
+    } else {
+      router.push(targetPath);
+    }
+  };
+
   return (
     <div className="space-y-12 py-2">
       {/* 1. Hero Section (Matches Wireframe Screen 1) */}
@@ -21,24 +66,61 @@ export default function HomePage() {
             Book doorstep onsite service, schedule workshop visits, or request emergency roadside towing with real-time tracking and transparent part & labor prices.
           </p>
 
-          {/* Search Box */}
+          {/* Search Box with empty location field & GPS button */}
           <div className="p-4 bg-white dark:bg-wire-800 border-2 border-wire-900 dark:border-wire-300 rounded-xl shadow-md space-y-3">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
-              <div className="space-y-1">
-                <label className="text-[11px] font-mono uppercase text-wire-500">1. Current Location</label>
-                <div className="flex items-center border border-wire-300 dark:border-wire-600 rounded px-2.5 py-2 text-xs bg-transparent">
-                  <span className="mr-2">📍</span>
+            <div className="grid grid-cols-1 md:grid-cols-12 gap-3 items-end">
+              {/* Location Input with GPS detection */}
+              <div className="md:col-span-5 space-y-1">
+                <div className="flex items-center justify-between">
+                  <label className="text-[11px] font-mono uppercase text-wire-500">1. Current Location</label>
+                  <button
+                    type="button"
+                    onClick={handleDetectLocation}
+                    disabled={isLocating}
+                    className="text-[11px] font-medium text-wire-700 hover:text-wire-900 dark:text-wire-300 flex items-center gap-1 hover:underline"
+                  >
+                    {isLocating ? (
+                      <>
+                        <Loader2 className="w-3 h-3 animate-spin" />
+                        <span>Detecting GPS...</span>
+                      </>
+                    ) : (
+                      <>
+                        <Navigation className="w-3 h-3" />
+                        <span>Use My GPS</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+                <div className="flex items-center border border-wire-300 dark:border-wire-600 rounded px-2.5 py-2 text-xs bg-transparent focus-within:border-wire-900">
+                  <span className="mr-2 text-wire-400">📍</span>
                   <input
                     type="text"
-                    defaultValue="Kochi Central / NH 66 Bypass"
-                    className="w-full bg-transparent focus:outline-none text-wire-900 dark:text-white"
+                    value={location}
+                    onChange={(e) => setLocation(e.target.value)}
+                    placeholder="Enter city, landmark, or tap GPS"
+                    className="w-full bg-transparent focus:outline-none text-wire-900 dark:text-white placeholder:text-wire-400"
                   />
+                  {location && (
+                    <button
+                      type="button"
+                      onClick={() => setLocation("")}
+                      className="text-wire-400 hover:text-wire-600 text-xs ml-1"
+                    >
+                      ✕
+                    </button>
+                  )}
                 </div>
               </div>
 
-              <div className="space-y-1">
+              {/* Service Select */}
+              <div className="md:col-span-4 space-y-1">
                 <label className="text-[11px] font-mono uppercase text-wire-500">2. Service Needed</label>
-                <select className="w-full border border-wire-300 dark:border-wire-600 rounded px-2.5 py-2 text-xs bg-white dark:bg-wire-800 text-wire-900 dark:text-white">
+                <select
+                  value={serviceNeeded}
+                  onChange={(e) => setServiceNeeded(e.target.value)}
+                  className="w-full border border-wire-300 dark:border-wire-600 rounded px-2.5 py-2 text-xs bg-white dark:bg-wire-800 text-wire-900 dark:text-white h-[35px]"
+                >
                   <option>General Service & Oil Change</option>
                   <option>Brake / Clutch Inspection</option>
                   <option>Battery Jumpstart / Replace</option>
@@ -46,19 +128,21 @@ export default function HomePage() {
                 </select>
               </div>
 
-              <div className="space-y-1">
+              {/* Action Button: Login Protected */}
+              <div className="md:col-span-3 space-y-1">
                 <label className="text-[11px] font-mono uppercase text-wire-500">3. Action</label>
-                <Link
-                  href="/customer/find-mechanic"
-                  className="w-full py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs uppercase tracking-wider hover:opacity-90 flex items-center justify-center gap-1.5 h-[34px]"
+                <button
+                  type="button"
+                  onClick={() => handleProtectedAction("/customer/find-mechanic")}
+                  className="w-full py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs uppercase tracking-wider hover:opacity-90 flex items-center justify-center gap-1.5 h-[35px] shadow-sm"
                 >
                   <span>Find Mechanics</span>
                   <ArrowRight className="w-3.5 h-3.5" />
-                </Link>
+                </button>
               </div>
             </div>
 
-            {/* Breakdown Banner Card */}
+            {/* Breakdown Banner Card: Login Protected */}
             <div className="mt-4 pt-3 border-t border-wire-200 dark:border-wire-700 flex flex-col sm:flex-row items-center justify-between gap-3 bg-red-50 dark:bg-red-950/40 p-3 rounded-lg border border-red-300 dark:border-red-800">
               <div className="flex items-center gap-3">
                 <span className="text-2xl animate-emerg">🚨</span>
@@ -71,12 +155,13 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              <Link
-                href="/customer/sos"
-                className="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded uppercase tracking-wider transition whitespace-nowrap shadow-sm"
+              <button
+                type="button"
+                onClick={() => handleProtectedAction("/customer/sos")}
+                className="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded uppercase tracking-wider transition whitespace-nowrap shadow-sm text-center"
               >
                 Vehicle broke down? Get help now ➔
-              </Link>
+              </button>
             </div>
           </div>
         </div>
@@ -149,25 +234,47 @@ export default function HomePage() {
         </div>
       </div>
 
-      {/* 4. Quick Portal Switcher Banner (For Evaluators & Operators) */}
+      {/* 4. Partner Access Board */}
       <div className="p-4 rounded-xl border border-wire-300 dark:border-wire-700 bg-wire-100 dark:bg-wire-850 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
         <div className="space-y-0.5">
           <div className="font-bold text-wire-900 dark:text-white">Are you a Garage Owner or Crane Fleet Operator?</div>
           <div className="text-wire-500">Log into your specialized operations dispatch board.</div>
         </div>
         <div className="flex gap-2">
-          <Link
-            href="/mechanic"
+          <button
+            type="button"
+            onClick={() => {
+              if (currentUser?.role === "mechanic") {
+                router.push("/mechanic");
+              } else {
+                router.push(
+                  `/login?role=mechanic&redirect=${encodeURIComponent(
+                    "/mechanic"
+                  )}&message=${encodeURIComponent("Please log in to continue.")}`
+                );
+              }
+            }}
             className="px-3.5 py-1.5 border border-wire-400 dark:border-wire-600 rounded bg-white dark:bg-wire-800 font-bold text-wire-900 dark:text-white hover:bg-wire-50"
           >
             🛠️ Mechanic Portal ›
-          </Link>
-          <Link
-            href="/crane"
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              if (currentUser?.role === "crane") {
+                router.push("/crane");
+              } else {
+                router.push(
+                  `/login?role=crane&redirect=${encodeURIComponent(
+                    "/crane"
+                  )}&message=${encodeURIComponent("Please log in to continue.")}`
+                );
+              }
+            }}
             className="px-3.5 py-1.5 border border-amber-400 bg-amber-500/10 text-amber-700 dark:text-amber-300 rounded font-bold hover:bg-amber-500/20"
           >
             🏗️ Crane Ops ›
-          </Link>
+          </button>
         </div>
       </div>
     </div>

@@ -5,8 +5,9 @@ import Link from "next/link";
 import { useApp } from "@/lib/app-context";
 import { formatCurrency } from "@/lib/utils";
 import { Wrench, Clock, CheckCircle2, Star, Check, X, Phone, AlertTriangle } from "lucide-react";
+import AuthGuard from "@/components/AuthGuard";
 
-export default function MechanicDashboard() {
+function MechanicDashboardContent() {
   const { bookings, updateBookingStatus, shops } = useApp();
   const currentShop = shops[0];
 
@@ -314,5 +315,13 @@ export default function MechanicDashboard() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function MechanicDashboard() {
+  return (
+    <AuthGuard allowedRoles={["mechanic"]}>
+      <MechanicDashboardContent />
+    </AuthGuard>
   );
 }
