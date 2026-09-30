@@ -1,5 +1,19 @@
 export type FuelType = "Petrol" | "Diesel" | "Electric" | "Hybrid" | "CNG";
 
+export type UserRole = "customer" | "mechanic" | "crane";
+
+export interface User {
+  id: string;
+  name: string;
+  email: string;
+  phone: string;
+  role: UserRole;
+  shopId?: string;
+  vehicleId?: string;
+  truckPlate?: string;
+  avatar?: string;
+}
+
 export interface Vehicle {
   id: string;
   make: string;

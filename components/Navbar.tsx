@@ -2,13 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Wrench, ShieldAlert, Truck, Car, Home, Database, Cloud } from "lucide-react";
+import { Wrench, ShieldAlert, Truck, Car, Home, Database, Cloud, User as UserIcon, LogIn, LogOut } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/lib/app-context";
 
 export default function Navbar() {
   const pathname = usePathname();
-  const { isCloudConnected } = useApp();
+  const { isCloudConnected, currentUser, logout } = useApp();
 
   const links = [
     { href: "/", label: "Home", icon: Home },
@@ -61,7 +61,7 @@ export default function Navbar() {
           {/* Cloud DB Status */}
           <div
             className={cn(
-              "hidden sm:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border",
+              "hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border",
               isCloudConnected
                 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                 : "bg-slate-800/80 text-slate-400 border-slate-700"
@@ -75,6 +75,31 @@ export default function Navbar() {
             {isCloudConnected ? <Cloud className="w-3.5 h-3.5 text-emerald-400" /> : <Database className="w-3.5 h-3.5 text-slate-400" />}
             <span>{isCloudConnected ? "Supabase Cloud" : "Local DB"}</span>
           </div>
+
+          {/* User Account / Role Pill */}
+          {currentUser ? (
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700 text-xs">
+              <UserIcon className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="font-semibold text-white max-w-[120px] truncate hidden sm:inline">
+                {currentUser.name}
+              </span>
+              <button
+                onClick={logout}
+                title="Sign out"
+                className="text-slate-400 hover:text-red-400 transition-colors p-0.5"
+              >
+                <LogOut className="w-3 h-3" />
+              </button>
+            </div>
+          ) : (
+            <Link
+              href="/login"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs sm:text-sm font-medium transition-all"
+            >
+              <LogIn className="w-3.5 h-3.5 text-emerald-400" />
+              <span>Sign In</span>
+            </Link>
+          )}
 
           {/* Quick Emergency SOS shortcut */}
           <Link

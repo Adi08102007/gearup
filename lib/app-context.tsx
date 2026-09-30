@@ -1,11 +1,14 @@
 "use client";
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from "react";
-import { Vehicle, MechanicShop, ServiceBooking, CraneTowDispatch, MaintenanceTask, ServiceItem } from "./types";
+import { Vehicle, MechanicShop, ServiceBooking, CraneTowDispatch, MaintenanceTask, ServiceItem, User, UserRole } from "./types";
 import { initialVehicles, sampleMaintenanceTasks, sampleMechanicShops, sampleBookings, sampleCraneDispatches } from "./mock-data";
 import { supabase, isSupabaseConfigured } from "./supabase";
 
 interface AppContextType {
+  currentUser: User | null;
+  login: (role: UserRole, phoneOrEmail: string, passwordOrOtp?: string) => boolean;
+  logout: () => void;
   vehicles: Vehicle[];
   activeVehicle: Vehicle;
   setActiveVehicleId: (id: string) => void;
@@ -29,6 +32,65 @@ const AppContext = createContext<AppContextType | undefined>(undefined);
 
 export function AppProvider({ children }: { children: React.ReactNode }) {
   const isCloud = isSupabaseConfigured();
+
+  const [currentUser, setCurrentUser] = useState<User | null>(() => {
+    if (typeof window !== "undefined") {
+      const saved = localStorage.getItem("gearup_user");
+      if (saved) return JSON.parse(saved);
+    }
+    return {
+      id: "usr-demo-1",
+      name: "Amaljith (Owner)",
+      email: "amaljith@gearup.com",
+      phone: "+91 98950 12345",
+      role: "customer",
+      vehicleId: "veh-1",
+    };
+  });
+
+  const login = (role: UserRole, phoneOrEmail: string, passwordOrOtp?: string): boolean => {
+    let user: User;
+    if (role === "customer") {
+      user = {
+        id: "usr-cust-1",
+        name: "Amaljith (Owner)",
+        email: phoneOrEmail.includes("@") ? phoneOrEmail : "owner@gearup.com",
+        phone: phoneOrEmail.includes("@") ? "+91 98950 12345" : phoneOrEmail,
+        role: "customer",
+        vehicleId: "veh-1",
+      };
+    } else if (role === "mechanic") {
+      user = {
+        id: "usr-mech-1",
+        name: "Apex Auto Master Tech",
+        email: phoneOrEmail.includes("@") ? phoneOrEmail : "service@apexauto.in",
+        phone: phoneOrEmail.includes("@") ? "+91 98470 11223" : phoneOrEmail,
+        role: "mechanic",
+        shopId: "shop-1",
+      };
+    } else {
+      user = {
+        id: "usr-crane-1",
+        name: "Highway Unit #4 Driver",
+        email: phoneOrEmail.includes("@") ? phoneOrEmail : "recovery4@keralatow.com",
+        phone: phoneOrEmail.includes("@") ? "+91 98460 77112" : phoneOrEmail,
+        role: "crane",
+        truckPlate: "KL 07 CW 9901",
+      };
+    }
+    setCurrentUser(user);
+    if (typeof window !== "undefined") {
+      localStorage.setItem("gearup_user", JSON.stringify(user));
+    }
+    return true;
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("gearup_user");
+    }
+  };
 
   const [vehicles, setVehicles] = useState<Vehicle[]>(() => {
     if (typeof window !== "undefined") {
@@ -490,6 +552,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
   return (
     <AppContext.Provider
       value={{
+        currentUser,
+        login,
+        logout,
         vehicles,
         activeVehicle,
         setActiveVehicleId,
