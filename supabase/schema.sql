@@ -160,4 +160,8 @@ VALUES
  'Near Container Terminal Rd, Kalamassery, Kochi', 'shop-1', 'Apex Auto Precision & Diagnostics', 'Kaloor - Kadavanthra Rd, Kochi', 8.4, 1500, 65, 2046, 'en_route',
  '{"front": true, "rear": true, "left": true, "right": false}'::jsonb,
  '8319', 'Fleet Unit #4 (Hydraulic Bed)', '+91 98460 77112', 'KL 07 CW 9901')
-ON CONFLICT (id) DO NOTHING;
+-- Enable Realtime WebSockets for all core tables
+ALTER PUBLICATION supabase_realtime ADD TABLE vehicles;
+ALTER PUBLICATION supabase_realtime ADD TABLE bookings;
+ALTER PUBLICATION supabase_realtime ADD TABLE tow_dispatches;
+

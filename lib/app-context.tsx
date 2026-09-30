@@ -142,7 +142,27 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
 
   useEffect(() => {
     syncWithSupabase();
-  }, [syncWithSupabase]);
+
+    if (!supabase || !isCloud) return;
+
+    // Realtime WebSocket channel listening to PostgreSQL table changes
+    const channel = supabase
+      .channel("gearup-realtime-sync")
+      .on("postgres_changes", { event: "*", schema: "public", table: "bookings" }, () => {
+        syncWithSupabase();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "vehicles" }, () => {
+        syncWithSupabase();
+      })
+      .on("postgres_changes", { event: "*", schema: "public", table: "tow_dispatches" }, () => {
+        syncWithSupabase();
+      })
+      .subscribe();
+
+    return () => {
+      supabase?.removeChannel(channel);
+    };
+  }, [syncWithSupabase, isCloud]);
 
   // Synchronize localStorage
   useEffect(() => {
