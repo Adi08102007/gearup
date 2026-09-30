@@ -1,6 +1,7 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { useApp } from "@/lib/app-context";
 import { formatCurrency } from "@/lib/utils";
@@ -8,7 +9,16 @@ import AuthGuard from "@/components/AuthGuard";
 import { Calendar, AlertTriangle, ArrowRight, Plus } from "lucide-react";
 
 function CustomerDashboardContent() {
-  const { vehicles, activeVehicle, updateVehicleKm, maintenanceTasks, bookings } = useApp();
+  const router = useRouter();
+  const { currentUser, vehicles, activeVehicle, updateVehicleKm, maintenanceTasks, bookings } = useApp();
+
+  useEffect(() => {
+    if (currentUser?.role === "mechanic") {
+      router.replace("/mechanic");
+    } else if (currentUser?.role === "crane") {
+      router.replace("/crane");
+    }
+  }, [currentUser, router]);
   const [kmInput, setKmInput] = useState(activeVehicle ? activeVehicle.currentKm.toString() : "");
   const [isEditingKm, setIsEditingKm] = useState(false);
 

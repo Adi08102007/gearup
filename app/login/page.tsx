@@ -56,7 +56,20 @@ function LoginForm() {
     setTimeout(() => {
       login(activeRole, identifier, authMode === "otp" ? otpCode : password);
       setIsLoading(false);
-      router.push(redirectParam);
+
+      const rawRedirect = searchParams.get("redirect");
+      let destination = activeRole === "mechanic" ? "/mechanic" : activeRole === "crane" ? "/crane" : "/customer";
+      if (rawRedirect) {
+        if (activeRole === "mechanic" && !rawRedirect.startsWith("/customer")) {
+          destination = rawRedirect;
+        } else if (activeRole === "customer" && !rawRedirect.startsWith("/mechanic") && !rawRedirect.startsWith("/crane")) {
+          destination = rawRedirect;
+        } else if (activeRole === "crane" && !rawRedirect.startsWith("/customer")) {
+          destination = rawRedirect;
+        }
+      }
+
+      router.push(destination);
     }, 400);
   };
 

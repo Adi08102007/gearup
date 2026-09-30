@@ -27,7 +27,7 @@ export default function Navbar() {
         
         {/* Brand Logo */}
         <div className="flex items-center gap-6">
-          <Link href="/" className="flex items-center gap-2 group">
+          <Link href={isMechanic ? "/mechanic" : isCrane ? "/crane" : isCustomer ? "/customer" : "/"} className="flex items-center gap-2 group">
             <span className="w-8 h-8 rounded border border-wire-900 dark:border-white flex items-center justify-center font-bold text-sm bg-white dark:bg-wire-900 text-wire-900 dark:text-white">
               ⚙️
             </span>
@@ -35,7 +35,7 @@ export default function Navbar() {
               GEARUP
               {isMechanic && (
                 <span className="ml-1.5 text-[10px] font-sans font-normal bg-wire-200 dark:bg-wire-800 text-wire-700 dark:text-wire-300 px-1.5 py-0.5 rounded">
-                  FOR MECHANICS
+                  PARTNER
                 </span>
               )}
               {isCrane && (
@@ -64,6 +64,15 @@ export default function Navbar() {
                   </Link>
                 );
               })}
+            </nav>
+          )}
+
+          {/* Mechanic Navigation Links (ONLY when logged in as Mechanic) */}
+          {currentUser && isMechanic && (
+            <nav className="hidden lg:flex items-center gap-5 text-xs font-medium text-wire-600 dark:text-wire-300">
+              <Link href="/mechanic" className="text-wire-900 dark:text-white font-bold">
+                Dashboard
+              </Link>
             </nav>
           )}
         </div>
