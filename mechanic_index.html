@@ -1,0 +1,2869 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GearUp — Mechanic Wireframe Lab & Workbench</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            wire: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              850: '#172033',
+              900: '#0f172a',
+              950: '#020617',
+            }
+          },
+          fontFamily: {
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Wireframe sketch conventions */
+    .wire-hatch {
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba(148, 163, 184, 0.12),
+        rgba(148, 163, 184, 0.12) 6px,
+        transparent 6px,
+        transparent 12px
+      );
+    }
+    .wire-box-dashed {
+      border: 1.5px dashed #94a3b8;
+    }
+    /* Hide scrollbars in mockup containers */
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-wire-100 dark:bg-wire-950 text-wire-800 dark:text-wire-100 font-sans antialiased min-h-screen">
+
+  <!-- ========================================================================= -->
+  <!-- TOP CONTROLLER BAR: WIREFRAME LAB CONTROLS (DESKTOP/TABLET/MOBILE & PAGES) -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-50 bg-white dark:bg-wire-900 border-b border-wire-300 dark:border-wire-700 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5 font-mono font-black text-sm tracking-wider text-wire-900 dark:text-white">
+        <span class="bg-wire-900 text-white dark:bg-white dark:text-wire-900 px-1.5 py-0.5 rounded text-xs">🛠️ PRO</span>
+        <span>GEARUP WIREFRAME LAB</span>
+      </div>
+      <span class="hidden md:inline-block text-xs font-mono text-wire-500 dark:text-wire-400">| Mechanic / Workshop Portal</span>
+      <a href="index.html" class="hidden sm:inline-flex items-center gap-1 text-xs text-wire-600 dark:text-wire-400 hover:text-wire-900 dark:hover:text-white underline ml-2">
+        <span>‹ Customer</span>
+      </a>
+      <span class="hidden sm:inline text-wire-300">•</span>
+      <a href="crane_index.html" class="hidden sm:inline-flex items-center gap-1 text-xs text-amber-600 dark:text-amber-400 hover:underline">
+        <span>Crane Portal ›</span>
+      </a>
+    </div>
+
+    <!-- Viewport Switcher Controls -->
+    <div class="flex items-center bg-wire-100 dark:bg-wire-900 p-1 rounded-lg border border-wire-300 dark:border-wire-700 text-xs">
+      <button onclick="setViewport('desktop')" id="vp-btn-desktop" class="px-2.5 py-1 rounded font-medium transition bg-white dark:bg-wire-700 shadow-sm text-wire-900 dark:text-white flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        <span>Desktop (1280px)</span>
+      </button>
+      <button onclick="setViewport('tablet')" id="vp-btn-tablet" class="px-2.5 py-1 rounded font-medium transition text-wire-600 dark:text-wire-400 hover:text-wire-900 dark:hover:text-white flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        <span>Tablet (768px)</span>
+      </button>
+      <button onclick="setViewport('mobile')" id="vp-btn-mobile" class="px-2.5 py-1 rounded font-medium transition text-wire-600 dark:text-wire-400 hover:text-wire-900 dark:hover:text-white flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        <span>Mobile (390px)</span>
+      </button>
+    </div>
+
+    <!-- Screen Navigator Select -->
+    <div class="flex items-center gap-2">
+      <label for="page-select" class="text-xs text-wire-500 dark:text-wire-400 font-mono hidden lg:inline">PAGE:</label>
+      <select id="page-select" onchange="showPage(this.value)" class="text-xs bg-white dark:bg-wire-800 border border-wire-300 dark:border-wire-700 rounded px-2.5 py-1.5 font-medium text-wire-900 dark:text-wire-100 focus:outline-none focus:ring-1 focus:ring-wire-800">
+        <optgroup label="Logged-Out & Onboarding">
+          <option value="m-login">1. Mechanic Login (Pro Portal)</option>
+          <option value="m-signup">2. Mechanic Sign Up (5-Step Stepper)</option>
+          <option value="m-forgot">3. Forgot Password Flow</option>
+          <option value="m-pending">4. Pending Verification State</option>
+        </optgroup>
+        <optgroup label="Logged-In Operations">
+          <option value="m-dashboard" selected>5. Mechanic Dashboard</option>
+          <option value="m-requests">6. Incoming Requests (Timer & Fast Accept)</option>
+          <option value="m-booking-details">7. Booking Details (Onsite/Offsite Stepper)</option>
+          <option value="m-log-service">8. Log Service (Km, Parts & Invoicing)</option>
+        </optgroup>
+        <optgroup label="Shop Management & Growth">
+          <option value="m-services-prices">9. Services & Prices Catalog</option>
+          <option value="m-service-logs">10. Service Logs & Job History</option>
+          <option value="m-reviews">11. Verified Reviews & Replies</option>
+          <option value="m-earnings">12. Earnings & Payout Analytics</option>
+          <option value="m-availability">13. Availability & Working Hours</option>
+          <option value="m-profile">14. Workshop Profile & Verification</option>
+          <option value="m-notifications">15. Notifications Center</option>
+        </optgroup>
+        <optgroup label="Architecture & Flow">
+          <option value="m-sitemap">16. Mechanic Sitemap & User Flow</option>
+          <option value="m-image-preview">17. Visual Wireframe Mockup (Side-by-Side Image)</option>
+        </optgroup>
+      </select>
+
+      <!-- Theme Toggle -->
+      <button onclick="toggleDarkMode()" title="Toggle Dark/Light Mode" class="p-1.5 border border-wire-300 dark:border-wire-700 rounded hover:bg-wire-100 dark:hover:bg-wire-700 text-wire-700 dark:text-wire-300">
+        <svg id="theme-icon-sun" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <svg id="theme-icon-moon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN WORKSPACE CONTAINER -->
+  <!-- ========================================================================= -->
+  <main class="py-6 px-2 sm:px-4 flex justify-center min-h-[calc(100vh-60px)]">
+    <div id="viewport-container" class="w-full max-w-[1280px] transition-all duration-300 bg-white dark:bg-wire-950 border border-wire-300 dark:border-wire-700 rounded-xl shadow-lg overflow-hidden flex flex-col relative min-h-[750px]">
+
+      <!-- ===================================================================== -->
+      <!-- A. LOGGED-OUT TOP BAR (SINGLE CLEAN BAR: LOGO, LOGIN, SIGNUP, LANG)   -->
+      <!-- ===================================================================== -->
+      <div id="logged-out-header" class="hidden border-b border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-900 px-6 py-3.5 flex items-center justify-between">
+        <button onclick="showPage('m-login')" class="flex items-center gap-2 font-mono font-black text-lg tracking-wider text-wire-900 dark:text-white">
+          <span class="border border-wire-900 dark:border-white p-0.5 rounded">⚙️</span>
+          <span>GEARUP <span class="text-xs bg-wire-200 dark:bg-wire-800 px-1.5 py-0.5 rounded font-normal text-wire-700 dark:text-wire-300">FOR MECHANICS</span></span>
+        </button>
+
+        <div class="flex items-center gap-3 text-xs">
+          <!-- Language Selector -->
+          <div class="flex items-center gap-1 border border-wire-300 dark:border-wire-700 rounded px-2 py-1 text-wire-600 dark:text-wire-300 cursor-pointer">
+            <span>🌐</span>
+            <span>EN</span>
+            <span class="text-wire-400">▾</span>
+          </div>
+          <!-- Login & Sign up buttons -->
+          <button onclick="showPage('m-login')" class="px-3 py-1.5 border border-wire-400 dark:border-wire-600 rounded font-medium hover:border-wire-900 dark:hover:border-white">
+            Login
+          </button>
+          <button onclick="showPage('m-signup')" class="px-3.5 py-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold hover:opacity-90">
+            Sign up as Partner
+          </button>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- B. LOGGED-IN TOP BAR (STATUS SWITCH, NOTIFICATIONS, PROFILE)          -->
+      <!-- ===================================================================== -->
+      <div id="logged-in-header" class="border-b border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-900 px-4 py-2.5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <!-- Mobile Sidebar Toggle -->
+          <button onclick="toggleSidebarDrawer()" class="md:hidden p-1.5 text-wire-700 dark:text-wire-300 border border-wire-300 dark:border-wire-700 rounded">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+
+          <button onclick="showPage('m-dashboard')" class="flex items-center gap-2 font-mono font-black text-base md:text-lg tracking-wider text-wire-900 dark:text-white">
+            <span class="border border-wire-900 dark:border-white p-0.5 rounded">⚙️</span>
+            <span>GEARUP <span class="text-[10px] bg-wire-900 text-white dark:bg-wire-200 dark:text-wire-900 px-1 py-0.5 rounded ml-1 font-sans">PARTNER</span></span>
+          </button>
+        </div>
+
+        <!-- Center: Status Switch (Online / Busy / Offline) -->
+        <div class="flex items-center bg-wire-100 dark:bg-wire-800 p-0.5 rounded-lg border border-wire-300 dark:border-wire-700 text-xs font-medium">
+          <button onclick="setMechanicStatus('available')" id="status-btn-available" class="px-2.5 py-1 rounded-md flex items-center gap-1.5 bg-white dark:bg-wire-700 shadow-sm text-emerald-700 dark:text-emerald-400 font-bold">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>Available</span>
+          </button>
+          <button onclick="setMechanicStatus('busy')" id="status-btn-busy" class="px-2.5 py-1 rounded-md flex items-center gap-1.5 text-wire-600 dark:text-wire-400 hover:text-wire-900">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span>Busy</span>
+          </button>
+          <button onclick="confirmGoOffline()" id="status-btn-offline" class="px-2.5 py-1 rounded-md flex items-center gap-1.5 text-wire-600 dark:text-wire-400 hover:text-wire-900">
+            <span class="w-2 h-2 rounded-full bg-wire-400"></span>
+            <span>Offline</span>
+          </button>
+        </div>
+
+        <!-- Right: Language, Notifications, Profile Menu -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="hidden sm:flex items-center gap-1 text-xs border border-wire-300 dark:border-wire-700 rounded px-2 py-1 text-wire-600 dark:text-wire-300 cursor-pointer">
+            <span>🌐</span>
+            <span>EN</span>
+            <span class="text-wire-400">▾</span>
+          </div>
+
+          <!-- Notification Bell with Counter -->
+          <button onclick="showPage('m-notifications')" class="relative p-1.5 text-wire-700 dark:text-wire-300 hover:text-wire-900 border border-wire-300 dark:border-wire-700 rounded">
+            <span>🔔</span>
+            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-600 text-white rounded-full text-[10px] font-bold flex items-center justify-center">3</span>
+          </button>
+
+          <!-- Generic Profile Dropdown (No Personal Names) -->
+          <button onclick="showPage('m-profile')" class="flex items-center gap-1.5 border border-wire-300 dark:border-wire-700 rounded-full pl-1.5 pr-2.5 py-1 text-xs text-wire-800 dark:text-wire-200 hover:border-wire-500">
+            <span class="w-6 h-6 rounded-full bg-wire-200 dark:bg-wire-700 flex items-center justify-center text-xs font-mono font-bold">🔧</span>
+            <span class="font-medium hidden sm:inline">Workshop #1</span>
+            <span class="text-wire-400">▾</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- C. VERIFICATION BANNER (CONDITIONAL)                                  -->
+      <!-- ===================================================================== -->
+      <div id="verification-banner" class="hidden bg-amber-50 dark:bg-amber-950/40 border-b border-amber-300 dark:border-amber-800 px-4 py-2.5 flex items-center justify-between text-xs text-amber-900 dark:text-amber-200">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-600 dark:text-amber-400 text-base">⚠️</span>
+          <span><strong>Account Pending Verification:</strong> Your documents are under review (usually within 24 hours). Accepting customer requests is disabled until approved.</span>
+        </div>
+        <button onclick="showPage('m-profile')" class="underline font-semibold hover:text-amber-950 ml-2 whitespace-nowrap">View Status ›</button>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- D. APP BODY LAYOUT: SIDEBAR (DESKTOP) + CONTENT + BOTTOM BAR (MOBILE) -->
+      <!-- ===================================================================== -->
+      <div class="flex flex-1 relative overflow-hidden">
+
+        <!-- DESKTOP SIDEBAR -->
+        <aside id="desktop-sidebar" class="hidden md:flex flex-col w-56 border-r border-wire-300 dark:border-wire-700 bg-wire-50/50 dark:bg-wire-900/50 p-3 space-y-1 text-xs font-medium shrink-0">
+          <div class="px-3 py-2 text-[10px] font-mono uppercase tracking-wider text-wire-400 dark:text-wire-500">Operations</div>
+          
+          <button onclick="showPage('m-dashboard')" id="nav-btn-m-dashboard" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg bg-wire-200 dark:bg-wire-800 text-wire-900 dark:text-white font-bold transition">
+            <span class="flex items-center gap-2.5">
+              <span>📊</span>
+              <span>Dashboard</span>
+            </span>
+          </button>
+
+          <button onclick="showPage('m-requests')" id="nav-btn-m-requests" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>⚡</span>
+              <span>Incoming Requests</span>
+            </span>
+            <span class="px-1.5 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold animate-pulse">1</span>
+          </button>
+
+          <button onclick="showPage('m-booking-details')" id="nav-btn-m-booking-details" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>📍</span>
+              <span>Active Bookings</span>
+            </span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+          </button>
+
+          <button onclick="showPage('m-log-service')" id="nav-btn-m-log-service" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>📝</span>
+              <span>Log Service</span>
+            </span>
+          </button>
+
+          <div class="pt-3 px-3 py-2 text-[10px] font-mono uppercase tracking-wider text-wire-400 dark:text-wire-500">Shop Management</div>
+
+          <button onclick="showPage('m-services-prices')" id="nav-btn-m-services-prices" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>🏷️</span>
+              <span>Services & Prices</span>
+            </span>
+          </button>
+
+          <button onclick="showPage('m-service-logs')" id="nav-btn-m-service-logs" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>📋</span>
+              <span>Service Logs</span>
+            </span>
+          </button>
+
+          <button onclick="showPage('m-reviews')" id="nav-btn-m-reviews" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>⭐</span>
+              <span>Reviews</span>
+            </span>
+            <span class="text-[10px] font-mono text-wire-500">4.9</span>
+          </button>
+
+          <button onclick="showPage('m-earnings')" id="nav-btn-m-earnings" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>💰</span>
+              <span>Earnings</span>
+            </span>
+          </button>
+
+          <button onclick="showPage('m-availability')" id="nav-btn-m-availability" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>🕒</span>
+              <span>Availability</span>
+            </span>
+          </button>
+
+          <button onclick="showPage('m-profile')" id="nav-btn-m-profile" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>🏪</span>
+              <span>Shop Profile</span>
+            </span>
+            <span class="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[9px] font-bold">VERIFIED</span>
+          </button>
+
+          <div class="pt-4 mt-auto border-t border-wire-200 dark:border-wire-800">
+            <div class="p-2.5 bg-wire-100 dark:bg-wire-800/60 rounded-lg text-[11px] text-wire-600 dark:text-wire-400 flex items-center justify-between">
+              <div>
+                <div class="font-bold text-wire-900 dark:text-white">Auto-Busy Mode</div>
+                <div class="text-[10px]">When job starts</div>
+              </div>
+              <input type="checkbox" checked class="w-4 h-4 rounded text-wire-900 focus:ring-0">
+            </div>
+          </div>
+        </aside>
+
+        <!-- MAIN SCROLLABLE CONTENT VIEWPORT -->
+        <div id="content-scroll-container" class="flex-1 overflow-y-auto no-scrollbar pb-16 md:pb-6">
+
+          <!-- ================================================================= -->
+          <!-- 1. MECHANIC LOGIN (PRO PORTAL LAYOUT - DISTINCT FROM CUSTOMER)    -->
+          <!-- ================================================================= -->
+          <section id="m-login" class="page-view hidden p-6 md:p-10 flex-col items-center justify-center min-h-[600px]">
+            <div class="w-full max-w-4xl grid md:grid-cols-12 border border-wire-300 dark:border-wire-700 rounded-xl overflow-hidden shadow-sm bg-white dark:bg-wire-900">
+              
+              <!-- Left: Pro Portal Intro & Perks -->
+              <div class="md:col-span-5 bg-wire-50 dark:bg-wire-850 p-6 md:p-8 border-b md:border-b-0 md:border-r border-wire-300 dark:border-wire-700 flex flex-col justify-between">
+                <div>
+                  <div class="inline-flex items-center gap-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 px-2.5 py-1 rounded text-xs font-mono font-bold uppercase mb-4">
+                    <span>🛠️ Mechanic Partner Portal</span>
+                  </div>
+                  <h2 class="text-xl font-bold text-wire-900 dark:text-white mb-2">Grow your garage business with GearUp</h2>
+                  <p class="text-xs text-wire-600 dark:text-wire-400 mb-6 leading-relaxed">
+                    Direct customer breakdown alerts, transparent labor payouts, digital service history logging, and instant roadside dispatch.
+                  </p>
+
+                  <div class="space-y-3 text-xs">
+                    <div class="flex items-start gap-2.5">
+                      <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 flex items-center justify-center font-bold text-[11px] shrink-0">✓</span>
+                      <span><strong>Instant Onsite & Offsite Jobs:</strong> Accept requests nearby within 2 minutes.</span>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                      <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 flex items-center justify-center font-bold text-[11px] shrink-0">✓</span>
+                      <span><strong>Transparent Pricing:</strong> Publish your own labor rates and parts catalog.</span>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                      <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 flex items-center justify-center font-bold text-[11px] shrink-0">✓</span>
+                      <span><strong>Verified Badge:</strong> Build customer trust with genuine review badges.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-6 border-t border-wire-200 dark:border-wire-800 mt-6 text-xs text-wire-500">
+                  <span>Need help? Partner Helpline: <strong class="font-mono text-wire-800 dark:text-wire-200">1800-GEAR-PRO</strong></span>
+                </div>
+              </div>
+
+              <!-- Right: Mechanic Login Form -->
+              <div class="md:col-span-7 p-6 md:p-8 flex flex-col justify-center">
+                <div class="mb-6">
+                  <h3 class="text-lg font-bold text-wire-900 dark:text-white">Partner Sign In</h3>
+                  <p class="text-xs text-wire-500">Access your workshop dashboard, jobs, and earnings</p>
+                </div>
+
+                <!-- Login Method Switcher: Password vs OTP -->
+                <div class="flex border border-wire-300 dark:border-wire-700 rounded-lg p-1 mb-4 text-xs font-medium bg-wire-50 dark:bg-wire-800">
+                  <button onclick="switchLoginMode('pwd')" id="login-tab-pwd" class="flex-1 py-1.5 text-center rounded bg-white dark:bg-wire-700 shadow-sm font-bold text-wire-900 dark:text-white">Password Login</button>
+                  <button onclick="switchLoginMode('otp')" id="login-tab-otp" class="flex-1 py-1.5 text-center rounded text-wire-600 dark:text-wire-400 hover:text-wire-900">OTP Login</button>
+                </div>
+
+                <form onsubmit="event.preventDefault(); showPage('m-dashboard');" class="space-y-4 text-xs">
+                  <div>
+                    <label class="block font-medium text-wire-700 dark:text-wire-300 mb-1">Registered Email or Phone Number</label>
+                    <input type="text" placeholder="e.g. mechanic@workshop.com or +91 9876543210" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800 text-wire-900 dark:text-white focus:outline-none focus:ring-1 focus:ring-wire-800" required>
+                  </div>
+
+                  <!-- Password Field (Password Mode) -->
+                  <div id="login-pwd-field">
+                    <div class="flex justify-between items-center mb-1">
+                      <label class="font-medium text-wire-700 dark:text-wire-300">Password</label>
+                      <button type="button" onclick="showPage('m-forgot')" class="text-wire-600 dark:text-wire-400 underline hover:text-wire-900">Forgot password?</button>
+                    </div>
+                    <div class="relative">
+                      <input type="password" id="m-login-pass" value="••••••••••••" placeholder="Enter password" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800 text-wire-900 dark:text-white pr-10">
+                      <button type="button" onclick="togglePasswordVisibility('m-login-pass', this)" class="absolute right-3 top-2.5 text-wire-400 hover:text-wire-700 text-xs">👁️</button>
+                    </div>
+                  </div>
+
+                  <!-- OTP Field (Hidden by default) -->
+                  <div id="login-otp-field" class="hidden">
+                    <div class="flex justify-between items-center mb-1">
+                      <label class="font-medium text-wire-700 dark:text-wire-300">Enter 6-digit OTP</label>
+                      <button type="button" class="text-wire-600 dark:text-wire-400 underline">Send OTP</button>
+                    </div>
+                    <input type="text" placeholder="• • • • • •" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800 text-center font-mono tracking-widest text-sm">
+                  </div>
+
+                  <div class="flex items-center justify-between pt-1">
+                    <label class="flex items-center gap-2 cursor-pointer text-wire-600 dark:text-wire-400">
+                      <input type="checkbox" checked class="w-3.5 h-3.5 rounded text-wire-900">
+                      <span>Remember this workshop terminal</span>
+                    </label>
+                  </div>
+
+                  <button type="submit" class="w-full py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 font-bold rounded-lg hover:opacity-90 transition text-sm">
+                    Sign In to Workshop Dashboard ➔
+                  </button>
+                </form>
+
+                <div class="mt-6 pt-4 border-t border-wire-200 dark:border-wire-800 flex flex-col sm:flex-row items-center justify-between text-xs gap-2">
+                  <span class="text-wire-500">New mechanic or garage? <button onclick="showPage('m-signup')" class="font-bold underline text-wire-900 dark:text-white">Register Shop</button></span>
+                  <a href="index.html" class="text-wire-600 dark:text-wire-400 hover:underline">Not a mechanic? Customer login ›</a>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 2. MECHANIC SIGN UP (5-STEP PROGRESS BAR STEPPER)                 -->
+          <!-- ================================================================= -->
+          <section id="m-signup" class="page-view hidden p-4 md:p-8 flex-col items-center">
+            <div class="w-full max-w-3xl border border-wire-300 dark:border-wire-700 rounded-xl bg-white dark:bg-wire-900 p-6 shadow-sm">
+              
+              <!-- Stepper Header -->
+              <div class="border-b border-wire-200 dark:border-wire-800 pb-4 mb-6">
+                <div class="flex items-center justify-between mb-2">
+                  <h2 class="text-base md:text-lg font-bold text-wire-900 dark:text-white">Register Workshop & Partner Account</h2>
+                  <span class="text-xs font-mono text-wire-500" id="step-indicator-text">Step 1 of 5</span>
+                </div>
+                
+                <!-- 5-Step Visual Progress Bar -->
+                <div class="grid grid-cols-5 gap-2">
+                  <div id="prog-bar-1" class="h-1.5 rounded-full bg-wire-900 dark:bg-white transition-all"></div>
+                  <div id="prog-bar-2" class="h-1.5 rounded-full bg-wire-200 dark:bg-wire-800 transition-all"></div>
+                  <div id="prog-bar-3" class="h-1.5 rounded-full bg-wire-200 dark:bg-wire-800 transition-all"></div>
+                  <div id="prog-bar-4" class="h-1.5 rounded-full bg-wire-200 dark:bg-wire-800 transition-all"></div>
+                  <div id="prog-bar-5" class="h-1.5 rounded-full bg-wire-200 dark:bg-wire-800 transition-all"></div>
+                </div>
+
+                <!-- Step Labels -->
+                <div class="grid grid-cols-5 text-[10px] text-wire-500 font-medium text-center mt-1">
+                  <span>1. Personal</span>
+                  <span>2. Shop</span>
+                  <span>3. Services</span>
+                  <span>4. Verify</span>
+                  <span>5. Review</span>
+                </div>
+              </div>
+
+              <!-- STEP 1: PERSONAL DETAILS -->
+              <div id="signup-step-1" class="signup-step space-y-4 text-xs">
+                <h3 class="font-bold text-sm text-wire-900 dark:text-white">Step 1: Partner & Owner Information</h3>
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block font-medium mb-1">Full Legal Name *</label>
+                    <input type="text" placeholder="e.g. Your name" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">
+                  </div>
+                  <div>
+                    <label class="block font-medium mb-1">Mobile Phone (for SMS dispatch) *</label>
+                    <input type="tel" placeholder="+91 98765 43210" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">
+                  </div>
+                  <div>
+                    <label class="block font-medium mb-1">Email Address *</label>
+                    <input type="email" placeholder="owner@workshop.com" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">
+                  </div>
+                  <div>
+                    <label class="block font-medium mb-1">Create Password *</label>
+                    <input type="password" placeholder="At least 8 characters" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">
+                  </div>
+                </div>
+                <div class="flex justify-end pt-4">
+                  <button onclick="setSignupStep(2)" class="px-5 py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold hover:opacity-90">
+                    Next: Shop Details ➔
+                  </button>
+                </div>
+              </div>
+
+              <!-- STEP 2: SHOP DETAILS -->
+              <div id="signup-step-2" class="signup-step hidden space-y-4 text-xs">
+                <h3 class="font-bold text-sm text-wire-900 dark:text-white">Step 2: Workshop / Garage Location & Hours</h3>
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div class="sm:col-span-2">
+                    <label class="block font-medium mb-1">Shop / Garage Registered Name *</label>
+                    <input type="text" placeholder="e.g. Workshop Name #1 / Metro Auto Care" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="block font-medium mb-1">Shop Street Address & Landmark *</label>
+                    <textarea rows="2" placeholder="Building name, street, nearby landmark, pincode" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800"></textarea>
+                  </div>
+                  
+                  <!-- Map Pin Placeholder -->
+                  <div class="sm:col-span-2 border border-dashed border-wire-300 dark:border-wire-700 rounded-lg p-4 bg-wire-50 dark:bg-wire-850 flex items-center justify-between">
+                    <div>
+                      <div class="font-bold text-wire-900 dark:text-white flex items-center gap-1.5">
+                        <span>📍</span>
+                        <span>Shop GPS Coordinates / Map Pin</span>
+                      </div>
+                      <div class="text-[11px] text-wire-500">Auto-detected: 9.9816° N, 76.2999° E (Accurate within 5 meters)</div>
+                    </div>
+                    <button type="button" class="px-3 py-1.5 border border-wire-400 rounded bg-white dark:bg-wire-800 font-medium">Adjust Pin</button>
+                  </div>
+
+                  <div>
+                    <label class="block font-medium mb-1">Working Hours (Opening) *</label>
+                    <input type="time" value="08:00" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">
+                  </div>
+                  <div>
+                    <label class="block font-medium mb-1">Working Hours (Closing) *</label>
+                    <input type="time" value="20:00" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">
+                  </div>
+                </div>
+
+                <div class="flex justify-between pt-4">
+                  <button onclick="setSignupStep(1)" class="px-4 py-2 border border-wire-300 rounded font-medium">‹ Back</button>
+                  <button onclick="setSignupStep(3)" class="px-5 py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold hover:opacity-90">
+                    Next: Services & Pricing ➔
+                  </button>
+                </div>
+              </div>
+
+              <!-- STEP 3: SERVICES & PRICING -->
+              <div id="signup-step-3" class="signup-step hidden space-y-4 text-xs">
+                <h3 class="font-bold text-sm text-wire-900 dark:text-white">Step 3: Services Offered & Service Modes</h3>
+                
+                <!-- Modes & Radius -->
+                <div class="grid sm:grid-cols-3 gap-3 p-3 bg-wire-50 dark:bg-wire-850 border border-wire-200 dark:border-wire-700 rounded-lg">
+                  <div>
+                    <label class="block font-bold mb-1">Service Modes *</label>
+                    <div class="space-y-1">
+                      <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked class="w-3.5 h-3.5 rounded text-wire-900">
+                        <span>🚐 Onsite (Mobile Van)</span>
+                      </label>
+                      <label class="flex items-center gap-2 cursor-pointer">
+                        <input type="checkbox" checked class="w-3.5 h-3.5 rounded text-wire-900">
+                        <span>🏢 Offsite (Garage Visit)</span>
+                      </label>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block font-bold mb-1">Onsite Service Radius</label>
+                    <div class="flex items-center gap-2">
+                      <input type="number" value="15" class="w-20 px-2 py-1 border border-wire-300 rounded bg-white dark:bg-wire-800">
+                      <span class="text-wire-500">km from shop</span>
+                    </div>
+                  </div>
+                  <div>
+                    <label class="block font-bold mb-1">Base Onsite Visit Charge</label>
+                    <div class="flex items-center gap-1">
+                      <span class="text-wire-500">₹</span>
+                      <input type="number" value="150" class="w-24 px-2 py-1 border border-wire-300 rounded bg-white dark:bg-wire-800">
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Searchable Checklist of Services -->
+                <div>
+                  <div class="flex justify-between items-center mb-2">
+                    <label class="font-bold text-wire-900 dark:text-white">Services & Base Labor Rates (Search & Select)</label>
+                    <input type="text" placeholder="Filter services..." class="px-2.5 py-1 text-[11px] border border-wire-300 rounded bg-white dark:bg-wire-800 w-44">
+                  </div>
+                  <div class="border border-wire-300 dark:border-wire-700 rounded-lg divide-y divide-wire-200 dark:divide-wire-800 max-h-48 overflow-y-auto">
+                    <div class="p-2.5 flex items-center justify-between bg-wire-50/50 dark:bg-wire-850">
+                      <label class="flex items-center gap-2"><input type="checkbox" checked class="w-3.5 h-3.5"> <span>Engine Oil & Filter Service</span></label>
+                      <div class="flex items-center gap-1 text-wire-500"><span>Labor ₹</span><input type="number" value="350" class="w-16 px-1.5 py-0.5 border rounded bg-white dark:bg-wire-800 text-xs"></div>
+                    </div>
+                    <div class="p-2.5 flex items-center justify-between">
+                      <label class="flex items-center gap-2"><input type="checkbox" checked class="w-3.5 h-3.5"> <span>Brake Pads Replacement (Front/Rear)</span></label>
+                      <div class="flex items-center gap-1 text-wire-500"><span>Labor ₹</span><input type="number" value="400" class="w-16 px-1.5 py-0.5 border rounded bg-white dark:bg-wire-800 text-xs"></div>
+                    </div>
+                    <div class="p-2.5 flex items-center justify-between">
+                      <label class="flex items-center gap-2"><input type="checkbox" checked class="w-3.5 h-3.5"> <span>Battery Jumpstart & Health Test</span></label>
+                      <div class="flex items-center gap-1 text-wire-500"><span>Labor ₹</span><input type="number" value="200" class="w-16 px-1.5 py-0.5 border rounded bg-white dark:bg-wire-800 text-xs"></div>
+                    </div>
+                    <div class="p-2.5 flex items-center justify-between">
+                      <label class="flex items-center gap-2"><input type="checkbox" checked class="w-3.5 h-3.5"> <span>Flat Tyre Puncture Repair & Inflate</span></label>
+                      <div class="flex items-center gap-1 text-wire-500"><span>Labor ₹</span><input type="number" value="150" class="w-16 px-1.5 py-0.5 border rounded bg-white dark:bg-wire-800 text-xs"></div>
+                    </div>
+                    <div class="p-2.5 flex items-center justify-between">
+                      <label class="flex items-center gap-2"><input type="checkbox" class="w-3.5 h-3.5"> <span>AC Gas Charging & Leak Check</span></label>
+                      <div class="flex items-center gap-1 text-wire-500"><span>Labor ₹</span><input type="number" value="650" class="w-16 px-1.5 py-0.5 border rounded bg-white dark:bg-wire-800 text-xs"></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex justify-between pt-4">
+                  <button onclick="setSignupStep(2)" class="px-4 py-2 border border-wire-300 rounded font-medium">‹ Back</button>
+                  <button onclick="setSignupStep(4)" class="px-5 py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold hover:opacity-90">
+                    Next: Verification Documents ➔
+                  </button>
+                </div>
+              </div>
+
+              <!-- STEP 4: VERIFICATION -->
+              <div id="signup-step-4" class="signup-step hidden space-y-4 text-xs">
+                <h3 class="font-bold text-sm text-wire-900 dark:text-white">Step 4: Business Verification & Licenses</h3>
+                <p class="text-wire-500">Upload documents to verify your garage and earn the GearUp Verified Partner badge.</p>
+                
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <!-- Govt ID / Trade License Upload -->
+                  <div class="border-2 border-dashed border-wire-300 dark:border-wire-700 rounded-lg p-5 text-center bg-wire-50/50 dark:bg-wire-850 flex flex-col items-center justify-center">
+                    <div class="text-2xl mb-2">📄</div>
+                    <div class="font-bold text-wire-900 dark:text-white mb-1">Trade License / Govt Reg Certificate</div>
+                    <div class="text-[11px] text-wire-500 mb-3">PDF, JPG or PNG (Max 5MB)</div>
+                    <label class="px-3 py-1.5 border border-wire-400 rounded bg-white dark:bg-wire-800 font-medium cursor-pointer hover:border-wire-800">
+                      <span>Browse Document</span>
+                      <input type="file" class="hidden">
+                    </label>
+                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 mt-2">✓ trade_license_2026.pdf attached</span>
+                  </div>
+
+                  <!-- Shop Front Photo Placeholder -->
+                  <div class="border-2 border-dashed border-wire-300 dark:border-wire-700 rounded-lg p-5 text-center bg-wire-50/50 dark:bg-wire-850 flex flex-col items-center justify-center">
+                    <div class="text-2xl mb-2">📸</div>
+                    <div class="font-bold text-wire-900 dark:text-white mb-1">Shop Front Photo (Signboard Visible)</div>
+                    <div class="text-[11px] text-wire-500 mb-3">Helps customers identify your garage</div>
+                    <label class="px-3 py-1.5 border border-wire-400 rounded bg-white dark:bg-wire-800 font-medium cursor-pointer hover:border-wire-800">
+                      <span>Upload Photo</span>
+                      <input type="file" class="hidden">
+                    </label>
+                    <span class="text-[10px] text-emerald-600 dark:text-emerald-400 mt-2">✓ shop_exterior.jpg attached</span>
+                  </div>
+                </div>
+
+                <div class="flex justify-between pt-4">
+                  <button onclick="setSignupStep(3)" class="px-4 py-2 border border-wire-300 rounded font-medium">‹ Back</button>
+                  <button onclick="setSignupStep(5)" class="px-5 py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold hover:opacity-90">
+                    Next: Review & Submit ➔
+                  </button>
+                </div>
+              </div>
+
+              <!-- STEP 5: REVIEW & SUBMIT -->
+              <div id="signup-step-5" class="signup-step hidden space-y-4 text-xs">
+                <h3 class="font-bold text-sm text-wire-900 dark:text-white">Step 5: Review Application & Partner Agreement</h3>
+                
+                <div class="border border-wire-300 dark:border-wire-700 rounded-lg p-4 bg-wire-50/50 dark:bg-wire-850 space-y-3">
+                  <div class="grid grid-cols-2 gap-2 text-[11px]">
+                    <div><span class="text-wire-500">Partner Legal Name:</span> <strong class="text-wire-900 dark:text-white">Your name</strong></div>
+                    <div><span class="text-wire-500">Registered Shop:</span> <strong class="text-wire-900 dark:text-white">Workshop Name #1</strong></div>
+                    <div><span class="text-wire-500">Contact:</span> <span class="font-mono">+91 98765 43210</span></div>
+                    <div><span class="text-wire-500">Working Hours:</span> <span class="font-mono">08:00 AM - 08:00 PM</span></div>
+                    <div><span class="text-wire-500">Modes:</span> <span>Onsite (15 km radius, ₹150 visit) + Offsite</span></div>
+                    <div><span class="text-wire-500">Documents:</span> <span class="text-emerald-600 font-bold">2 files verified</span></div>
+                  </div>
+                </div>
+
+                <label class="flex items-start gap-2 cursor-pointer p-3 border border-wire-200 dark:border-wire-800 rounded-lg">
+                  <input type="checkbox" checked class="w-4 h-4 rounded text-wire-900 mt-0.5">
+                  <span class="text-wire-600 dark:text-wire-300 leading-normal">
+                    I agree to the GearUp Partner Code of Conduct: upfront pricing, mandatory odometer logging on service completion, and prompt customer communication.
+                  </span>
+                </label>
+
+                <div class="flex justify-between pt-4">
+                  <button onclick="setSignupStep(4)" class="px-4 py-2 border border-wire-300 rounded font-medium">‹ Back</button>
+                  <button onclick="submitSignupAndShowPending()" class="px-6 py-2.5 bg-emerald-700 text-white rounded font-bold hover:bg-emerald-800">
+                    Submit Registration Application ✓
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 3. FORGOT PASSWORD FLOW (EMAIL/PHONE -> OTP -> NEW PASSWORD)      -->
+          <!-- ================================================================= -->
+          <section id="m-forgot" class="page-view hidden p-6 flex-col items-center justify-center min-h-[500px]">
+            <div class="w-full max-w-md border border-wire-300 dark:border-wire-700 rounded-xl bg-white dark:bg-wire-900 p-6 shadow-sm text-xs">
+              <h3 class="text-lg font-bold text-wire-900 dark:text-white mb-1">Reset Partner Password</h3>
+              <p class="text-wire-500 mb-4">Enter your registered email or phone number to receive a secure recovery code.</p>
+
+              <!-- Step A: Contact Input -->
+              <div id="forgot-step-a" class="space-y-4">
+                <div>
+                  <label class="block font-medium mb-1">Registered Phone or Email</label>
+                  <input type="text" id="forgot-target" value="+91 98765 43210" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">
+                </div>
+                <button onclick="setForgotStep('b')" class="w-full py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold">
+                  Send Recovery OTP ➔
+                </button>
+              </div>
+
+              <!-- Step B: OTP Entry -->
+              <div id="forgot-step-b" class="hidden space-y-4">
+                <div class="p-2.5 bg-wire-50 dark:bg-wire-800 rounded border border-wire-200 dark:border-wire-700 text-[11px] text-wire-600 dark:text-wire-300">
+                  OTP sent to <span class="font-mono font-bold">+91 98765 43210</span>. (Expires in 5:00)
+                </div>
+                <div>
+                  <label class="block font-medium mb-1">6-Digit Verification Code</label>
+                  <input type="text" placeholder="• • • • • •" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800 text-center font-mono text-base tracking-widest">
+                </div>
+                <button onclick="setForgotStep('c')" class="w-full py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold">
+                  Verify OTP ➔
+                </button>
+              </div>
+
+              <!-- Step C: New Password -->
+              <div id="forgot-step-c" class="hidden space-y-4">
+                <div>
+                  <label class="block font-medium mb-1">New Password</label>
+                  <input type="password" placeholder="At least 8 characters" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800">
+                </div>
+                <div>
+                  <label class="block font-medium mb-1">Confirm New Password</label>
+                  <input type="password" placeholder="Re-enter password" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800">
+                </div>
+                <button onclick="setForgotStep('d')" class="w-full py-2 bg-emerald-700 text-white rounded font-bold">
+                  Update Password ✓
+                </button>
+              </div>
+
+              <!-- Step D: Success -->
+              <div id="forgot-step-d" class="hidden space-y-4 text-center py-4">
+                <div class="w-12 h-12 rounded-full bg-emerald-100 text-emerald-700 flex items-center justify-center text-xl mx-auto font-bold">✓</div>
+                <h4 class="font-bold text-sm text-wire-900 dark:text-white">Password Updated Successfully</h4>
+                <p class="text-wire-500 text-[11px]">You can now log in with your updated credentials.</p>
+                <button onclick="showPage('m-login')" class="w-full py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold">
+                  Proceed to Login ➔
+                </button>
+              </div>
+
+              <div class="mt-4 pt-3 border-t border-wire-200 dark:border-wire-800 text-center">
+                <button onclick="showPage('m-login')" class="text-wire-500 hover:text-wire-900 underline">‹ Back to Login</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 4. PENDING VERIFICATION STATE (RESTRICTED ACCESS VIEW)            -->
+          <!-- ================================================================= -->
+          <section id="m-pending" class="page-view hidden p-6 flex-col items-center justify-center min-h-[550px]">
+            <div class="w-full max-w-lg border border-amber-300 dark:border-amber-800 rounded-xl bg-amber-50/40 dark:bg-amber-950/20 p-6 md:p-8 text-center text-xs">
+              <div class="w-14 h-14 rounded-full bg-amber-100 dark:bg-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center text-2xl mx-auto mb-4 font-bold">
+                ⏳
+              </div>
+              <span class="inline-block px-2.5 py-1 bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200 font-bold rounded-full text-[10px] uppercase tracking-wider mb-2">
+                Application Under Verification
+              </span>
+              <h3 class="text-lg font-bold text-wire-900 dark:text-white mb-2">Workshop Verification in Progress</h3>
+              <p class="text-wire-600 dark:text-wire-400 mb-6 leading-relaxed">
+                Thank you for registering with GearUp! Our partner ops team is currently verifying your trade license and shop credentials.
+              </p>
+
+              <!-- Verification Checklist Status -->
+              <div class="border border-wire-300 dark:border-wire-700 rounded-lg p-4 bg-white dark:bg-wire-900 text-left space-y-2 mb-6 text-[11px]">
+                <div class="flex items-center justify-between">
+                  <span>Owner Contact & Phone Check</span>
+                  <span class="text-emerald-600 font-bold">✓ Verified</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>Trade License Document Audit</span>
+                  <span class="text-amber-600 font-bold">⏳ In Review</span>
+                </div>
+                <div class="flex items-center justify-between">
+                  <span>GPS Workshop Geo-Fencing</span>
+                  <span class="text-wire-400">○ Pending</span>
+                </div>
+              </div>
+
+              <!-- Restriction Notice -->
+              <div class="p-3 bg-wire-100 dark:bg-wire-850 rounded-lg text-wire-600 dark:text-wire-400 mb-6 text-left">
+                <strong>Restriction Notice:</strong> While pending, you can set up your services, parts catalog, and working hours, but <strong>incoming customer breakdown requests will remain disabled</strong> until badge activation.
+              </div>
+
+              <div class="flex flex-col sm:flex-row gap-3 justify-center">
+                <button onclick="simulateVerificationApproval()" class="px-4 py-2 bg-emerald-700 text-white rounded font-bold hover:bg-emerald-800">
+                  Simulate Ops Approval (Demo) ✓
+                </button>
+                <button onclick="showPage('m-services-prices')" class="px-4 py-2 border border-wire-400 rounded font-medium">
+                  Configure Services & Rates ›
+                </button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 5. MECHANIC DASHBOARD                                            -->
+          <!-- ================================================================= -->
+          <section id="m-dashboard" class="page-view p-4 md:p-6 space-y-6">
+            
+            <!-- Dashboard Top: Welcome + Big Status Switch -->
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-wire-50 dark:bg-wire-900 border border-wire-300 dark:border-wire-700 rounded-xl p-4 md:p-5">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-lg md:text-xl font-bold text-wire-900 dark:text-white">Workshop Dashboard</h2>
+                  <span class="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">LIVE</span>
+                </div>
+                <p class="text-xs text-wire-500">Station terminal • <span id="dash-status-indicator" class="font-bold text-emerald-600">Available for breakdown calls</span></p>
+              </div>
+
+              <!-- Big Visual Status Toggle Button -->
+              <div class="flex items-center gap-3">
+                <div class="text-right hidden sm:block">
+                  <div class="text-[11px] font-bold text-wire-800 dark:text-wire-200">Current Radar</div>
+                  <div class="text-[10px] text-wire-500">15 km radius active</div>
+                </div>
+                <button onclick="toggleBigStatus()" id="big-status-btn" class="px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs flex items-center gap-2 shadow-sm transition">
+                  <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
+                  <span id="big-status-text">ONLINE & ACCEPTING</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Today's Summary Metrics (4 Cards) -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+              <!-- Metric 1: New Requests -->
+              <div onclick="showPage('m-requests')" class="cursor-pointer border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 hover:border-red-400 transition relative overflow-hidden">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-medium text-wire-500">New Requests</span>
+                  <span class="w-2 h-2 rounded-full bg-red-500 animate-pulse"></span>
+                </div>
+                <div class="flex items-baseline gap-2">
+                  <span class="text-2xl font-bold text-wire-900 dark:text-white font-mono">1</span>
+                  <span class="text-[10px] text-red-600 font-bold bg-red-50 dark:bg-red-950/50 px-1 rounded">2:15 left</span>
+                </div>
+                <div class="text-[10px] text-wire-500 mt-1">Requires immediate response</div>
+              </div>
+
+              <!-- Metric 2: Active Jobs -->
+              <div onclick="showPage('m-booking-details')" class="cursor-pointer border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 hover:border-wire-500 transition">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-medium text-wire-500">Active Jobs</span>
+                  <span class="text-xs">🚐</span>
+                </div>
+                <div class="text-2xl font-bold text-wire-900 dark:text-white font-mono">2</div>
+                <div class="text-[10px] text-emerald-600 font-medium mt-1">1 Onsite • 1 In Garage</div>
+              </div>
+
+              <!-- Metric 3: Completed Today -->
+              <div onclick="showPage('m-service-logs')" class="cursor-pointer border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 hover:border-wire-500 transition">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-medium text-wire-500">Completed Today</span>
+                  <span class="text-xs">✓</span>
+                </div>
+                <div class="text-2xl font-bold text-wire-900 dark:text-white font-mono">5</div>
+                <div class="text-[10px] text-wire-500 mt-1">Avg turnaround: 42 mins</div>
+              </div>
+
+              <!-- Metric 4: Today's Earnings -->
+              <div onclick="showPage('m-earnings')" class="cursor-pointer border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 hover:border-wire-500 transition">
+                <div class="flex items-center justify-between mb-2">
+                  <span class="text-xs font-medium text-wire-500">Today's Earnings</span>
+                  <span class="text-xs">💰</span>
+                </div>
+                <div class="text-2xl font-bold text-wire-900 dark:text-white font-mono">₹4,250</div>
+                <div class="text-[10px] text-emerald-600 font-medium mt-1">+18% vs yesterday</div>
+              </div>
+            </div>
+
+            <!-- Priority Section: Incoming Urgent Request Card -->
+            <div class="border-2 border-red-500/80 rounded-xl p-4 bg-red-50/30 dark:bg-red-950/20 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-red-600 text-white text-[10px] font-bold uppercase tracking-wider animate-pulse">
+                    🚨 EMERGENCY BREAKDOWN
+                  </span>
+                  <span class="text-xs font-bold text-wire-900 dark:text-white">Customer breakdown 3.2 km away</span>
+                </div>
+                <div class="flex items-center gap-1.5 font-mono text-xs font-bold text-red-700 dark:text-red-400 bg-white dark:bg-wire-900 px-2.5 py-1 rounded border border-red-300">
+                  <span>⏱️ Expiring in:</span>
+                  <span id="dash-timer">02:15</span>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-3 gap-3 text-xs bg-white dark:bg-wire-900 p-3.5 rounded-lg border border-red-200 dark:border-red-900/50">
+                <div>
+                  <div class="text-wire-500 text-[10px] uppercase font-mono">Customer & Vehicle</div>
+                  <div class="font-bold text-wire-900 dark:text-white text-sm">Swift Dzire (White)</div>
+                  <div class="text-wire-600 dark:text-wire-400 font-mono text-[11px]">KL-07-CC-1234 • Car</div>
+                </div>
+
+                <div>
+                  <div class="text-wire-500 text-[10px] uppercase font-mono">Location & Mode</div>
+                  <div class="font-bold text-wire-900 dark:text-white flex items-center gap-1">
+                    <span>🚐 Onsite Service</span>
+                    <span class="text-xs text-wire-400">(3.2 km)</span>
+                  </div>
+                  <div class="text-wire-600 dark:text-wire-400 text-[11px] truncate">Near North Overbridge, MG Road</div>
+                </div>
+
+                <div>
+                  <div class="text-wire-500 text-[10px] uppercase font-mono">Reported Issue & Payout</div>
+                  <div class="font-bold text-wire-900 dark:text-white">Engine stalled + Battery dead</div>
+                  <div class="text-emerald-700 dark:text-emerald-400 font-bold font-mono text-[11px]">Est. Payout: ₹650 (Visit + Jumpstart)</div>
+                </div>
+              </div>
+
+              <div class="flex items-center justify-end gap-2 pt-1">
+                <button onclick="confirmRejectRequest('REQ-901')" class="px-3 py-1.5 border border-wire-300 dark:border-wire-700 text-wire-700 dark:text-wire-300 rounded font-medium text-xs hover:bg-wire-100">
+                  Decline / Forward
+                </button>
+                <button onclick="acceptRequestAndOpenBooking('REQ-901')" class="px-5 py-1.5 bg-emerald-700 text-white rounded font-bold text-xs hover:bg-emerald-800 flex items-center gap-1.5 shadow-sm">
+                  <span>Accept Breakdown Call (1-Tap)</span>
+                  <span>➔</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Two-Column Layout: Active / Upcoming Bookings + Latest Reviews -->
+            <div class="grid lg:grid-cols-12 gap-6">
+              
+              <!-- Left: Upcoming Bookings (8 Cols) -->
+              <div class="lg:col-span-8 border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                <div class="flex items-center justify-between pb-2 border-b border-wire-200 dark:border-wire-800">
+                  <h3 class="font-bold text-sm text-wire-900 dark:text-white flex items-center gap-2">
+                    <span>📅 Active & Scheduled Jobs</span>
+                    <span class="text-xs px-2 py-0.5 rounded-full bg-wire-100 dark:bg-wire-800 text-wire-700 dark:text-wire-300">2 active</span>
+                  </h3>
+                  <button onclick="showPage('m-booking-details')" class="text-xs text-wire-600 dark:text-wire-400 underline hover:text-wire-900">View Details ›</button>
+                </div>
+
+                <!-- Booking Row 1 (In Service) -->
+                <div class="p-3 border border-wire-200 dark:border-wire-800 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs bg-wire-50/50 dark:bg-wire-850">
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                      <span class="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 font-bold text-[10px]">🚐 ONSITE</span>
+                      <span class="font-bold text-wire-900 dark:text-white">Customer #41 • Classic 350</span>
+                      <span class="text-wire-400 font-mono text-[10px]">#BK-8021</span>
+                    </div>
+                    <div class="text-[11px] text-wire-500">Service: Chain Lube & Clutch Cable • Arrived at customer location</div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="px-2 py-1 bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-300 rounded font-bold text-[11px]">🔧 In Service</span>
+                    <button onclick="showPage('m-log-service')" class="px-3 py-1 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-medium hover:opacity-90">
+                      Complete & Log ›
+                    </button>
+                  </div>
+                </div>
+
+                <!-- Booking Row 2 (Scheduled Offsite) -->
+                <div class="p-3 border border-wire-200 dark:border-wire-800 rounded-lg flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs">
+                  <div class="space-y-1">
+                    <div class="flex items-center gap-2">
+                      <span class="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 font-bold text-[10px]">🏢 OFFSITE</span>
+                      <span class="font-bold text-wire-900 dark:text-white">Customer #52 • Honda City</span>
+                      <span class="text-wire-400 font-mono text-[10px]">#BK-8024</span>
+                    </div>
+                    <div class="text-[11px] text-wire-500">Service: Brake Disc Turn & Pad Change • Slot: Today 2:30 PM</div>
+                  </div>
+                  <div class="flex items-center gap-2">
+                    <span class="px-2 py-1 bg-wire-100 dark:bg-wire-800 text-wire-700 dark:text-wire-300 rounded font-medium text-[11px]">Awaiting Arrival</span>
+                    <button onclick="showPage('m-booking-details')" class="px-3 py-1 border border-wire-300 rounded font-medium hover:bg-wire-100">
+                      View Job ›
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Latest Customer Reviews (4 Cols) -->
+              <div class="lg:col-span-4 border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                <div class="flex items-center justify-between pb-2 border-b border-wire-200 dark:border-wire-800">
+                  <h3 class="font-bold text-sm text-wire-900 dark:text-white flex items-center gap-1.5">
+                    <span>⭐ Recent Reviews</span>
+                    <span class="text-xs font-mono font-normal text-wire-500">(4.9/5.0)</span>
+                  </h3>
+                  <button onclick="showPage('m-reviews')" class="text-xs text-wire-600 dark:text-wire-400 underline hover:text-wire-900">All ›</button>
+                </div>
+
+                <div class="space-y-3 text-xs">
+                  <div class="p-2.5 rounded bg-wire-50 dark:bg-wire-850 border border-wire-200 dark:border-wire-800 space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-wire-900 dark:text-white">Customer (Swift Dzire)</span>
+                      <span class="text-amber-500 font-bold">★★★★★</span>
+                    </div>
+                    <p class="text-[11px] text-wire-600 dark:text-wire-400 italic">
+                      "Mechanic arrived in 18 minutes. Tested alternator, swapped battery, and gave transparent bill."
+                    </p>
+                    <div class="text-[10px] text-wire-400 flex justify-between items-center pt-1">
+                      <span>2 hours ago • Verified Job</span>
+                      <button onclick="openReplyModal('REV-101')" class="underline text-wire-700 dark:text-wire-300">Reply</button>
+                    </div>
+                  </div>
+
+                  <div class="p-2.5 rounded bg-wire-50 dark:bg-wire-850 border border-wire-200 dark:border-wire-800 space-y-1">
+                    <div class="flex items-center justify-between">
+                      <span class="font-bold text-wire-900 dark:text-white">Customer (Classic 350)</span>
+                      <span class="text-amber-500 font-bold">★★★★★</span>
+                    </div>
+                    <p class="text-[11px] text-wire-600 dark:text-wire-400 italic">
+                      "Accurate odometer logging and genuine OEM chain spray used."
+                    </p>
+                    <div class="text-[10px] text-wire-400 flex justify-between items-center pt-1">
+                      <span>Yesterday • Verified Job</span>
+                      <button onclick="openReplyModal('REV-102')" class="underline text-wire-700 dark:text-wire-300">Reply</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 6. INCOMING REQUESTS (TIMER, CHECKLIST, FAST ACCEPT / REJECT)    -->
+          <!-- ================================================================= -->
+          <section id="m-requests" class="page-view hidden p-4 md:p-6 space-y-4">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-3 border-b border-wire-300 dark:border-wire-700">
+              <div>
+                <h2 class="text-lg font-bold text-wire-900 dark:text-white flex items-center gap-2">
+                  <span>⚡ Incoming Customer Requests</span>
+                  <span class="px-2 py-0.5 rounded-full bg-red-600 text-white text-xs font-mono font-bold">1 ACTIVE</span>
+                </h2>
+                <p class="text-xs text-wire-500">Live breakdown requests dispatched to you based on your 15 km service radius.</p>
+              </div>
+
+              <!-- Filter Tabs: Active / Forwarded / History -->
+              <div class="flex items-center gap-1 text-xs border border-wire-300 dark:border-wire-700 rounded-lg p-0.5 bg-wire-50 dark:bg-wire-900">
+                <button class="px-3 py-1 bg-white dark:bg-wire-700 rounded shadow-sm font-bold text-wire-900 dark:text-white">Active (1)</button>
+                <button class="px-3 py-1 text-wire-600 dark:text-wire-400 hover:text-wire-900">Forwarded (2)</button>
+                <button class="px-3 py-1 text-wire-600 dark:text-wire-400 hover:text-wire-900">Expired</button>
+              </div>
+            </div>
+
+            <!-- REQUEST CARD 1: ACTIVE LIVE CARD WITH COUNTDOWN -->
+            <div id="request-card-live" class="border-2 border-wire-900 dark:border-white rounded-xl p-5 bg-white dark:bg-wire-900 shadow-md space-y-4">
+              
+              <!-- Header: Urgency, Mode, Distance, Countdown -->
+              <div class="flex flex-wrap items-center justify-between gap-3 pb-3 border-b border-wire-200 dark:border-wire-800">
+                <div class="flex items-center gap-2">
+                  <span class="px-2.5 py-1 rounded bg-red-600 text-white text-xs font-bold uppercase tracking-wider flex items-center gap-1">
+                    <span>🚨</span>
+                    <span>Emergency Breakdown</span>
+                  </span>
+                  <span class="px-2 py-1 rounded bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 font-bold text-xs">
+                    🚐 Onsite Request
+                  </span>
+                  <span class="px-2 py-1 rounded bg-wire-100 dark:bg-wire-800 text-wire-700 dark:text-wire-300 text-xs font-mono">
+                    📍 3.2 km from shop
+                  </span>
+                </div>
+
+                <!-- 2-3 Minute Countdown Timer -->
+                <div class="flex items-center gap-2 bg-red-50 dark:bg-red-950/60 border border-red-300 dark:border-red-800 px-3 py-1.5 rounded-lg text-red-700 dark:text-red-300 font-mono text-sm font-bold">
+                  <span class="w-2 h-2 rounded-full bg-red-600 animate-ping"></span>
+                  <span>Respond in:</span>
+                  <span id="req-countdown-val">02:15</span>
+                </div>
+              </div>
+
+              <!-- Body: Vehicle Details, Location, Checklist, Custom Issues -->
+              <div class="grid md:grid-cols-12 gap-5 text-xs">
+                
+                <!-- Vehicle & Customer (4 Cols) -->
+                <div class="md:col-span-4 space-y-2">
+                  <div class="text-[10px] font-mono text-wire-400 uppercase">Customer & Vehicle</div>
+                  <div class="p-3 bg-wire-50 dark:bg-wire-850 rounded-lg border border-wire-200 dark:border-wire-800 space-y-1">
+                    <div class="font-bold text-sm text-wire-900 dark:text-white">Swift Dzire (White)</div>
+                    <div class="font-mono text-wire-600 dark:text-wire-300">Reg: KL-07-CC-1234</div>
+                    <div class="text-wire-500">Odometer: ~45,200 km • Petrol</div>
+                    <div class="pt-1 text-[11px] text-wire-500 border-t border-wire-200 dark:border-wire-700 mt-2">
+                      Customer Name: <strong class="text-wire-800 dark:text-wire-200">Customer</strong> (Phone revealed on Accept)
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Location & GPS (4 Cols) -->
+                <div class="md:col-span-4 space-y-2">
+                  <div class="text-[10px] font-mono text-wire-400 uppercase">Breakdown Spot</div>
+                  <div class="p-3 bg-wire-50 dark:bg-wire-850 rounded-lg border border-wire-200 dark:border-wire-800 space-y-1">
+                    <div class="font-bold text-wire-900 dark:text-white flex items-center gap-1">
+                      <span>📍</span>
+                      <span>Service Road, Near Overbridge #4</span>
+                    </div>
+                    <div class="text-wire-500">Landmark: Opposite Metro Pillar 412</div>
+                    <div class="text-wire-500 font-mono text-[11px]">Est. drive time: 8-10 mins with mobile van</div>
+                    <div class="wire-hatch h-10 rounded border border-wire-300 dark:border-wire-700 mt-2 flex items-center justify-center text-[10px] font-mono text-wire-500">
+                      [🗺️ Mini GPS Map Preview: 3.2 km]
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Ticked Checklist & Custom Issues (4 Cols) -->
+                <div class="md:col-span-4 space-y-2">
+                  <div class="text-[10px] font-mono text-wire-400 uppercase">Customer Checklist & Symptoms</div>
+                  <div class="p-3 bg-wire-50 dark:bg-wire-850 rounded-lg border border-wire-200 dark:border-wire-800 space-y-2">
+                    <div class="space-y-1">
+                      <div class="flex items-center gap-1.5 text-emerald-700 dark:text-emerald-400 font-medium">
+                        <span>✓</span>
+                        <span>Jumpstart / Battery check (Standard)</span>
+                      </div>
+                      <div class="flex items-start gap-1.5 bg-amber-50 dark:bg-amber-950/40 p-1.5 rounded border border-amber-300 dark:border-amber-800 text-amber-900 dark:text-amber-200">
+                        <span class="text-amber-600 font-bold">⚠️</span>
+                        <div>
+                          <strong>Custom Issue: Needs inspection</strong>
+                          <div class="text-[10px] text-wire-600 dark:text-wire-300">"Car died while idling at traffic light. Smells like hot rubber."</div>
+                        </div>
+                      </div>
+                    </div>
+
+                    <div class="pt-2 border-t border-wire-200 dark:border-wire-700 flex justify-between items-center text-[11px]">
+                      <span class="text-wire-500">Base Estimate:</span>
+                      <strong class="font-mono text-emerald-700 dark:text-emerald-400 text-sm">₹650 (Visit ₹150 + Labor)</strong>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Footer Actions: Accept (1-Tap) or Reject with Confirmation -->
+              <div class="pt-3 border-t border-wire-200 dark:border-wire-800 flex flex-col sm:flex-row items-center justify-between gap-3">
+                <div class="text-[11px] text-wire-500">
+                  ⚠️ If not accepted before timer expires, request automatically forwards to the next nearest mechanic.
+                </div>
+
+                <div class="flex items-center gap-3 w-full sm:w-auto">
+                  <button onclick="confirmRejectRequest('REQ-901')" class="flex-1 sm:flex-none px-4 py-2 border border-wire-300 dark:border-wire-700 text-wire-700 dark:text-wire-300 rounded-lg font-medium text-xs hover:bg-red-50 hover:text-red-700">
+                    Reject / Pass
+                  </button>
+                  <button onclick="acceptRequestAndOpenBooking('REQ-901')" class="flex-1 sm:flex-none px-6 py-2.5 bg-emerald-700 text-white rounded-lg font-bold text-xs hover:bg-emerald-800 flex items-center justify-center gap-2 shadow">
+                    <span>Accept Job Now (1-Tap)</span>
+                    <span>➔</span>
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            <!-- EXPIRED / FORWARDED REQUEST CARD (DEMONSTRATES FORWARDED STATE) -->
+            <div class="border border-dashed border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-wire-50/50 dark:bg-wire-850/40 text-xs opacity-70 space-y-2">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-wire-200 dark:bg-wire-800 text-wire-600 dark:text-wire-400 font-mono text-[10px]">
+                    #REQ-898 (EXPIRED)
+                  </span>
+                  <span class="font-bold text-wire-700 dark:text-wire-300">Hyundai i20 • Flat Tyre</span>
+                  <span class="text-wire-400">4.1 km away</span>
+                </div>
+                <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300 text-[10px] font-bold">
+                  Forwarded to Workshop #2 (Timer expired)
+                </span>
+              </div>
+              <div class="text-wire-500 text-[11px]">
+                Request was automatically reassigned to the next available mechanic after 3 minutes of inactivity.
+              </div>
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 7. BOOKING DETAILS (ONSITE VS OFFSITE STEPS & PRICE QUOTE)       -->
+          <!-- ================================================================= -->
+          <section id="m-booking-details" class="page-view hidden p-4 md:p-6 space-y-5">
+            
+            <!-- Booking Header & Quick Status -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-wire-300 dark:border-wire-700">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-lg font-bold text-wire-900 dark:text-white">Active Job #BK-8021</h2>
+                  <span class="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 font-bold text-xs" id="booking-mode-tag">
+                    🚐 ONSITE SERVICE
+                  </span>
+                  <span class="px-2 py-0.5 rounded bg-red-100 dark:bg-red-950 text-red-800 dark:text-red-300 text-[10px] font-bold">
+                    EMERGENCY
+                  </span>
+                </div>
+                <p class="text-xs text-wire-500">Accepted 12 mins ago • Swift Dzire (KL-07-CC-1234)</p>
+              </div>
+
+              <!-- Switch mode preview for testing: Onsite Flow vs Offsite Flow -->
+              <div class="flex items-center gap-2 text-xs bg-wire-100 dark:bg-wire-800 p-1 rounded-lg border border-wire-300 dark:border-wire-700">
+                <span class="text-[10px] text-wire-500 font-mono pl-1">SIMULATE FLOW:</span>
+                <button onclick="setBookingFlowMode('onsite')" id="flow-btn-onsite" class="px-2.5 py-1 rounded bg-white dark:bg-wire-700 font-bold shadow-sm text-wire-900 dark:text-white">
+                  Onsite Flow
+                </button>
+                <button onclick="setBookingFlowMode('offsite')" id="flow-btn-offsite" class="px-2.5 py-1 rounded text-wire-600 dark:text-wire-400 hover:text-wire-900">
+                  Offsite Flow
+                </button>
+              </div>
+            </div>
+
+            <!-- JOB STATUS PROGRESSION STEPPER -->
+            <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900">
+              <div class="text-xs font-bold text-wire-900 dark:text-white mb-3 flex items-center justify-between">
+                <span>Job Status Progression</span>
+                <span class="text-wire-500 font-mono text-[11px]" id="current-step-label">Stage 3 of 5: Arrived at Location</span>
+              </div>
+
+              <!-- ONSITE STEPPER (5 Stages) -->
+              <div id="onsite-stepper" class="grid grid-cols-5 gap-2 text-center text-xs">
+                <div class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200">
+                  <div class="font-bold">1. Accepted</div>
+                  <div class="text-[10px] text-emerald-600">✓ Done 10:14</div>
+                </div>
+                <div class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200">
+                  <div class="font-bold">2. On The Way</div>
+                  <div class="text-[10px] text-emerald-600">✓ Done 10:18</div>
+                </div>
+                <div class="p-2 rounded-lg bg-wire-900 text-white dark:bg-white dark:text-wire-900 font-bold shadow">
+                  <div>3. Arrived</div>
+                  <div class="text-[10px] opacity-80">Current</div>
+                </div>
+                <div class="p-2 rounded-lg bg-wire-100 dark:bg-wire-800 text-wire-500">
+                  <div class="font-bold">4. In Service</div>
+                  <div class="text-[10px]">Next</div>
+                </div>
+                <div class="p-2 rounded-lg bg-wire-100 dark:bg-wire-800 text-wire-500">
+                  <div class="font-bold">5. Completed</div>
+                  <div class="text-[10px]">Logs km</div>
+                </div>
+              </div>
+
+              <!-- OFFSITE STEPPER (4 Stages - Hidden by default) -->
+              <div id="offsite-stepper" class="hidden grid grid-cols-4 gap-2 text-center text-xs">
+                <div class="p-2 rounded-lg bg-emerald-100 dark:bg-emerald-950/60 border border-emerald-300 dark:border-emerald-800 text-emerald-900 dark:text-emerald-200 font-bold">
+                  1. Accepted
+                </div>
+                <div class="p-2 rounded-lg bg-wire-900 text-white dark:bg-white dark:text-wire-900 font-bold shadow">
+                  2. Vehicle Received
+                </div>
+                <div class="p-2 rounded-lg bg-wire-100 dark:bg-wire-800 text-wire-500 font-bold">
+                  3. In Service
+                </div>
+                <div class="p-2 rounded-lg bg-wire-100 dark:bg-wire-800 text-wire-500 font-bold">
+                  4. Completed
+                </div>
+              </div>
+
+              <!-- Advance Status Action Buttons -->
+              <div class="flex flex-wrap items-center justify-between gap-3 pt-4 mt-3 border-t border-wire-200 dark:border-wire-800">
+                <div class="text-xs text-wire-500">
+                  Update status as you travel and work so the customer sees live progress.
+                </div>
+                <div class="flex items-center gap-2">
+                  <button onclick="advanceJobStatus('in_service')" class="px-4 py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs hover:opacity-90">
+                    Mark "In Service / Work Started" ➔
+                  </button>
+                  <button onclick="showPage('m-log-service')" class="px-4 py-2 bg-emerald-700 text-white rounded font-bold text-xs hover:bg-emerald-800">
+                    Finish Job & Log Service ➔
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Main Content: Customer Contact, Vehicle & Issues, Map/Schedule -->
+            <div class="grid md:grid-cols-12 gap-5 text-xs">
+              
+              <!-- Left: Customer & Vehicle Card (4 Cols) -->
+              <div class="md:col-span-4 space-y-4">
+                <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                  <div class="text-[10px] font-mono uppercase text-wire-400">Customer Contact</div>
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="font-bold text-sm text-wire-900 dark:text-white">Customer</div>
+                      <div class="text-wire-500 font-mono text-[11px]">+91 98765 12345</div>
+                    </div>
+                    <a href="tel:+919876512345" class="px-3 py-1.5 bg-emerald-600 text-white rounded-lg font-bold flex items-center gap-1 hover:bg-emerald-700">
+                      <span>📞</span>
+                      <span>Call</span>
+                    </a>
+                  </div>
+
+                  <div class="pt-3 border-t border-wire-200 dark:border-wire-800 space-y-1">
+                    <div class="text-[10px] font-mono uppercase text-wire-400">Vehicle Specifications</div>
+                    <div class="font-bold text-wire-900 dark:text-white">Swift Dzire (White)</div>
+                    <div class="flex justify-between text-wire-500 text-[11px]">
+                      <span>Reg: <strong class="font-mono text-wire-800 dark:text-wire-200">KL-07-CC-1234</strong></span>
+                      <span>Odometer: <strong class="font-mono text-wire-800 dark:text-wire-200">45,210 km</strong></span>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Technician Actions: Suggest Quote for Custom Issues -->
+                <div class="border border-amber-300 dark:border-amber-800 rounded-xl p-4 bg-amber-50/40 dark:bg-amber-950/20 space-y-3">
+                  <div class="font-bold text-wire-900 dark:text-white text-xs flex items-center gap-1.5">
+                    <span>🛠️</span>
+                    <span>Additional Inspection Actions</span>
+                  </div>
+                  <p class="text-[11px] text-wire-600 dark:text-wire-400">
+                    If additional faults or custom issues require an updated price estimate:
+                  </p>
+                  <div>
+                    <button onclick="openSuggestChangeModal()" class="w-full py-2.5 px-3 border border-amber-400 bg-white dark:bg-wire-800 rounded-lg font-bold text-amber-900 dark:text-amber-200 hover:bg-amber-50 text-left flex items-center justify-between shadow-sm">
+                      <span>💬 Suggest a Change / Add Price Quote</span>
+                      <span>›</span>
+                    </button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Map Route & Ticked Checklist (8 Cols) -->
+              <div class="md:col-span-8 space-y-4">
+                
+                <!-- Map Route & Navigation (Onsite) or Scheduled Slot (Offsite) -->
+                <div id="booking-map-card" class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="font-bold text-wire-900 dark:text-white">Route to Customer Breakdown Spot</div>
+                      <div class="text-[11px] text-wire-500">Service Road, Near Overbridge #4 • 3.2 km (8 mins)</div>
+                    </div>
+                    <button class="px-3 py-1.5 border border-wire-400 rounded bg-wire-50 dark:bg-wire-800 font-medium flex items-center gap-1">
+                      <span>🧭 Open in Google Maps</span>
+                    </button>
+                  </div>
+                  
+                  <!-- Map Mockup -->
+                  <div class="wire-hatch h-48 rounded-lg border border-wire-300 dark:border-wire-700 flex flex-col items-center justify-center text-xs font-mono text-wire-500 relative">
+                    <div class="bg-white/90 dark:bg-wire-900/90 px-3 py-1.5 rounded border border-wire-300 shadow text-center">
+                      <div class="font-bold text-wire-900 dark:text-white">🚗 Mechanic Mobile Van ➔ Customer Swift Dzire</div>
+                      <div class="text-[10px] text-emerald-600">Arrived at scene (0.0 km remaining)</div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Offsite Schedule Card (Hidden during onsite) -->
+                <div id="booking-offsite-card" class="hidden border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-2">
+                  <div class="font-bold text-wire-900 dark:text-white">Workshop Bay Allocation</div>
+                  <div class="text-wire-500">Scheduled Time Slot: <strong>Today 2:30 PM - 4:00 PM</strong></div>
+                  <div class="text-wire-500">Assigned Bay: <strong>Bay #2 (Hydraulic Lift)</strong></div>
+                </div>
+
+                <!-- Customer Selected Checklist & Status -->
+                <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                  <div class="font-bold text-wire-900 dark:text-white">Service Checklist Requested by Customer</div>
+                  
+                  <div class="space-y-2">
+                    <div class="p-2.5 border border-wire-200 dark:border-wire-800 rounded-lg flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <span class="w-4 h-4 rounded bg-emerald-600 text-white flex items-center justify-center text-[10px] font-bold">✓</span>
+                        <span class="font-medium text-wire-900 dark:text-white">Battery Jumpstart & Alternator Charging Test</span>
+                      </div>
+                      <span class="font-mono text-wire-500">₹200 labor</span>
+                    </div>
+
+                    <div class="p-2.5 border border-amber-300 dark:border-amber-800 rounded-lg bg-amber-50/50 dark:bg-amber-950/20 flex items-start justify-between">
+                      <div class="flex items-start gap-2">
+                        <span class="text-amber-600 font-bold">⚠️</span>
+                        <div>
+                          <span class="font-bold text-amber-900 dark:text-amber-200">Custom Issue (Customer Note):</span>
+                          <p class="text-wire-600 dark:text-wire-300 text-[11px] mt-0.5">
+                            "Engine died at traffic light. Smells like hot rubber. Please inspect belt and pulleys."
+                          </p>
+                        </div>
+                      </div>
+                      <span class="px-2 py-0.5 bg-amber-200 dark:bg-amber-900 text-amber-900 dark:text-amber-200 rounded font-bold text-[10px]">Needs Quote</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 8. LOG SERVICE (ODOMETER, CHECKLIST, PARTS, EXTRA ISSUES, BILL)   -->
+          <!-- ================================================================= -->
+          <section id="m-log-service" class="page-view hidden p-4 md:p-6 space-y-5">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-wire-300 dark:border-wire-700">
+              <div>
+                <h2 class="text-lg font-bold text-wire-900 dark:text-white flex items-center gap-2">
+                  <span>📝 Log Service & Generate Invoice</span>
+                  <span class="px-2 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-xs font-mono font-bold">FINALIZING</span>
+                </h2>
+                <p class="text-xs text-wire-500">
+                  Saving this log automatically updates the customer's permanent vehicle history and predicts next maintenance km.
+                </p>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button onclick="showPage('m-booking-details')" class="px-3 py-1.5 border border-wire-300 rounded text-xs font-medium">‹ Back to Booking</button>
+              </div>
+            </div>
+
+            <!-- MANDATORY ODOMETER READING (PROMINENT INPUT) -->
+            <div class="border-2 border-wire-900 dark:border-white rounded-xl p-4 md:p-5 bg-wire-50 dark:bg-wire-850 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="text-xl">⏱️</span>
+                  <h3 class="font-bold text-sm md:text-base text-wire-900 dark:text-white">Current Vehicle Odometer Reading (Required) *</h3>
+                </div>
+                <p class="text-xs text-wire-500 mt-0.5">
+                  Verify against the vehicle instrument cluster. Last recorded: <strong>45,210 km</strong>.
+                </p>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <input type="number" id="log-odometer" value="45250" class="w-36 px-3 py-2 text-base font-bold font-mono border-2 border-wire-900 dark:border-white rounded-lg bg-white dark:bg-wire-900 text-wire-900 dark:text-white text-right">
+                <span class="font-bold text-sm font-mono text-wire-700 dark:text-wire-300">KM</span>
+              </div>
+            </div>
+
+            <div class="grid lg:grid-cols-12 gap-6 text-xs">
+              
+              <!-- Left Form: Items Done, Parts Used, Extra Issues Found (8 Cols) -->
+              <div class="lg:col-span-8 space-y-5">
+                
+                <!-- Section 1: Checklist Items Done (Tick Each) -->
+                <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                  <div class="font-bold text-wire-900 dark:text-white text-sm">1. Work Completed Checklist (Tick All Done)</div>
+                  
+                  <div class="space-y-2">
+                    <label class="flex items-center justify-between p-2.5 border border-wire-200 dark:border-wire-800 rounded-lg hover:bg-wire-50 dark:hover:bg-wire-800 cursor-pointer">
+                      <div class="flex items-center gap-2.5">
+                        <input type="checkbox" checked class="w-4 h-4 rounded text-wire-900">
+                        <span class="font-medium text-wire-900 dark:text-white">Battery Jumpstart & Terminal Cleaning</span>
+                      </div>
+                      <span class="text-wire-500 font-mono">₹200</span>
+                    </label>
+
+                    <label class="flex items-center justify-between p-2.5 border border-wire-200 dark:border-wire-800 rounded-lg hover:bg-wire-50 dark:hover:bg-wire-800 cursor-pointer">
+                      <div class="flex items-center gap-2.5">
+                        <input type="checkbox" checked class="w-4 h-4 rounded text-wire-900">
+                        <span class="font-medium text-wire-900 dark:text-white">Alternator Output & Belt Tension Check</span>
+                      </div>
+                      <span class="text-wire-500 font-mono">₹150</span>
+                    </label>
+
+                    <label class="flex items-center justify-between p-2.5 border border-wire-200 dark:border-wire-800 rounded-lg hover:bg-wire-50 dark:hover:bg-wire-800 cursor-pointer">
+                      <div class="flex items-center gap-2.5">
+                        <input type="checkbox" checked class="w-4 h-4 rounded text-wire-900">
+                        <span class="font-medium text-wire-900 dark:text-white">Multi-point Safety & Fluid Level Inspection</span>
+                      </div>
+                      <span class="text-emerald-600 font-bold">Complimentary</span>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Section 2: Parts & Materials Used -->
+                <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                  <div class="flex items-center justify-between">
+                    <div class="font-bold text-wire-900 dark:text-white text-sm">2. Replacement Parts & Consumables</div>
+                    <button onclick="openAddPartModal()" class="px-2.5 py-1 border border-wire-300 rounded font-medium hover:bg-wire-100 flex items-center gap-1">
+                      <span>+ Add Part</span>
+                    </button>
+                  </div>
+
+                  <table class="w-full text-left border-collapse border border-wire-200 dark:border-wire-800 rounded-lg overflow-hidden">
+                    <thead class="bg-wire-50 dark:bg-wire-800 text-[10px] uppercase font-mono text-wire-500">
+                      <tr>
+                        <th class="p-2">Part Description</th>
+                        <th class="p-2 w-16 text-center">Qty</th>
+                        <th class="p-2 w-24 text-right">Unit Price</th>
+                        <th class="p-2 w-24 text-right">Subtotal</th>
+                        <th class="p-2 w-10"></th>
+                      </tr>
+                    </thead>
+                    <tbody class="divide-y divide-wire-200 dark:divide-wire-800 font-mono text-[11px]">
+                      <tr>
+                        <td class="p-2 font-sans font-medium text-wire-900 dark:text-white">Alternator V-Ribbed Belt (OEM)</td>
+                        <td class="p-2 text-center">1</td>
+                        <td class="p-2 text-right">₹450</td>
+                        <td class="p-2 text-right font-bold">₹450</td>
+                        <td class="p-2 text-center text-wire-400 hover:text-red-600 cursor-pointer">✕</td>
+                      </tr>
+                      <tr>
+                        <td class="p-2 font-sans font-medium text-wire-900 dark:text-white">Battery Terminal Anti-Corrosion Spray</td>
+                        <td class="p-2 text-center">1</td>
+                        <td class="p-2 text-right">₹120</td>
+                        <td class="p-2 text-right font-bold">₹120</td>
+                        <td class="p-2 text-center text-wire-400 hover:text-red-600 cursor-pointer">✕</td>
+                      </tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <!-- Section 3: Extra Issues Found (Needs Customer Approval) -->
+                <div class="border border-amber-300 dark:border-amber-800 rounded-xl p-4 bg-amber-50/30 dark:bg-amber-950/20 space-y-3">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="font-bold text-amber-900 dark:text-amber-200 text-sm flex items-center gap-1.5">
+                        <span>⚠️ Extra Issues Found During Inspection</span>
+                      </div>
+                      <div class="text-[11px] text-wire-600 dark:text-wire-400">
+                        Requires customer approval before starting additional work.
+                      </div>
+                    </div>
+                    <span class="px-2 py-0.5 rounded bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300 font-bold text-[10px]">
+                      APPROVED BY CUSTOMER
+                    </span>
+                  </div>
+
+                  <div class="p-3 bg-white dark:bg-wire-900 rounded-lg border border-amber-200 dark:border-amber-900/50 space-y-2">
+                    <div class="flex justify-between items-start">
+                      <div>
+                        <div class="font-bold text-wire-900 dark:text-white">Front Brake Pads Worn (2 mm remaining)</div>
+                        <div class="text-wire-500 text-[11px]">Recommended replacement within 300 km. Customer approved pad inspection.</div>
+                      </div>
+                      <div class="text-right font-mono">
+                        <div class="font-bold text-wire-900 dark:text-white">₹350</div>
+                        <div class="text-[10px] text-wire-400">Labor quote</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                <!-- Section 4: Mechanic Diagnostic Notes & Photos -->
+                <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                  <div class="font-bold text-wire-900 dark:text-white text-sm">4. Diagnostic Notes & Work Photos</div>
+                  
+                  <div>
+                    <label class="block font-medium mb-1 text-wire-700 dark:text-wire-300">Mechanic Advice to Vehicle Owner</label>
+                    <textarea rows="2" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800 text-wire-900 dark:text-white" placeholder="e.g. Battery health is at 65%. Recommended to replace before next winter."></textarea>
+                  </div>
+
+                  <!-- Photo Upload Placeholders -->
+                  <div class="grid grid-cols-3 gap-3">
+                    <div class="border border-dashed border-wire-300 dark:border-wire-700 rounded-lg p-3 text-center bg-wire-50 dark:bg-wire-850 flex flex-col items-center justify-center">
+                      <span class="text-base mb-1">📸</span>
+                      <span class="text-[10px] text-wire-500">Odometer Photo (Uploaded)</span>
+                    </div>
+                    <div class="border border-dashed border-wire-300 dark:border-wire-700 rounded-lg p-3 text-center bg-wire-50 dark:bg-wire-850 flex flex-col items-center justify-center">
+                      <span class="text-base mb-1">📸</span>
+                      <span class="text-[10px] text-wire-500">Old Belt (Uploaded)</span>
+                    </div>
+                    <div class="border border-dashed border-wire-300 dark:border-wire-700 rounded-lg p-3 text-center hover:bg-wire-50 dark:hover:bg-wire-850 cursor-pointer flex flex-col items-center justify-center">
+                      <span class="text-base mb-1">+</span>
+                      <span class="text-[10px] font-medium text-wire-600 dark:text-wire-300">Add Photo</span>
+                    </div>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Right: Live Invoice Summary & Action (4 Cols) -->
+              <div class="lg:col-span-4 space-y-4">
+                <div class="border-2 border-wire-800 dark:border-wire-200 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-4 shadow-sm sticky top-20">
+                  <div class="border-b border-wire-200 dark:border-wire-800 pb-3">
+                    <div class="text-[10px] font-mono uppercase text-wire-400">Invoice Preview</div>
+                    <div class="font-bold text-base text-wire-900 dark:text-white">GearUp Service Receipt</div>
+                    <div class="text-wire-500 text-[11px] font-mono">Invoice #INV-2026-9041</div>
+                  </div>
+
+                  <!-- Line Item Breakdown -->
+                  <div class="space-y-2 font-mono text-[11px]">
+                    <div class="flex justify-between">
+                      <span class="font-sans text-wire-600 dark:text-wire-400">Labor Charge (3 items)</span>
+                      <span class="text-wire-900 dark:text-white">₹350</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="font-sans text-wire-600 dark:text-wire-400">Parts & Materials (2 items)</span>
+                      <span class="text-wire-900 dark:text-white">₹570</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="font-sans text-wire-600 dark:text-wire-400">Onsite Mobile Visit Fee</span>
+                      <span class="text-wire-900 dark:text-white">₹150</span>
+                    </div>
+                    <div class="flex justify-between">
+                      <span class="font-sans text-wire-600 dark:text-wire-400">Taxes (GST 18% on Labor)</span>
+                      <span class="text-wire-900 dark:text-white">₹63</span>
+                    </div>
+
+                    <div class="pt-3 border-t-2 border-wire-900 dark:border-white flex justify-between items-baseline font-bold text-sm">
+                      <span class="font-sans">Grand Total:</span>
+                      <span class="text-emerald-700 dark:text-emerald-400 text-base">₹1,133</span>
+                    </div>
+                  </div>
+
+                  <div class="p-2.5 bg-wire-50 dark:bg-wire-850 rounded border border-wire-200 dark:border-wire-700 text-[10px] text-wire-600 dark:text-wire-400 space-y-1 font-sans">
+                    <div>✓ Vehicle: <strong>Swift Dzire (KL-07-CC-1234)</strong></div>
+                    <div>✓ Next Oil Due: <strong>Predicted at 45,500 km</strong></div>
+                    <div>✓ Payment mode: <strong>Online via GearUp Escrow</strong></div>
+                  </div>
+
+                  <button onclick="saveServiceLogAndComplete()" class="w-full py-3 bg-emerald-700 text-white rounded-lg font-bold text-sm hover:bg-emerald-800 shadow transition flex items-center justify-center gap-2">
+                    <span>Finalize & Send Bill to Customer</span>
+                    <span>✓</span>
+                  </button>
+
+                  <div class="text-[10px] text-center text-wire-400">
+                    Saves to customer logbook and releases payout to mechanic wallet.
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 9. SERVICES & PRICES (CATALOG, RADIUS, VISIT CHARGE, HOURS)       -->
+          <!-- ================================================================= -->
+          <section id="m-services-prices" class="page-view hidden p-4 md:p-6 space-y-5">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-wire-300 dark:border-wire-700">
+              <div>
+                <h2 class="text-lg font-bold text-wire-900 dark:text-white">Services & Transparent Price Catalog</h2>
+                <p class="text-xs text-wire-500">Configure your labor rates, parts inventory, visit charges, and service boundary.</p>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button onclick="openAddPartModal()" class="px-3 py-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs hover:opacity-90">
+                  + Add Custom Service / Part
+                </button>
+              </div>
+            </div>
+
+            <!-- Top Config Bar: Modes, Radius, Visit Charge -->
+            <div class="grid sm:grid-cols-3 gap-4 p-4 border border-wire-300 dark:border-wire-700 rounded-xl bg-wire-50 dark:bg-wire-850 text-xs">
+              <div class="space-y-1">
+                <div class="font-bold text-wire-900 dark:text-white">Service Modes Accepted</div>
+                <div class="flex items-center gap-3 pt-1">
+                  <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" checked class="w-4 h-4 rounded text-wire-900">
+                    <span>🚐 Onsite</span>
+                  </label>
+                  <label class="flex items-center gap-1.5 cursor-pointer">
+                    <input type="checkbox" checked class="w-4 h-4 rounded text-wire-900">
+                    <span>🏢 Offsite</span>
+                  </label>
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <div class="font-bold text-wire-900 dark:text-white">Onsite Mobile Radius</div>
+                <div class="flex items-center gap-2">
+                  <input type="number" value="15" class="w-16 px-2 py-1 border border-wire-300 rounded bg-white dark:bg-wire-900 font-mono">
+                  <span class="text-wire-500">km from garage</span>
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <div class="font-bold text-wire-900 dark:text-white">Standard Visit Charge</div>
+                <div class="flex items-center gap-2">
+                  <span class="text-wire-500">₹</span>
+                  <input type="number" value="150" class="w-20 px-2 py-1 border border-wire-300 rounded bg-white dark:bg-wire-900 font-mono">
+                  <span class="text-wire-500">per mobile call</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Services List with Search & Edit -->
+            <div class="border border-wire-300 dark:border-wire-700 rounded-xl bg-white dark:bg-wire-900 overflow-hidden text-xs">
+              
+              <div class="p-3 border-b border-wire-200 dark:border-wire-800 flex flex-col sm:flex-row sm:items-center justify-between gap-2 bg-wire-50/50 dark:bg-wire-850">
+                <div class="font-bold text-wire-900 dark:text-white">Labor Rates by Service Category</div>
+                <input type="text" placeholder="Search service name..." class="px-2.5 py-1 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-900 w-full sm:w-60 text-xs">
+              </div>
+
+              <table class="w-full text-left border-collapse">
+                <thead class="bg-wire-50 dark:bg-wire-800 text-[10px] uppercase font-mono text-wire-500 border-b border-wire-200 dark:border-wire-800">
+                  <tr>
+                    <th class="p-3">Service Name</th>
+                    <th class="p-3">Applicable Modes</th>
+                    <th class="p-3">Est. Duration</th>
+                    <th class="p-3 text-right">Labor Rate</th>
+                    <th class="p-3 text-center">Status</th>
+                    <th class="p-3 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody class="divide-y divide-wire-200 dark:divide-wire-800">
+                  <tr>
+                    <td class="p-3 font-medium text-wire-900 dark:text-white">Engine Oil Flush & Filter Change</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-wire-100 dark:bg-wire-800 text-[10px]">Onsite + Offsite</span></td>
+                    <td class="p-3 text-wire-500">30 mins</td>
+                    <td class="p-3 text-right font-mono font-bold">₹350</td>
+                    <td class="p-3 text-center"><span class="text-emerald-600 font-bold">Active</span></td>
+                    <td class="p-3 text-right"><button class="underline text-wire-600">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-medium text-wire-900 dark:text-white">Brake Pad Replacement (Front Pair)</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-wire-100 dark:bg-wire-800 text-[10px]">Onsite + Offsite</span></td>
+                    <td class="p-3 text-wire-500">45 mins</td>
+                    <td class="p-3 text-right font-mono font-bold">₹400</td>
+                    <td class="p-3 text-center"><span class="text-emerald-600 font-bold">Active</span></td>
+                    <td class="p-3 text-right"><button class="underline text-wire-600">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-medium text-wire-900 dark:text-white">Emergency Battery Jumpstart</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 text-[10px]">Onsite Only</span></td>
+                    <td class="p-3 text-wire-500">15 mins</td>
+                    <td class="p-3 text-right font-mono font-bold">₹200</td>
+                    <td class="p-3 text-center"><span class="text-emerald-600 font-bold">Active</span></td>
+                    <td class="p-3 text-right"><button class="underline text-wire-600">Edit</button></td>
+                  </tr>
+                  <tr>
+                    <td class="p-3 font-medium text-wire-900 dark:text-white">Brake Rotor / Disc Skimming (Lathe)</td>
+                    <td class="p-3"><span class="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 text-[10px]">Offsite Only (Machinery)</span></td>
+                    <td class="p-3 text-wire-500">2 hours</td>
+                    <td class="p-3 text-right font-mono font-bold">₹850</td>
+                    <td class="p-3 text-center"><span class="text-emerald-600 font-bold">Active</span></td>
+                    <td class="p-3 text-right"><button class="underline text-wire-600">Edit</button></td>
+                  </tr>
+                </tbody>
+              </table>
+
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 10. SERVICE LOGS & COMPLETED JOBS (FILTERS, EXPANDABLE ROWS, PDF) -->
+          <!-- ================================================================= -->
+          <section id="m-service-logs" class="page-view hidden p-4 md:p-6 space-y-5">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-wire-300 dark:border-wire-700">
+              <div>
+                <h2 class="text-lg font-bold text-wire-900 dark:text-white">Service History Logs</h2>
+                <p class="text-xs text-wire-500">Permanent record of all customer jobs, odometer records, and downloaded tax invoices.</p>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <button class="px-3 py-1.5 border border-wire-300 dark:border-wire-700 rounded text-xs font-medium hover:bg-wire-100 flex items-center gap-1">
+                  <span>📄 Export CSV / Audit</span>
+                </button>
+              </div>
+            </div>
+
+            <!-- Filters Toolbar -->
+            <div class="flex flex-wrap items-center gap-3 p-3 border border-wire-300 dark:border-wire-700 rounded-xl bg-wire-50 dark:bg-wire-850 text-xs">
+              <input type="text" placeholder="Search vehicle, invoice #, customer..." class="px-3 py-1.5 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-900 flex-1 min-w-[200px]">
+              
+              <select class="px-2.5 py-1.5 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-900">
+                <option>All Modes (Onsite + Offsite)</option>
+                <option>Onsite Only</option>
+                <option>Offsite Only</option>
+              </select>
+
+              <select class="px-2.5 py-1.5 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-900">
+                <option>Date: Last 30 Days</option>
+                <option>This Week</option>
+                <option>Today</option>
+                <option>Custom Range</option>
+              </select>
+            </div>
+
+            <!-- Expandable Log Entries -->
+            <div class="space-y-3 text-xs">
+              
+              <!-- Log Entry 1 (Expanded) -->
+              <div class="border border-wire-300 dark:border-wire-700 rounded-xl overflow-hidden bg-white dark:bg-wire-900">
+                <div class="p-3.5 bg-wire-50/70 dark:bg-wire-850 flex flex-wrap items-center justify-between gap-3 border-b border-wire-200 dark:border-wire-800">
+                  <div class="flex items-center gap-3">
+                    <span class="font-mono font-bold text-wire-500">24 Aug 2026</span>
+                    <span class="px-2 py-0.5 rounded bg-blue-100 dark:bg-blue-950 text-blue-800 dark:text-blue-300 font-bold text-[10px]">🚐 ONSITE</span>
+                    <span class="font-bold text-wire-900 dark:text-white">Customer (Swift Dzire • KL-07-CC-1234)</span>
+                  </div>
+
+                  <div class="flex items-center gap-4">
+                    <span class="font-mono text-wire-600 dark:text-wire-400">Odometer: <strong>40,120 km</strong></span>
+                    <span class="font-mono font-bold text-emerald-700 dark:text-emerald-400 text-sm">₹2,450</span>
+                    <button class="px-2 py-1 border border-wire-300 rounded font-medium text-[11px]">Download Invoice 📄</button>
+                  </div>
+                </div>
+
+                <div class="p-4 space-y-3 bg-white dark:bg-wire-900">
+                  <div class="grid md:grid-cols-3 gap-3 text-[11px]">
+                    <div>
+                      <div class="font-bold text-wire-900 dark:text-white mb-1">Checklist Done</div>
+                      <div class="space-y-0.5 text-wire-600 dark:text-wire-400">
+                        <div>✓ Full Synthetic Oil Flush (3.5L)</div>
+                        <div>✓ OEM Oil Filter Replacement</div>
+                        <div>✓ Brake Fluid Top-up</div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div class="font-bold text-wire-900 dark:text-white mb-1">Parts & Materials</div>
+                      <div class="space-y-0.5 text-wire-600 dark:text-wire-400 font-mono">
+                        <div>• Synthetic 5W-30 (₹1,575)</div>
+                        <div>• Filter Element (₹325)</div>
+                      </div>
+                    </div>
+
+                    <div>
+                      <div class="font-bold text-wire-900 dark:text-white mb-1">Cost Breakdown</div>
+                      <div class="space-y-0.5 text-wire-600 dark:text-wire-400 font-mono">
+                        <div>Labor: ₹400 • Visit: ₹150</div>
+                        <div>Parts: ₹1,900 • Total: ₹2,450</div>
+                        <div class="text-emerald-600 font-bold font-sans">Customer Rating: ★★★★★</div>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Log Entry 2 (Collapsed) -->
+              <div class="border border-wire-300 dark:border-wire-700 rounded-xl overflow-hidden bg-white dark:bg-wire-900">
+                <div class="p-3.5 bg-white dark:bg-wire-900 flex flex-wrap items-center justify-between gap-3">
+                  <div class="flex items-center gap-3">
+                    <span class="font-mono font-bold text-wire-500">18 Aug 2026</span>
+                    <span class="px-2 py-0.5 rounded bg-purple-100 dark:bg-purple-950 text-purple-800 dark:text-purple-300 font-bold text-[10px]">🏢 OFFSITE</span>
+                    <span class="font-bold text-wire-900 dark:text-white">Customer (Classic 350 • KL-07-AA-9988)</span>
+                  </div>
+
+                  <div class="flex items-center gap-4">
+                    <span class="font-mono text-wire-600 dark:text-wire-400">Odometer: <strong>38,000 km</strong></span>
+                    <span class="font-mono font-bold text-emerald-700 dark:text-emerald-400 text-sm">₹850</span>
+                    <button class="text-wire-500 underline text-[11px]">Expand Details ▼</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 11. REVIEWS (VERIFIED REVIEWS, SUMMARY & REPLY MODAL)              -->
+          <!-- ================================================================= -->
+          <section id="m-reviews" class="page-view hidden p-4 md:p-6 space-y-5">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-wire-300 dark:border-wire-700">
+              <div>
+                <h2 class="text-lg font-bold text-wire-900 dark:text-white">Verified Customer Reviews</h2>
+                <p class="text-xs text-wire-500">Reviews are strictly submitted by customers after a completed, logged service.</p>
+              </div>
+
+              <div class="flex items-center gap-2">
+                <span class="px-2.5 py-1 bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 rounded font-bold text-xs">
+                  4.9 Star Average (48 Reviews)
+                </span>
+              </div>
+            </div>
+
+            <!-- Review Cards Stack -->
+            <div class="space-y-4 text-xs">
+              
+              <!-- Review 1 -->
+              <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-wire-900 dark:text-white">Customer</span>
+                      <span class="px-2 py-0.2 rounded bg-wire-100 dark:bg-wire-800 text-[10px] text-wire-600 dark:text-wire-400">Swift Dzire</span>
+                      <span class="text-emerald-600 font-bold text-[10px]">✓ Verified Service Completion</span>
+                    </div>
+                    <div class="text-amber-500 font-bold text-sm mt-0.5">★★★★★</div>
+                  </div>
+                  <span class="text-wire-400 font-mono text-[11px]">2 hours ago</span>
+                </div>
+
+                <p class="text-wire-700 dark:text-wire-300 leading-relaxed">
+                  "Mechanic reached my office parking lot in 18 minutes with full mobile van tools. Battery jumpstart was clean, alternator voltage tested, and transparent receipt issued on the app."
+                </p>
+
+                <!-- Mechanic Reply Box -->
+                <div class="p-3 bg-wire-50 dark:bg-wire-850 rounded-lg border-l-2 border-wire-900 dark:border-white text-[11px] space-y-1">
+                  <div class="font-bold text-wire-900 dark:text-white">Workshop Reply:</div>
+                  <p class="text-wire-600 dark:text-wire-400">
+                    "Thank you for trusting GearUp! Happy to have you back on the road safely. Don't forget to get that alternator belt checked at your 50,000 km mark."
+                  </p>
+                </div>
+              </div>
+
+              <!-- Review 2 (Awaiting Reply) -->
+              <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                <div class="flex items-start justify-between">
+                  <div>
+                    <div class="flex items-center gap-2">
+                      <span class="font-bold text-wire-900 dark:text-white">Customer</span>
+                      <span class="px-2 py-0.2 rounded bg-wire-100 dark:bg-wire-800 text-[10px] text-wire-600 dark:text-wire-400">Classic 350</span>
+                      <span class="text-emerald-600 font-bold text-[10px]">✓ Verified Service Completion</span>
+                    </div>
+                    <div class="text-amber-500 font-bold text-sm mt-0.5">★★★★★</div>
+                  </div>
+                  <span class="text-wire-400 font-mono text-[11px]">Yesterday</span>
+                </div>
+
+                <p class="text-wire-700 dark:text-wire-300 leading-relaxed">
+                  "Quick chain lubrication and brake adjustment. Accurate odometer update logged into my vehicle history."
+                </p>
+
+                <div class="flex justify-end">
+                  <button onclick="openReplyModal('REV-102')" class="px-3 py-1.5 border border-wire-300 rounded font-medium hover:bg-wire-100">
+                    💬 Post Official Workshop Reply
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 12. EARNINGS & PAYOUT ANALYTICS                                   -->
+          <!-- ================================================================= -->
+          <section id="m-earnings" class="page-view hidden p-4 md:p-6 space-y-5">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-wire-300 dark:border-wire-700">
+              <div>
+                <h2 class="text-lg font-bold text-wire-900 dark:text-white">Workshop Earnings & Payouts</h2>
+                <p class="text-xs text-wire-500">Transparent summary of labor, parts, visit charges, and weekly bank settlements.</p>
+              </div>
+
+              <!-- Timeframe Tabs -->
+              <div class="flex items-center gap-1 border border-wire-300 dark:border-wire-700 rounded-lg p-0.5 bg-wire-50 dark:bg-wire-900 text-xs">
+                <button onclick="setEarningsPeriod('today')" id="earn-btn-today" class="px-3 py-1 rounded bg-white dark:bg-wire-700 font-bold shadow-sm">Today</button>
+                <button onclick="setEarningsPeriod('week')" id="earn-btn-week" class="px-3 py-1 rounded text-wire-600 dark:text-wire-400">This Week</button>
+                <button onclick="setEarningsPeriod('month')" id="earn-btn-month" class="px-3 py-1 rounded text-wire-600 dark:text-wire-400">This Month</button>
+              </div>
+            </div>
+
+            <!-- Earnings Metric Cards -->
+            <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+              <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900">
+                <div class="text-xs font-medium text-wire-500 mb-1">Total Payout (<span id="earn-period-label">Today</span>)</div>
+                <div class="text-2xl font-bold font-mono text-wire-900 dark:text-white" id="earn-total-val">₹4,250</div>
+                <div class="text-[10px] text-emerald-600 mt-1">Direct Bank Deposit scheduled for Monday</div>
+              </div>
+
+              <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900">
+                <div class="text-xs font-medium text-wire-500 mb-1">Jobs Completed</div>
+                <div class="text-2xl font-bold font-mono text-wire-900 dark:text-white" id="earn-jobs-count">5 Jobs</div>
+                <div class="text-[10px] text-wire-500 mt-1">3 Onsite • 2 In Garage</div>
+              </div>
+
+              <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900">
+                <div class="text-xs font-medium text-wire-500 mb-1">Average Payout per Job</div>
+                <div class="text-2xl font-bold font-mono text-wire-900 dark:text-white">₹850</div>
+                <div class="text-[10px] text-emerald-600 mt-1">0% commission on emergency breakdown calls</div>
+              </div>
+            </div>
+
+            <!-- Simple Wireframe Chart Placeholder -->
+            <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold text-wire-900 dark:text-white">Weekly Payout Trend (Mon - Sun)</span>
+                <span class="text-wire-500 font-mono">₹28,600 Weekly Total</span>
+              </div>
+              
+              <!-- SVG Bar Chart Wireframe -->
+              <div class="h-44 w-full flex items-end justify-between gap-2 pt-6 pb-2 px-4 bg-wire-50 dark:bg-wire-850 rounded-lg border border-wire-200 dark:border-wire-700">
+                <div class="flex-1 flex flex-col items-center gap-1.5">
+                  <div class="text-[10px] font-mono text-wire-500">₹3.8k</div>
+                  <div class="w-full bg-wire-300 dark:bg-wire-600 rounded-t h-20"></div>
+                  <span class="text-[10px] font-mono">Mon</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center gap-1.5">
+                  <div class="text-[10px] font-mono text-wire-500">₹4.5k</div>
+                  <div class="w-full bg-wire-300 dark:bg-wire-600 rounded-t h-24"></div>
+                  <span class="text-[10px] font-mono">Tue</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center gap-1.5">
+                  <div class="text-[10px] font-mono text-wire-500">₹2.9k</div>
+                  <div class="w-full bg-wire-300 dark:bg-wire-600 rounded-t h-16"></div>
+                  <span class="text-[10px] font-mono">Wed</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center gap-1.5">
+                  <div class="text-[10px] font-mono text-wire-500">₹5.2k</div>
+                  <div class="w-full bg-wire-300 dark:bg-wire-600 rounded-t h-28"></div>
+                  <span class="text-[10px] font-mono">Thu</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center gap-1.5">
+                  <div class="text-[10px] font-mono text-wire-500">₹4.2k</div>
+                  <div class="w-full bg-wire-900 dark:bg-white rounded-t h-22"></div>
+                  <span class="text-[10px] font-mono font-bold">Today</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center gap-1.5">
+                  <div class="text-[10px] font-mono text-wire-400">--</div>
+                  <div class="w-full border-t border-dashed border-wire-400 h-6"></div>
+                  <span class="text-[10px] font-mono text-wire-400">Sat</span>
+                </div>
+                <div class="flex-1 flex flex-col items-center gap-1.5">
+                  <div class="text-[10px] font-mono text-wire-400">--</div>
+                  <div class="w-full border-t border-dashed border-wire-400 h-6"></div>
+                  <span class="text-[10px] font-mono text-wire-400">Sun</span>
+                </div>
+              </div>
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 13. AVAILABILITY SETTINGS (HOURS, AUTO-BUSY, HOLIDAY TOGGLE)     -->
+          <!-- ================================================================= -->
+          <section id="m-availability" class="page-view hidden p-4 md:p-6 space-y-5">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-wire-300 dark:border-wire-700">
+              <div>
+                <h2 class="text-lg font-bold text-wire-900 dark:text-white">Shop Availability & Dispatch Rules</h2>
+                <p class="text-xs text-wire-500">Control when your garage accepts calls and configure smart auto-busy toggles.</p>
+              </div>
+
+              <button class="px-4 py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs hover:opacity-90">
+                Save Preferences ✓
+              </button>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-6 text-xs">
+              
+              <!-- Weekly Working Hours -->
+              <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                <div class="font-bold text-sm text-wire-900 dark:text-white">Standard Weekly Working Hours</div>
+                
+                <div class="space-y-2">
+                  <div class="flex items-center justify-between p-2 border border-wire-200 dark:border-wire-800 rounded">
+                    <span class="w-24 font-bold">Mon - Fri</span>
+                    <div class="flex items-center gap-2">
+                      <input type="time" value="08:00" class="px-2 py-1 border rounded bg-white dark:bg-wire-800">
+                      <span>to</span>
+                      <input type="time" value="20:00" class="px-2 py-1 border rounded bg-white dark:bg-wire-800">
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-between p-2 border border-wire-200 dark:border-wire-800 rounded">
+                    <span class="w-24 font-bold">Saturday</span>
+                    <div class="flex items-center gap-2">
+                      <input type="time" value="08:30" class="px-2 py-1 border rounded bg-white dark:bg-wire-800">
+                      <span>to</span>
+                      <input type="time" value="18:00" class="px-2 py-1 border rounded bg-white dark:bg-wire-800">
+                    </div>
+                  </div>
+
+                  <div class="flex items-center justify-between p-2 border border-wire-200 dark:border-wire-800 rounded bg-wire-50 dark:bg-wire-850">
+                    <span class="w-24 font-bold text-wire-500">Sunday</span>
+                    <label class="flex items-center gap-2 cursor-pointer">
+                      <input type="checkbox" checked class="w-4 h-4 rounded text-wire-900">
+                      <span>Emergency breakdown dispatch only</span>
+                    </label>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Dispatch & Holiday Controls -->
+              <div class="space-y-4">
+                <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                  <div class="font-bold text-sm text-wire-900 dark:text-white">Smart Dispatch Toggles</div>
+                  
+                  <div class="space-y-3">
+                    <label class="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" checked class="w-4 h-4 rounded text-wire-900 mt-0.5">
+                      <div>
+                        <div class="font-bold text-wire-900 dark:text-white">Auto-Busy while working on an active job</div>
+                        <div class="text-wire-500 text-[11px]">Prevents getting interrupted by new emergency calls when under a vehicle.</div>
+                      </div>
+                    </label>
+
+                    <label class="flex items-start gap-3 cursor-pointer">
+                      <input type="checkbox" checked class="w-4 h-4 rounded text-wire-900 mt-0.5">
+                      <div>
+                        <div class="font-bold text-wire-900 dark:text-white">Nighttime Emergency Surcharge Notice</div>
+                        <div class="text-wire-500 text-[11px]">Alert customers that calls after 9:00 PM carry a +₹100 night technician allowance.</div>
+                      </div>
+                    </label>
+                  </div>
+                </div>
+
+                <!-- Holiday / Leave Mode -->
+                <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-wire-50 dark:bg-wire-850 space-y-2">
+                  <div class="flex items-center justify-between">
+                    <div>
+                      <div class="font-bold text-wire-900 dark:text-white">Workshop Holiday / Closed Mode</div>
+                      <div class="text-[11px] text-wire-500">Pause all incoming requests for scheduled leave.</div>
+                    </div>
+                    <button class="px-3 py-1.5 border border-wire-400 rounded bg-white dark:bg-wire-900 font-medium">Schedule Leave</button>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 14. SHOP PROFILE & VERIFICATION BADGE                             -->
+          <!-- ================================================================= -->
+          <section id="m-profile" class="page-view hidden p-4 md:p-6 space-y-5">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-wire-300 dark:border-wire-700">
+              <div>
+                <h2 class="text-lg font-bold text-wire-900 dark:text-white">Workshop Profile & Credentials</h2>
+                <p class="text-xs text-wire-500">Public profile details shown to vehicle owners looking for nearby mechanics.</p>
+              </div>
+
+              <button class="px-4 py-2 border border-wire-300 rounded font-medium text-xs hover:bg-wire-100">
+                ✏️ Edit Shop Profile
+              </button>
+            </div>
+
+            <div class="grid md:grid-cols-12 gap-6 text-xs">
+              
+              <!-- Left: Shop Info & Badge (5 Cols) -->
+              <div class="md:col-span-5 space-y-4">
+                <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-5 bg-white dark:bg-wire-900 space-y-4 text-center">
+                  <div class="w-20 h-20 rounded-full bg-wire-100 dark:bg-wire-800 border-2 border-wire-900 dark:border-white mx-auto flex items-center justify-center text-3xl font-mono">
+                    🔧
+                  </div>
+                  <div>
+                    <h3 class="font-bold text-base text-wire-900 dark:text-white">Workshop Name #1</h3>
+                    <p class="text-wire-500">Multi-Brand Car & Two-Wheeler Service Center</p>
+                    <div class="mt-2 inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-800 dark:text-emerald-300 font-bold text-xs">
+                      <span>✓</span>
+                      <span>GEARUP VERIFIED PARTNER</span>
+                    </div>
+                  </div>
+
+                  <div class="pt-3 border-t border-wire-200 dark:border-wire-800 grid grid-cols-2 gap-2 text-[11px] text-left">
+                    <div><span class="text-wire-500">Partner ID:</span> <span class="font-mono">#MEC-7721</span></div>
+                    <div><span class="text-wire-500">Rating:</span> <strong>4.9 ★ (48 jobs)</strong></div>
+                    <div><span class="text-wire-500">Member Since:</span> <span>March 2025</span></div>
+                    <div><span class="text-wire-500">Verification:</span> <strong class="text-emerald-600">Active</strong></div>
+                  </div>
+                </div>
+
+                <!-- Shop Photos Placeholder -->
+                <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-2">
+                  <div class="font-bold text-wire-900 dark:text-white">Shop Photos (3 Active)</div>
+                  <div class="grid grid-cols-3 gap-2">
+                    <div class="wire-hatch h-16 rounded border border-wire-300 flex items-center justify-center text-[10px] text-wire-500">Front</div>
+                    <div class="wire-hatch h-16 rounded border border-wire-300 flex items-center justify-center text-[10px] text-wire-500">Bay #1</div>
+                    <div class="wire-hatch h-16 rounded border border-wire-300 flex items-center justify-center text-[10px] text-wire-500">Van</div>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Right: Address, Hours, Verification Documents (7 Cols) -->
+              <div class="md:col-span-7 space-y-4">
+                <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                  <div class="font-bold text-wire-900 dark:text-white">Garage Location & Pin</div>
+                  <div class="space-y-1">
+                    <div class="font-medium text-wire-800 dark:text-wire-200">Building #4, Bypass Service Road, Near Junction #2</div>
+                    <div class="text-wire-500">Pincode: 682025 • Landmark: Opposite Metro Pillar 412</div>
+                    <div class="text-[11px] font-mono text-wire-400">GPS: 9.9816° N, 76.2999° E</div>
+                  </div>
+                </div>
+
+                <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                  <div class="font-bold text-wire-900 dark:text-white">Verified Government Documents</div>
+                  <div class="space-y-2">
+                    <div class="p-2.5 border border-wire-200 dark:border-wire-800 rounded-lg flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <span>📄</span>
+                        <span class="font-medium">Trade License & Municipal Certificate</span>
+                      </div>
+                      <span class="text-emerald-600 font-bold text-[11px]">✓ Verified</span>
+                    </div>
+
+                    <div class="p-2.5 border border-wire-200 dark:border-wire-800 rounded-lg flex items-center justify-between">
+                      <div class="flex items-center gap-2">
+                        <span>📄</span>
+                        <span class="font-medium">Commercial Shop Insurance Policy</span>
+                      </div>
+                      <span class="text-emerald-600 font-bold text-[11px]">✓ Verified</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 15. NOTIFICATIONS CENTER                                          -->
+          <!-- ================================================================= -->
+          <section id="m-notifications" class="page-view hidden p-4 md:p-6 space-y-4">
+            
+            <div class="flex items-center justify-between pb-3 border-b border-wire-300 dark:border-wire-700">
+              <div>
+                <h2 class="text-lg font-bold text-wire-900 dark:text-white">Partner Notifications</h2>
+                <p class="text-xs text-wire-500">System alerts, new request notifications, and booking updates.</p>
+              </div>
+              <button class="text-xs underline text-wire-600 dark:text-wire-400">Mark all as read</button>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <!-- Notif 1 -->
+              <div onclick="showPage('m-requests')" class="cursor-pointer p-3.5 border-l-4 border-red-600 border border-wire-200 dark:border-wire-800 rounded-lg bg-white dark:bg-wire-900 hover:bg-wire-50 flex items-start justify-between">
+                <div class="space-y-1">
+                  <div class="font-bold text-wire-900 dark:text-white flex items-center gap-2">
+                    <span>🚨 New Emergency Breakdown Alert!</span>
+                    <span class="px-1.5 py-0.2 rounded bg-red-100 text-red-700 text-[10px] font-bold">URGENT</span>
+                  </div>
+                  <p class="text-wire-600 dark:text-wire-400">Customer breakdown reported 3.2 km away. Swift Dzire • Battery failure.</p>
+                </div>
+                <span class="text-[10px] font-mono text-wire-400">2 mins ago</span>
+              </div>
+
+              <!-- Notif 2 -->
+              <div onclick="showPage('m-reviews')" class="cursor-pointer p-3.5 border-l-4 border-emerald-600 border border-wire-200 dark:border-wire-800 rounded-lg bg-white dark:bg-wire-900 hover:bg-wire-50 flex items-start justify-between">
+                <div class="space-y-1">
+                  <div class="font-bold text-wire-900 dark:text-white">⭐ 5-Star Review Received</div>
+                  <p class="text-wire-600 dark:text-wire-400">Customer left a 5-star review: "Mechanic arrived in 18 minutes. Transparent billing."</p>
+                </div>
+                <span class="text-[10px] font-mono text-wire-400">2 hours ago</span>
+              </div>
+
+              <!-- Notif 3 -->
+              <div onclick="showPage('m-earnings')" class="cursor-pointer p-3.5 border-l-4 border-blue-600 border border-wire-200 dark:border-wire-800 rounded-lg bg-white dark:bg-wire-900 hover:bg-wire-50 flex items-start justify-between">
+                <div class="space-y-1">
+                  <div class="font-bold text-wire-900 dark:text-white">💰 Payout Settlement Processed</div>
+                  <p class="text-wire-600 dark:text-wire-400">Weekly settlement of ₹28,600 has been transferred to your registered bank account.</p>
+                </div>
+                <span class="text-[10px] font-mono text-wire-400">Yesterday</span>
+              </div>
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 16. SITEMAP & USER FLOW DIAGRAM                                   -->
+          <!-- ================================================================= -->
+          <section id="m-sitemap" class="page-view hidden p-4 md:p-6 space-y-6">
+            <div>
+              <h2 class="text-lg font-bold text-wire-900 dark:text-white">Mechanic System Architecture & User Flow</h2>
+              <p class="text-xs text-wire-500">Comprehensive sitemap and step-by-step dispatch workflow.</p>
+            </div>
+
+            <!-- Workflow Flowchart Wireframe -->
+            <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-5 bg-white dark:bg-wire-900 space-y-4 text-xs">
+              <h3 class="font-bold text-sm text-wire-900 dark:text-white">Core Job Lifecycle: Request to Customer Logbook</h3>
+              
+              <div class="grid grid-cols-1 md:grid-cols-6 gap-2 text-center text-[11px]">
+                <div class="p-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-300 dark:border-red-800">
+                  <div class="font-bold text-red-700 dark:text-red-300">1. Request Received</div>
+                  <div class="text-[10px] text-wire-500 mt-1">2-3 min countdown timer</div>
+                </div>
+
+                <div class="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800">
+                  <div class="font-bold text-emerald-700 dark:text-emerald-300">2. 1-Tap Accept</div>
+                  <div class="text-[10px] text-wire-500 mt-1">Auto-Busy toggled ON</div>
+                </div>
+
+                <div class="p-3 rounded-lg bg-blue-50 dark:bg-blue-950/40 border border-blue-300 dark:border-blue-800">
+                  <div class="font-bold text-blue-700 dark:text-blue-300">3. Travel / Receive</div>
+                  <div class="text-[10px] text-wire-500 mt-1">GPS Route (Onsite) or Bay (Offsite)</div>
+                </div>
+
+                <div class="p-3 rounded-lg bg-amber-50 dark:bg-amber-950/40 border border-amber-300 dark:border-amber-800">
+                  <div class="font-bold text-amber-700 dark:text-amber-300">4. Service Vehicle</div>
+                  <div class="text-[10px] text-wire-500 mt-1">Checklist + Extra Issues Approval</div>
+                </div>
+
+                <div class="p-3 rounded-lg bg-wire-900 text-white dark:bg-white dark:text-wire-900">
+                  <div class="font-bold">5. Log Service (Km)</div>
+                  <div class="text-[10px] opacity-80 mt-1">Mandatory Odometer input</div>
+                </div>
+
+                <div class="p-3 rounded-lg bg-emerald-50 dark:bg-emerald-950/40 border border-emerald-300 dark:border-emerald-800">
+                  <div class="font-bold text-emerald-700 dark:text-emerald-300">6. Customer Sync & Review</div>
+                  <div class="text-[10px] text-wire-500 mt-1">History updated + Verified Review</div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Complete Sitemap Tree -->
+            <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-5 bg-white dark:bg-wire-900 space-y-3 text-xs">
+              <h3 class="font-bold text-sm text-wire-900 dark:text-white">Mechanic Portal Sitemap</h3>
+              
+              <div class="grid sm:grid-cols-3 gap-4 text-[11px]">
+                <div class="p-3 bg-wire-50 dark:bg-wire-850 rounded-lg space-y-1.5">
+                  <div class="font-bold text-wire-900 dark:text-white uppercase font-mono text-[10px]">A. Logged-Out & Onboarding</div>
+                  <div class="text-wire-600 dark:text-wire-400">• Mechanic Login (Password / OTP)</div>
+                  <div class="text-wire-600 dark:text-wire-400">• 5-Step Sign Up Stepper</div>
+                  <div class="text-wire-600 dark:text-wire-400">• Forgot Password Recovery</div>
+                  <div class="text-wire-600 dark:text-wire-400">• Pending Verification Banner</div>
+                </div>
+
+                <div class="p-3 bg-wire-50 dark:bg-wire-850 rounded-lg space-y-1.5">
+                  <div class="font-bold text-wire-900 dark:text-white uppercase font-mono text-[10px]">B. Live Operations</div>
+                  <div class="text-wire-600 dark:text-wire-400">• Mechanic Dashboard & Summary</div>
+                  <div class="text-wire-600 dark:text-wire-400">• Incoming Requests (2-min timer)</div>
+                  <div class="text-wire-600 dark:text-wire-400">• Active Booking Details (Onsite/Offsite)</div>
+                  <div class="text-wire-600 dark:text-wire-400">• Log Service & Mandatory Odometer</div>
+                </div>
+
+                <div class="p-3 bg-wire-50 dark:bg-wire-850 rounded-lg space-y-1.5">
+                  <div class="font-bold text-wire-900 dark:text-white uppercase font-mono text-[10px]">C. Management & Settings</div>
+                  <div class="text-wire-600 dark:text-wire-400">• Services & Prices Catalog</div>
+                  <div class="text-wire-600 dark:text-wire-400">• Service History Logs & Invoices</div>
+                  <div class="text-wire-600 dark:text-wire-400">• Verified Customer Reviews</div>
+                  <div class="text-wire-600 dark:text-wire-400">• Earnings & Bank Payouts</div>
+                  <div class="text-wire-600 dark:text-wire-400">• Working Hours & Availability</div>
+                  <div class="text-wire-600 dark:text-wire-400">• Workshop Profile & Verification</div>
+                </div>
+              </div>
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 17. VISUAL WIREFRAME MOCKUP (IMAGE PREVIEW)                       -->
+          <!-- ================================================================= -->
+          <section id="m-image-preview" class="page-view hidden p-4 md:p-6 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-wire-300 dark:border-wire-700">
+              <div>
+                <h2 class="text-lg font-bold text-wire-900 dark:text-white">Dual Wireframe Visual Mockup</h2>
+                <p class="text-xs text-wire-500">Side-by-side low-fidelity comparison: Customer Portal vs. Mechanic Partner Portal.</p>
+              </div>
+              <a href="gearup_dual_wireframes.jpg" target="_blank" download class="px-3 py-1.5 border border-wire-300 dark:border-wire-700 rounded text-xs font-medium hover:bg-wire-100 flex items-center gap-1">
+                <span>⬇️ Download Image</span>
+              </a>
+            </div>
+
+            <div class="border-2 border-wire-300 dark:border-wire-700 rounded-xl overflow-hidden shadow-sm bg-white dark:bg-wire-900 p-2">
+              <img src="gearup_dual_wireframes.jpg" alt="GearUp Customer and Mechanic Wireframes Side-by-Side" class="w-full h-auto rounded-lg">
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- E. MOBILE BOTTOM NAVIGATION BAR (FIXED FOR VIEWPORTS <= 768px)        -->
+      <!-- ===================================================================== -->
+      <nav id="mobile-bottom-nav" class="md:hidden border-t border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-900 grid grid-cols-5 text-[10px] font-medium text-center py-2 fixed bottom-0 left-0 right-0 z-40">
+        <button onclick="showPage('m-dashboard')" id="mob-nav-dash" class="flex flex-col items-center gap-0.5 text-wire-900 dark:text-white font-bold">
+          <span class="text-base">📊</span>
+          <span>Dashboard</span>
+        </button>
+        <button onclick="showPage('m-requests')" id="mob-nav-req" class="flex flex-col items-center gap-0.5 text-wire-500 hover:text-wire-900 relative">
+          <span class="text-base">⚡</span>
+          <span>Requests</span>
+          <span class="absolute top-0 right-3 w-2 h-2 rounded-full bg-red-600"></span>
+        </button>
+        <button onclick="showPage('m-booking-details')" id="mob-nav-book" class="flex flex-col items-center gap-0.5 text-wire-500 hover:text-wire-900">
+          <span class="text-base">📍</span>
+          <span>Bookings</span>
+        </button>
+        <button onclick="showPage('m-log-service')" id="mob-nav-log" class="flex flex-col items-center gap-0.5 text-wire-500 hover:text-wire-900">
+          <span class="text-base">📝</span>
+          <span>Log</span>
+        </button>
+        <button onclick="toggleSidebarDrawer()" class="flex flex-col items-center gap-0.5 text-wire-500 hover:text-wire-900">
+          <span class="text-base">☰</span>
+          <span>More</span>
+        </button>
+      </nav>
+
+      <!-- MOBILE SLIDE-OVER DRAWER (FOR 'MORE' ITEMS) -->
+      <div id="mobile-drawer" class="hidden fixed inset-0 z-50 bg-black/50 md:hidden flex justify-end">
+        <div class="w-64 bg-white dark:bg-wire-900 h-full p-4 space-y-3 overflow-y-auto">
+          <div class="flex items-center justify-between pb-3 border-b border-wire-200 dark:border-wire-800">
+            <span class="font-bold text-sm text-wire-900 dark:text-white">Shop Menu</span>
+            <button onclick="toggleSidebarDrawer()" class="p-1 text-wire-500 text-lg">✕</button>
+          </div>
+          <div class="space-y-1 text-xs">
+            <button onclick="showPage('m-services-prices'); toggleSidebarDrawer();" class="w-full text-left p-2.5 rounded hover:bg-wire-100 flex items-center gap-2">🏷️ Services & Prices</button>
+            <button onclick="showPage('m-service-logs'); toggleSidebarDrawer();" class="w-full text-left p-2.5 rounded hover:bg-wire-100 flex items-center gap-2">📋 Service Logs</button>
+            <button onclick="showPage('m-reviews'); toggleSidebarDrawer();" class="w-full text-left p-2.5 rounded hover:bg-wire-100 flex items-center gap-2">⭐ Reviews</button>
+            <button onclick="showPage('m-earnings'); toggleSidebarDrawer();" class="w-full text-left p-2.5 rounded hover:bg-wire-100 flex items-center gap-2">💰 Earnings</button>
+            <button onclick="showPage('m-availability'); toggleSidebarDrawer();" class="w-full text-left p-2.5 rounded hover:bg-wire-100 flex items-center gap-2">🕒 Availability</button>
+            <button onclick="showPage('m-profile'); toggleSidebarDrawer();" class="w-full text-left p-2.5 rounded hover:bg-wire-100 flex items-center gap-2">🏪 Shop Profile</button>
+            <button onclick="showPage('m-sitemap'); toggleSidebarDrawer();" class="w-full text-left p-2.5 rounded hover:bg-wire-100 flex items-center gap-2">🗺️ Sitemap & Flow</button>
+            <div class="pt-3 border-t border-wire-200">
+              <button onclick="showPage('m-login'); toggleSidebarDrawer();" class="w-full text-left p-2.5 text-red-600 flex items-center gap-2">🚪 Sign Out</button>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- ========================================================================= -->
+  <!-- MODAL DIALOGS: REJECT REQUEST, CONFIRM OFFLINE, SUGGEST QUOTE, ADD PART   -->
+  <!-- ========================================================================= -->
+
+  <!-- 1. CONFIRM REJECT MODAL -->
+  <div id="modal-reject" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-wire-900 border border-wire-300 dark:border-wire-700 rounded-xl p-5 max-w-sm w-full space-y-3 text-xs shadow-xl">
+      <div class="flex items-center gap-2 text-red-600 font-bold text-sm">
+        <span>⚠️</span>
+        <span>Confirm Reject Request</span>
+      </div>
+      <p class="text-wire-600 dark:text-wire-400">
+        Are you sure you want to pass on this customer? The request will be immediately routed to the next nearest mechanic.
+      </p>
+      <div>
+        <label class="block font-medium mb-1">Reason for declining (Optional):</label>
+        <select class="w-full p-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">
+          <option>Busy with active job</option>
+          <option>Outside workable range</option>
+          <option>Parts not in stock</option>
+          <option>Closing shop for the day</option>
+        </select>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal('modal-reject')" class="px-3 py-1.5 border border-wire-300 rounded font-medium">Cancel</button>
+        <button onclick="executeRejectRequest()" class="px-3 py-1.5 bg-red-600 text-white rounded font-bold hover:bg-red-700">Confirm & Forward</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. CONFIRM OFFLINE MODAL -->
+  <div id="modal-offline" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-wire-900 border border-wire-300 dark:border-wire-700 rounded-xl p-5 max-w-sm w-full space-y-3 text-xs shadow-xl">
+      <div class="flex items-center gap-2 text-amber-600 font-bold text-sm">
+        <span>⚠️</span>
+        <span>Go Offline Confirmation</span>
+      </div>
+      <p class="text-wire-600 dark:text-wire-400">
+        You will stop receiving new breakdown alerts and customer search results. You have <strong>2 active/scheduled bookings</strong>.
+      </p>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal('modal-offline')" class="px-3 py-1.5 border border-wire-300 rounded font-medium">Keep Online</button>
+        <button onclick="executeGoOffline()" class="px-3 py-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold">Go Offline</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. SUGGEST CHANGE / ADD PRICE QUOTE MODAL -->
+  <div id="modal-suggest-change" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-wire-900 border border-wire-300 dark:border-wire-700 rounded-xl p-5 max-w-md w-full space-y-4 text-xs shadow-xl">
+      <div class="flex items-center justify-between border-b border-wire-200 dark:border-wire-800 pb-2">
+        <div class="font-bold text-sm text-wire-900 dark:text-white">Suggest a Change / Add Extra Price Quote</div>
+        <button onclick="closeModal('modal-suggest-change')" class="text-wire-400 text-base">✕</button>
+      </div>
+      <p class="text-wire-500 text-[11px]">
+        Found an additional fault on inspection? Add the recommended service and price. Customer receives a push notification to approve or reject.
+      </p>
+      <div class="space-y-3">
+        <div>
+          <label class="block font-medium mb-1">Issue Identified *</label>
+          <input type="text" placeholder="e.g. Front Brake Pads severely worn (2mm left)" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium mb-1">Additional Labor (₹)</label>
+            <input type="number" value="350" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800 font-mono">
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Est. Part Cost (₹)</label>
+            <input type="number" value="850" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800 font-mono">
+          </div>
+        </div>
+        <div>
+          <label class="block font-medium mb-1">Reason / Explanation for Customer</label>
+          <textarea rows="2" placeholder="Will cause brake rotor damage if driven further." class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800"></textarea>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal('modal-suggest-change')" class="px-3 py-1.5 border border-wire-300 rounded font-medium">Cancel</button>
+        <button onclick="sendSuggestedChange()" class="px-4 py-1.5 bg-emerald-700 text-white rounded font-bold hover:bg-emerald-800">Send Quote to Customer ➔</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. ADD PART MODAL -->
+  <div id="modal-add-part" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-wire-900 border border-wire-300 dark:border-wire-700 rounded-xl p-5 max-w-sm w-full space-y-3 text-xs shadow-xl">
+      <div class="flex items-center justify-between border-b border-wire-200 dark:border-wire-800 pb-2">
+        <div class="font-bold text-sm text-wire-900 dark:text-white">Add Part / Consumable to Log</div>
+        <button onclick="closeModal('modal-add-part')" class="text-wire-400 text-base">✕</button>
+      </div>
+      <div class="space-y-3">
+        <div>
+          <label class="block font-medium mb-1">Part Name / Brand</label>
+          <input type="text" placeholder="e.g. Synthetic Engine Oil 5W-30 (1L)" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800">
+        </div>
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block font-medium mb-1">Quantity</label>
+            <input type="number" value="1" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800 font-mono">
+          </div>
+          <div>
+            <label class="block font-medium mb-1">Unit Price (₹)</label>
+            <input type="number" value="450" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800 font-mono">
+          </div>
+        </div>
+      </div>
+      <div class="flex justify-end gap-2 pt-2">
+        <button onclick="closeModal('modal-add-part')" class="px-3 py-1.5 border border-wire-300 rounded font-medium">Cancel</button>
+        <button onclick="closeModal('modal-add-part')" class="px-4 py-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold">Add to Invoice</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. REPLY TO REVIEW MODAL -->
+  <div id="modal-reply" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white dark:bg-wire-900 border border-wire-300 dark:border-wire-700 rounded-xl p-5 max-w-md w-full space-y-3 text-xs shadow-xl">
+      <div class="flex items-center justify-between border-b border-wire-200 dark:border-wire-800 pb-2">
+        <div class="font-bold text-sm text-wire-900 dark:text-white">Post Official Workshop Reply</div>
+        <button onclick="closeModal('modal-reply')" class="text-wire-400 text-base">✕</button>
+      </div>
+      <p class="text-wire-500 text-[11px]">
+        Your reply will appear publicly under the customer's verified review on your GearUp workshop profile.
+      </p>
+      <div>
+        <textarea rows="3" placeholder="Thank the customer for their business and provide maintenance tips..." class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800 text-wire-900 dark:text-white"></textarea>
+      </div>
+      <div class="flex justify-end gap-2 pt-1">
+        <button onclick="closeModal('modal-reply')" class="px-3 py-1.5 border border-wire-300 rounded font-medium">Cancel</button>
+        <button onclick="closeModal('modal-reply')" class="px-4 py-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold">Post Reply ✓</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ========================================================================= -->
+  <!-- JAVASCRIPT: WORKBENCH CONTROLS, VIEWPORT SWITCHER, TIMERS & WORKFLOWS    -->
+  <!-- ========================================================================= -->
+  <script>
+    // State Variables
+    let currentViewport = 'desktop';
+    let mechanicStatus = 'available'; // 'available' | 'busy' | 'offline'
+    let currentFlowMode = 'onsite';   // 'onsite' | 'offsite'
+    let signupCurrentStep = 1;
+    let isVerified = true;            // default verified for demo; toggleable
+
+    // Countdown Timer (2 mins 15 secs simulation)
+    let countdownSeconds = 135;
+    let timerInterval = null;
+
+    function startCountdown() {
+      if (timerInterval) clearInterval(timerInterval);
+      timerInterval = setInterval(() => {
+        if (countdownSeconds > 0) {
+          countdownSeconds--;
+          const mins = Math.floor(countdownSeconds / 60).toString().padStart(2, '0');
+          const secs = (countdownSeconds % 60).toString().padStart(2, '0');
+          const formatted = `${mins}:${secs}`;
+          
+          const dashEl = document.getElementById('dash-timer');
+          const reqEl = document.getElementById('req-countdown-val');
+          if (dashEl) dashEl.innerText = formatted;
+          if (reqEl) reqEl.innerText = formatted;
+        } else {
+          clearInterval(timerInterval);
+          handleTimerExpired();
+        }
+      }, 1000);
+    }
+
+    function handleTimerExpired() {
+      const card = document.getElementById('request-card-live');
+      if (card) {
+        card.classList.add('opacity-50');
+        alert("⏱️ Response time expired! Request has been automatically forwarded to the next nearest mechanic.");
+      }
+    }
+
+    // Viewport Switcher
+    function setViewport(mode) {
+      currentViewport = mode;
+      const container = document.getElementById('viewport-container');
+      const btnDesktop = document.getElementById('vp-btn-desktop');
+      const btnTablet = document.getElementById('vp-btn-tablet');
+      const btnMobile = document.getElementById('vp-btn-mobile');
+
+      // Reset button styles
+      [btnDesktop, btnTablet, btnMobile].forEach(btn => {
+        btn.className = "px-2.5 py-1 rounded font-medium transition text-wire-600 dark:text-wire-400 hover:text-wire-900 dark:hover:text-white flex items-center gap-1.5";
+      });
+
+      const activeClass = "px-2.5 py-1 rounded font-medium transition bg-white dark:bg-wire-700 shadow-sm text-wire-900 dark:text-white flex items-center gap-1.5";
+
+      if (mode === 'desktop') {
+        container.style.maxWidth = '1280px';
+        btnDesktop.className = activeClass;
+      } else if (mode === 'tablet') {
+        container.style.maxWidth = '768px';
+        btnTablet.className = activeClass;
+      } else if (mode === 'mobile') {
+        container.style.maxWidth = '390px';
+        btnMobile.className = activeClass;
+      }
+    }
+
+    // Page Switching
+    function showPage(pageId) {
+      // Hide all page sections
+      document.querySelectorAll('.page-view').forEach(el => el.classList.add('hidden'));
+
+      // Show selected page
+      const target = document.getElementById(pageId);
+      if (target) target.classList.remove('hidden');
+
+      // Sync select dropdown
+      const select = document.getElementById('page-select');
+      if (select) select.value = pageId;
+
+      // Header Switching: Logged-Out vs Logged-In
+      const loggedOutHeader = document.getElementById('logged-out-header');
+      const loggedInHeader = document.getElementById('logged-in-header');
+      const desktopSidebar = document.getElementById('desktop-sidebar');
+      const mobileBottomNav = document.getElementById('mobile-bottom-nav');
+
+      const loggedOutPages = ['m-login', 'm-signup', 'm-forgot'];
+
+      if (loggedOutPages.includes(pageId)) {
+        loggedOutHeader.classList.remove('hidden');
+        loggedInHeader.classList.add('hidden');
+        desktopSidebar.classList.add('hidden');
+        mobileBottomNav.classList.add('hidden');
+      } else {
+        loggedOutHeader.classList.add('hidden');
+        loggedInHeader.classList.remove('hidden');
+        desktopSidebar.classList.remove('hidden');
+        mobileBottomNav.classList.remove('hidden');
+      }
+
+      // Sync Sidebar Active State
+      document.querySelectorAll('.sidebar-nav-btn').forEach(btn => {
+        btn.classList.remove('bg-wire-200', 'dark:bg-wire-800', 'font-bold', 'text-wire-900', 'dark:text-white');
+        btn.classList.add('text-wire-600', 'dark:text-wire-300');
+      });
+
+      const activeSidebarBtn = document.getElementById(`nav-btn-${pageId}`);
+      if (activeSidebarBtn) {
+        activeSidebarBtn.classList.remove('text-wire-600', 'dark:text-wire-300');
+        activeSidebarBtn.classList.add('bg-wire-200', 'dark:bg-wire-800', 'font-bold', 'text-wire-900', 'dark:text-white');
+      }
+
+      // Scroll to top
+      const scrollEl = document.getElementById('content-scroll-container');
+      if (scrollEl) scrollEl.scrollTop = 0;
+    }
+
+    // Status Management (Available / Busy / Offline)
+    function setMechanicStatus(status) {
+      mechanicStatus = status;
+      const btnAvail = document.getElementById('status-btn-available');
+      const btnBusy = document.getElementById('status-btn-busy');
+      const btnOffline = document.getElementById('status-btn-offline');
+
+      const bigBtn = document.getElementById('big-status-btn');
+      const bigText = document.getElementById('big-status-text');
+      const dashInd = document.getElementById('dash-status-indicator');
+
+      // Reset
+      [btnAvail, btnBusy, btnOffline].forEach(b => {
+        b.className = "px-2.5 py-1 rounded-md flex items-center gap-1.5 text-wire-600 dark:text-wire-400 hover:text-wire-900";
+      });
+
+      if (status === 'available') {
+        btnAvail.className = "px-2.5 py-1 rounded-md flex items-center gap-1.5 bg-white dark:bg-wire-700 shadow-sm text-emerald-700 dark:text-emerald-400 font-bold";
+        if (bigBtn) {
+          bigBtn.className = "px-4 py-2 bg-emerald-600 hover:bg-emerald-700 text-white rounded-lg font-bold text-xs flex items-center gap-2 shadow-sm transition";
+          bigText.innerText = "ONLINE & ACCEPTING";
+          dashInd.innerText = "Available for breakdown calls";
+          dashInd.className = "font-bold text-emerald-600";
+        }
+      } else if (status === 'busy') {
+        btnBusy.className = "px-2.5 py-1 rounded-md flex items-center gap-1.5 bg-white dark:bg-wire-700 shadow-sm text-amber-700 dark:text-amber-400 font-bold";
+        if (bigBtn) {
+          bigBtn.className = "px-4 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded-lg font-bold text-xs flex items-center gap-2 shadow-sm transition";
+          bigText.innerText = "BUSY ON JOB";
+          dashInd.innerText = "Busy on active breakdown";
+          dashInd.className = "font-bold text-amber-600";
+        }
+      } else if (status === 'offline') {
+        btnOffline.className = "px-2.5 py-1 rounded-md flex items-center gap-1.5 bg-white dark:bg-wire-700 shadow-sm text-wire-800 dark:text-wire-200 font-bold";
+        if (bigBtn) {
+          bigBtn.className = "px-4 py-2 bg-wire-700 hover:bg-wire-800 text-white rounded-lg font-bold text-xs flex items-center gap-2 shadow-sm transition";
+          bigText.innerText = "OFFLINE (HIDDEN)";
+          dashInd.innerText = "Offline • Not visible to customers";
+          dashInd.className = "font-bold text-wire-500";
+        }
+      }
+    }
+
+    function toggleBigStatus() {
+      if (mechanicStatus === 'available') {
+        confirmGoOffline();
+      } else {
+        setMechanicStatus('available');
+      }
+    }
+
+    function confirmGoOffline() {
+      document.getElementById('modal-offline').classList.remove('hidden');
+    }
+
+    function executeGoOffline() {
+      closeModal('modal-offline');
+      setMechanicStatus('offline');
+    }
+
+    // Modal helpers
+    function closeModal(id) {
+      document.getElementById(id).classList.add('hidden');
+    }
+
+    function confirmRejectRequest(reqId) {
+      document.getElementById('modal-reject').classList.remove('hidden');
+    }
+
+    function executeRejectRequest() {
+      closeModal('modal-reject');
+      const card = document.getElementById('request-card-live');
+      if (card) {
+        card.innerHTML = `<div class="p-4 text-center font-bold text-wire-500 text-xs">Request #REQ-901 declined and forwarded to the next nearest mechanic.</div>`;
+      }
+    }
+
+    function acceptRequestAndOpenBooking(reqId) {
+      alert("✅ Request Accepted! Navigating to Active Booking details...");
+      setMechanicStatus('busy'); // Auto-busy trigger
+      showPage('m-booking-details');
+    }
+
+    function openSuggestChangeModal() {
+      document.getElementById('modal-suggest-change').classList.remove('hidden');
+    }
+
+    function sendSuggestedChange() {
+      closeModal('modal-suggest-change');
+      alert("💬 Price quote sent to customer for review!");
+    }
+
+    function openAddPartModal() {
+      document.getElementById('modal-add-part').classList.remove('hidden');
+    }
+
+    function openReplyModal(revId) {
+      document.getElementById('modal-reply').classList.remove('hidden');
+    }
+
+    // Flow switcher: Onsite vs Offsite in Booking Details
+    function setBookingFlowMode(mode) {
+      currentFlowMode = mode;
+      const onsiteStep = document.getElementById('onsite-stepper');
+      const offsiteStep = document.getElementById('offsite-stepper');
+      const mapCard = document.getElementById('booking-map-card');
+      const offsiteCard = document.getElementById('booking-offsite-card');
+      const tag = document.getElementById('booking-mode-tag');
+
+      const btnOn = document.getElementById('flow-btn-onsite');
+      const btnOff = document.getElementById('flow-btn-offsite');
+
+      if (mode === 'onsite') {
+        onsiteStep.classList.remove('hidden');
+        offsiteStep.classList.add('hidden');
+        mapCard.classList.remove('hidden');
+        offsiteCard.classList.add('hidden');
+        tag.innerText = "🚐 ONSITE SERVICE";
+        btnOn.className = "px-2.5 py-1 rounded bg-white dark:bg-wire-700 font-bold shadow-sm text-wire-900 dark:text-white";
+        btnOff.className = "px-2.5 py-1 rounded text-wire-600 dark:text-wire-400 hover:text-wire-900";
+      } else {
+        onsiteStep.classList.add('hidden');
+        offsiteStep.classList.remove('hidden');
+        mapCard.classList.add('hidden');
+        offsiteCard.classList.remove('hidden');
+        tag.innerText = "🏢 OFFSITE (IN GARAGE)";
+        btnOff.className = "px-2.5 py-1 rounded bg-white dark:bg-wire-700 font-bold shadow-sm text-wire-900 dark:text-white";
+        btnOn.className = "px-2.5 py-1 rounded text-wire-600 dark:text-wire-400 hover:text-wire-900";
+      }
+    }
+
+    function advanceJobStatus(status) {
+      alert(`Job status progressed to: ${status}. Customer received live status notification.`);
+    }
+
+    function saveServiceLogAndComplete() {
+      const odo = document.getElementById('log-odometer').value;
+      if (!odo) {
+        alert("Please record the mandatory vehicle odometer reading before completing.");
+        return;
+      }
+      alert(`✅ Service completed and logged at ${odo} km! Customer logbook updated and tax invoice generated.`);
+      setMechanicStatus('available');
+      showPage('m-service-logs');
+    }
+
+    // Sign Up 5-Step Logic
+    function setSignupStep(step) {
+      signupCurrentStep = step;
+      document.querySelectorAll('.signup-step').forEach(el => el.classList.add('hidden'));
+      const target = document.getElementById(`signup-step-${step}`);
+      if (target) target.classList.remove('hidden');
+
+      document.getElementById('step-indicator-text').innerText = `Step ${step} of 5`;
+
+      // Progress bars
+      for (let i = 1; i <= 5; i++) {
+        const bar = document.getElementById(`prog-bar-${i}`);
+        if (i <= step) {
+          bar.className = "h-1.5 rounded-full bg-wire-900 dark:bg-white transition-all";
+        } else {
+          bar.className = "h-1.5 rounded-full bg-wire-200 dark:bg-wire-800 transition-all";
+        }
+      }
+    }
+
+    function submitSignupAndShowPending() {
+      showPage('m-pending');
+      document.getElementById('verification-banner').classList.remove('hidden');
+    }
+
+    function simulateVerificationApproval() {
+      alert("🎉 Account Approved & Verified! Full mechanic features activated.");
+      document.getElementById('verification-banner').classList.add('hidden');
+      showPage('m-dashboard');
+    }
+
+    // Forgot password sub-steps
+    function setForgotStep(sub) {
+      ['a', 'b', 'c', 'd'].forEach(s => {
+        const el = document.getElementById(`forgot-step-${s}`);
+        if (el) el.classList.add('hidden');
+      });
+      const target = document.getElementById(`forgot-step-${sub}`);
+      if (target) target.classList.remove('hidden');
+    }
+
+    // Login mode: Password vs OTP
+    function switchLoginMode(mode) {
+      const pwdTab = document.getElementById('login-tab-pwd');
+      const otpTab = document.getElementById('login-tab-otp');
+      const pwdField = document.getElementById('login-pwd-field');
+      const otpField = document.getElementById('login-otp-field');
+
+      if (mode === 'pwd') {
+        pwdTab.className = "flex-1 py-1.5 text-center rounded bg-white dark:bg-wire-700 shadow-sm font-bold text-wire-900 dark:text-white";
+        otpTab.className = "flex-1 py-1.5 text-center rounded text-wire-600 dark:text-wire-400 hover:text-wire-900";
+        pwdField.classList.remove('hidden');
+        otpField.classList.add('hidden');
+      } else {
+        otpTab.className = "flex-1 py-1.5 text-center rounded bg-white dark:bg-wire-700 shadow-sm font-bold text-wire-900 dark:text-white";
+        pwdTab.className = "flex-1 py-1.5 text-center rounded text-wire-600 dark:text-wire-400 hover:text-wire-900";
+        pwdField.classList.add('hidden');
+        otpField.classList.remove('hidden');
+      }
+    }
+
+    function togglePasswordVisibility(inputId, btn) {
+      const input = document.getElementById(inputId);
+      if (input.type === 'password') {
+        input.type = 'text';
+        btn.innerText = '🙈';
+      } else {
+        input.type = 'password';
+        btn.innerText = '👁️';
+      }
+    }
+
+    // Mobile Drawer
+    function toggleSidebarDrawer() {
+      const drawer = document.getElementById('mobile-drawer');
+      drawer.classList.toggle('hidden');
+    }
+
+    // Earnings timeframe switch
+    function setEarningsPeriod(period) {
+      const btnToday = document.getElementById('earn-btn-today');
+      const btnWeek = document.getElementById('earn-btn-week');
+      const btnMonth = document.getElementById('earn-btn-month');
+      const label = document.getElementById('earn-period-label');
+      const total = document.getElementById('earn-total-val');
+      const jobs = document.getElementById('earn-jobs-count');
+
+      [btnToday, btnWeek, btnMonth].forEach(b => b.className = "px-3 py-1 rounded text-wire-600 dark:text-wire-400");
+
+      if (period === 'today') {
+        btnToday.className = "px-3 py-1 rounded bg-white dark:bg-wire-700 font-bold shadow-sm";
+        label.innerText = "Today";
+        total.innerText = "₹4,250";
+        jobs.innerText = "5 Jobs";
+      } else if (period === 'week') {
+        btnWeek.className = "px-3 py-1 rounded bg-white dark:bg-wire-700 font-bold shadow-sm";
+        label.innerText = "This Week";
+        total.innerText = "₹28,600";
+        jobs.innerText = "34 Jobs";
+      } else if (period === 'month') {
+        btnMonth.className = "px-3 py-1 rounded bg-white dark:bg-wire-700 font-bold shadow-sm";
+        label.innerText = "This Month";
+        total.innerText = "₹1,18,400";
+        jobs.innerText = "142 Jobs";
+      }
+    }
+
+    // Dark Mode Toggle
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    // Initialize on Load
+    window.addEventListener('DOMContentLoaded', () => {
+      startCountdown();
+      showPage('m-dashboard');
+    });
+  </script>
+</body>
+</html>

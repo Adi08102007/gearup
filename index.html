@@ -1,0 +1,2360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GearUp — Customer Wireframe Prototype & Design System</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            wire: {
+              50: '#F9FAFB',
+              100: '#F3F4F6',
+              200: '#E5E7EB',
+              300: '#D1D5DB',
+              400: '#9CA3AF',
+              500: '#6B7280',
+              600: '#4B5563',
+              700: '#374151',
+              800: '#1F2937',
+              900: '#111827',
+            },
+            status: {
+              avail: '#16A34A',
+              busy: '#D97706',
+              offline: '#6B7280',
+              emerg: '#DC2626'
+            }
+          },
+          fontFamily: {
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace']
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    /* Wireframe placeholder boxes with diagonal cross */
+    .wireframe-box {
+      position: relative;
+      background-color: #f3f4f6;
+      border: 1px dashed #9ca3af;
+      overflow: hidden;
+    }
+    .dark .wireframe-box {
+      background-color: #1f2937;
+      border-color: #4b5563;
+    }
+    .wireframe-box::before, .wireframe-box::after {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      pointer-events: none;
+    }
+    .wireframe-cross::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      background: linear-gradient(to top right, transparent calc(50% - 1px), #d1d5db 50%, transparent calc(50% + 1px)),
+                  linear-gradient(to bottom right, transparent calc(50% - 1px), #d1d5db 50%, transparent calc(50% + 1px));
+    }
+    .dark .wireframe-cross::before {
+      background: linear-gradient(to top right, transparent calc(50% - 1px), #374151 50%, transparent calc(50% + 1px)),
+                  linear-gradient(to bottom right, transparent calc(50% - 1px), #374151 50%, transparent calc(50% + 1px));
+    }
+    @keyframes pulse-emergency {
+      0%, 100% { transform: scale(1); opacity: 1; }
+      50% { transform: scale(1.05); opacity: 0.9; }
+    }
+    .animate-emerg {
+      animation: pulse-emergency 2s infinite ease-in-out;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-wire-100 text-wire-900 dark:bg-wire-900 dark:text-wire-100 antialiased font-sans transition-colors duration-200">
+
+  <!-- TOP APP CONTROLLER BAR (Workbench Toolbar) -->
+  <header class="sticky top-0 z-50 bg-white dark:bg-wire-800 border-b border-wire-300 dark:border-wire-700 px-4 py-2.5 shadow-sm flex flex-wrap items-center justify-between gap-3">
+    <!-- Brand & Project Tag -->
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-2 font-mono font-bold text-base tracking-wider bg-wire-900 text-white dark:bg-white dark:text-wire-900 px-2.5 py-1 rounded">
+        <span>⚙️ GEARUP</span>
+        <span class="text-xs bg-red-600 text-white px-1.5 py-0.5 rounded font-sans uppercase">Wireframe Lab</span>
+      </div>
+      <span class="hidden sm:inline-block text-xs font-mono text-wire-500 dark:text-wire-400">Customer Flow</span>
+      <div class="hidden md:flex items-center gap-2 text-xs ml-2">
+        <a href="mechanic_index.html" class="text-wire-600 dark:text-wire-400 hover:text-wire-900 dark:hover:text-white underline">
+          <span>🛠️ Mechanic ›</span>
+        </a>
+        <span class="text-wire-300">•</span>
+        <a href="crane_index.html" class="text-amber-600 dark:text-amber-400 hover:underline">
+          <span>🏗️ Crane Ops ›</span>
+        </a>
+      </div>
+    </div>
+
+    <!-- Viewport Switcher Controls -->
+    <div class="flex items-center bg-wire-100 dark:bg-wire-900 p-1 rounded-lg border border-wire-300 dark:border-wire-700 text-xs">
+      <button onclick="setViewport('desktop')" id="vp-btn-desktop" class="px-2.5 py-1 rounded font-medium transition bg-white dark:bg-wire-700 shadow-sm text-wire-900 dark:text-white flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        <span>Desktop (1280px)</span>
+      </button>
+      <button onclick="setViewport('tablet')" id="vp-btn-tablet" class="px-2.5 py-1 rounded font-medium transition text-wire-600 dark:text-wire-400 hover:text-wire-900 dark:hover:text-white flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        <span>Tablet (768px)</span>
+      </button>
+      <button onclick="setViewport('mobile')" id="vp-btn-mobile" class="px-2.5 py-1 rounded font-medium transition text-wire-600 dark:text-wire-400 hover:text-wire-900 dark:hover:text-white flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        <span>Mobile (390px)</span>
+      </button>
+    </div>
+
+    <!-- Screen Navigator Select -->
+    <div class="flex items-center gap-2">
+      <label for="page-select" class="text-xs text-wire-500 dark:text-wire-400 font-mono hidden md:inline">PAGE:</label>
+      <select id="page-select" onchange="showPage(this.value)" class="text-xs bg-white dark:bg-wire-800 border border-wire-300 dark:border-wire-700 rounded px-2.5 py-1.5 font-medium text-wire-900 dark:text-wire-100 focus:outline-none focus:ring-1 focus:ring-wire-800">
+        <optgroup label="Logged-Out Pages">
+          <option value="p1-landing">1. Landing Page (Logged Out)</option>
+          <option value="p2-login">2. Customer Login</option>
+          <option value="p3-signup">3. Customer Sign Up</option>
+          <option value="p4-forgot">4. Forgot Password Flow</option>
+        </optgroup>
+        <optgroup label="Post-Signup Onboarding">
+          <option value="p5-add-vehicle">5. Add First Vehicle (Minimal Header)</option>
+        </optgroup>
+        <optgroup label="Logged-In Customer Flow">
+          <option value="p6-dashboard" selected>6. Customer Dashboard</option>
+          <option value="p7-my-vehicles">7. My Vehicles & Km Tracker</option>
+          <option value="p8-find-mechanic">8. Find Mechanic (Unselected Mode First)</option>
+          <option value="p9-emergency">9. Emergency Mode (Breakdown SOS)</option>
+          <option value="p10-profile-mechanic">10. Mechanic Profile & Rates</option>
+          <option value="p11-booking-flow">11. Booking Flow (Steps 1-4)</option>
+          <option value="p12-booking-status">12. Booking Status & Live Tracking</option>
+          <option value="p13-crane-request">13. Crane Recovery Request</option>
+          <option value="p14-service-history">14. Service History (Refined Logbook)</option>
+          <option value="p15-rate-review">15. Rate & Review</option>
+          <option value="p16-notifications">16. Notifications Center</option>
+          <option value="p17-settings">17. Profile & Settings</option>
+        </optgroup>
+        <optgroup label="Architecture & Design System">
+          <option value="p-components">Component Library (Wireframe Tokens)</option>
+          <option value="p-sitemap">Sitemap & Emergency Flow Diagram</option>
+        </optgroup>
+      </select>
+
+      <!-- Theme Toggle -->
+      <button onclick="toggleDarkMode()" title="Toggle Dark/Light Mode" class="p-1.5 border border-wire-300 dark:border-wire-700 rounded hover:bg-wire-100 dark:hover:bg-wire-700 text-wire-700 dark:text-wire-300">
+        <svg id="theme-icon-sun" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <svg id="theme-icon-moon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- WORKSPACE VIEWPORT WRAPPER -->
+  <main class="py-6 px-2 sm:px-4 flex justify-center min-h-[calc(100vh-60px)]">
+    <div id="viewport-container" class="w-full max-w-[1280px] transition-all duration-300 bg-white dark:bg-wire-950 border border-wire-300 dark:border-wire-700 rounded-xl shadow-lg overflow-hidden flex flex-col relative">
+
+      <!-- ========================================================================= -->
+      <!-- 1. LOGGED-OUT TOP BAR (SINGLE CLEAN BAR FOR LANDING / LOGIN / SIGNUP) -->
+      <!-- ========================================================================= -->
+      <div id="logged-out-header" class="hidden border-b border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-900 px-6 py-3.5 flex items-center justify-between">
+        <button onclick="showPage('p1-landing')" class="flex items-center gap-2 font-mono font-black text-lg tracking-wider text-wire-900 dark:text-white">
+          <span class="border border-wire-900 dark:border-white p-0.5 rounded">⚙️</span>
+          <span>GEARUP</span>
+        </button>
+
+        <div class="flex items-center gap-3 text-xs">
+          <!-- Language Selector -->
+          <div class="flex items-center gap-1 border border-wire-300 dark:border-wire-700 rounded px-2 py-1 text-wire-600 dark:text-wire-300 cursor-pointer">
+            <span>🌐</span>
+            <span>EN</span>
+            <span class="text-wire-400">▾</span>
+          </div>
+          <!-- Login & Sign up buttons -->
+          <button onclick="showPage('p2-login')" class="px-3 py-1.5 border border-wire-400 dark:border-wire-600 rounded font-medium hover:border-wire-900 dark:hover:border-white">
+            Login
+          </button>
+          <button onclick="showPage('p3-signup')" class="px-3.5 py-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold hover:opacity-90">
+            Sign up
+          </button>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 2. MINIMAL TOP BAR FOR ADD FIRST VEHICLE PAGE ONLY -->
+      <!-- (Only GearUp logo and 'Skip for now'. No menu, no bell, no profile, no SOS) -->
+      <!-- ========================================================================= -->
+      <div id="onboarding-header" class="hidden border-b border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-900 px-6 py-3.5 flex items-center justify-between">
+        <div class="flex items-center gap-2 font-mono font-black text-lg tracking-wider text-wire-900 dark:text-white">
+          <span class="border border-wire-900 dark:border-white p-0.5 rounded">⚙️</span>
+          <span>GEARUP</span>
+        </div>
+        <button onclick="showPage('p6-dashboard')" class="text-xs text-wire-500 hover:text-wire-900 dark:hover:text-white underline font-medium">
+          Skip for now ›
+        </button>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- 3. LOGGED-IN NAVBAR (NO VEHICLE CHIP ANYWHERE!) -->
+      <!-- Contains ONLY: Logo, Find Mechanic, Crane, My Vehicles, Service History, -->
+      <!-- Bookings, Language switch, Notifications, and Profile menu. -->
+      <!-- ========================================================================= -->
+      <div id="logged-in-header" class="border-b border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-900 px-4 py-3 flex items-center justify-between">
+        <!-- Left: Logo ONLY (NO VEHICLE CHIP) -->
+        <button onclick="showPage('p6-dashboard')" class="flex items-center gap-2 font-mono font-black text-lg tracking-wider text-wire-900 dark:text-white">
+          <span class="border border-wire-900 dark:border-white p-0.5 rounded">⚙️</span>
+          <span>GEARUP</span>
+        </button>
+
+        <!-- Center: Desktop Navigation Links -->
+        <nav class="hidden lg:flex items-center gap-5 text-xs font-medium text-wire-600 dark:text-wire-300">
+          <button onclick="showPage('p8-find-mechanic')" class="hover:text-wire-900 dark:hover:text-white transition">Find Mechanic</button>
+          <button onclick="showPage('p13-crane-request')" class="hover:text-wire-900 dark:hover:text-white transition">Crane</button>
+          <button onclick="showPage('p7-my-vehicles')" class="hover:text-wire-900 dark:hover:text-white transition">My Vehicles</button>
+          <button onclick="showPage('p14-service-history')" class="hover:text-wire-900 dark:hover:text-white transition">Service History</button>
+          <button onclick="showPage('p12-booking-status')" class="hover:text-wire-900 dark:hover:text-white transition flex items-center gap-1">
+            <span>Bookings</span>
+            <span class="w-2 h-2 rounded-full bg-emerald-500 inline-block" title="Active Booking"></span>
+          </button>
+        </nav>
+
+        <!-- Right: Language, Notifications, Generic Profile -->
+        <div class="flex items-center gap-3">
+          <div class="hidden sm:flex items-center gap-1 text-xs border border-wire-300 dark:border-wire-700 rounded px-2 py-1 text-wire-600 dark:text-wire-300 cursor-pointer">
+            <span>🌐</span>
+            <span>EN</span>
+            <span class="text-wire-400">▾</span>
+          </div>
+
+          <button onclick="showPage('p16-notifications')" class="relative p-1.5 text-wire-700 dark:text-wire-300 hover:text-wire-900 dark:hover:text-white border border-wire-300 dark:border-wire-700 rounded">
+            <span>🔔</span>
+            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-600 text-white rounded-full text-[10px] font-bold flex items-center justify-center">2</span>
+          </button>
+
+          <!-- Generic Profile Dropdown Pill (NO personal name) -->
+          <button onclick="showPage('p17-settings')" class="flex items-center gap-2 border border-wire-300 dark:border-wire-700 rounded-full pl-1.5 pr-2.5 py-1 text-xs text-wire-800 dark:text-wire-200 hover:border-wire-500">
+            <span class="w-6 h-6 rounded-full bg-wire-200 dark:bg-wire-700 flex items-center justify-center text-xs font-mono font-bold">👤</span>
+            <span class="font-medium hidden sm:inline">Profile</span>
+            <span class="text-wire-400">▾</span>
+          </button>
+
+          <!-- Mobile Hamburger Toggle -->
+          <button onclick="toggleMobileNav()" class="lg:hidden p-1.5 text-wire-700 dark:text-wire-300 border border-wire-300 dark:border-wire-700 rounded">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- MOBILE EXPANDABLE MENU (NO VEHICLE DETAILS) -->
+      <div id="mobile-nav-drawer" class="hidden border-b border-wire-300 dark:border-wire-700 bg-wire-50 dark:bg-wire-850 p-4 space-y-2 lg:hidden text-xs">
+        <div class="grid grid-cols-2 gap-2">
+          <button onclick="showPage('p8-find-mechanic')" class="p-2.5 text-left border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">🔍 Find Mechanic</button>
+          <button onclick="showPage('p13-crane-request')" class="p-2.5 text-left border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">🏗️ Crane</button>
+          <button onclick="showPage('p7-my-vehicles')" class="p-2.5 text-left border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">🚗 My Vehicles</button>
+          <button onclick="showPage('p14-service-history')" class="p-2.5 text-left border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">📋 Service History</button>
+          <button onclick="showPage('p12-booking-status')" class="p-2.5 text-left border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">📍 Bookings</button>
+          <button onclick="showPage('p17-settings')" class="p-2.5 text-left border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800">👤 Profile / Settings</button>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 1: LANDING PAGE (LOGGED-OUT STATE) -->
+      <!-- ========================================================================= -->
+      <section id="p1-landing" class="page-view hidden flex-col flex-1">
+        <!-- Hero Section -->
+        <div class="p-6 md:p-12 border-b border-wire-300 dark:border-wire-700 bg-wire-50/50 dark:bg-wire-900/30">
+          <div class="max-w-3xl">
+            <span class="inline-block px-2.5 py-1 text-xs font-mono border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800 mb-4">
+              [WIREFRAME] Responsive Customer Portal • Logged-out State
+            </span>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight mb-4">
+              Find a trusted, rated mechanic near you.
+            </h1>
+            <p class="text-sm sm:text-base text-wire-600 dark:text-wire-300 mb-8 leading-relaxed">
+              Book doorstep onsite service, schedule workshop visits, or request emergency roadside towing with real-time tracking and transparent part & labor prices.
+            </p>
+
+            <!-- Search Box (Logged-out: Prompts login/signup on search) -->
+            <div class="p-4 bg-white dark:bg-wire-800 border-2 border-wire-900 dark:border-wire-300 rounded-xl shadow-md space-y-3">
+              <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+                <div class="space-y-1">
+                  <label class="text-[11px] font-mono uppercase text-wire-500">1. Current Location</label>
+                  <div class="flex items-center border border-wire-300 dark:border-wire-600 rounded px-2.5 py-2 text-xs">
+                    <span class="mr-2">📍</span>
+                    <input type="text" placeholder="Enter city or area..." value="City Center / Highway Bypass" class="w-full bg-transparent focus:outline-none" />
+                  </div>
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[11px] font-mono uppercase text-wire-500">2. Service Needed</label>
+                  <select class="w-full border border-wire-300 dark:border-wire-600 rounded px-2.5 py-2 text-xs bg-transparent">
+                    <option>General Service & Oil Change</option>
+                    <option>Brake / Clutch Issue</option>
+                    <option>Battery Jumpstart / Replace</option>
+                    <option>Flat Tyre / Puncture Repair</option>
+                  </select>
+                </div>
+                <div class="space-y-1">
+                  <label class="text-[11px] font-mono uppercase text-wire-500">3. Action</label>
+                  <button onclick="promptAuthModal('Find Mechanic')" class="w-full py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs uppercase tracking-wider hover:opacity-90">
+                    Find Mechanics ➔
+                  </button>
+                </div>
+              </div>
+
+              <!-- Breakdown Card: Prompts login/signup -->
+              <div class="mt-4 pt-3 border-t border-wire-200 dark:border-wire-700 flex flex-col sm:flex-row items-center justify-between gap-3 bg-red-50 dark:bg-red-950/40 p-3 rounded-lg border border-red-300 dark:border-red-800">
+                <div class="flex items-center gap-3">
+                  <span class="text-2xl animate-emerg">🚨</span>
+                  <div>
+                    <div class="text-xs font-bold text-red-700 dark:text-red-400">VEHICLE BROKE DOWN? GET HELP NOW</div>
+                    <div class="text-[11px] text-wire-600 dark:text-wire-400">Emergency auto-dispatch to the nearest available technician in $\le 3$ clicks.</div>
+                  </div>
+                </div>
+                <button onclick="promptAuthModal('Emergency Roadside Breakdown')" class="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded uppercase tracking-wider transition whitespace-nowrap shadow-sm">
+                  Vehicle broke down? Get help now ➔
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- How It Works (3 Steps) -->
+        <div class="p-6 md:p-10 border-b border-wire-300 dark:border-wire-700">
+          <h2 class="text-lg font-bold uppercase font-mono tracking-wider mb-6 text-center">How GearUp Works (In 3 Simple Steps)</h2>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="border border-wire-300 dark:border-wire-700 p-5 rounded-lg bg-wire-50 dark:bg-wire-800/40">
+              <div class="w-8 h-8 rounded-full border-2 border-wire-900 dark:border-white font-mono font-bold flex items-center justify-center mb-3">1</div>
+              <h3 class="font-bold text-sm mb-1">Select Issue or Breakdown</h3>
+              <p class="text-xs text-wire-600 dark:text-wire-400 leading-relaxed">Choose from verified service checklists, add custom symptoms, and choose onsite or shop visit.</p>
+            </div>
+            <div class="border border-wire-300 dark:border-wire-700 p-5 rounded-lg bg-wire-50 dark:bg-wire-800/40">
+              <div class="w-8 h-8 rounded-full border-2 border-wire-900 dark:border-white font-mono font-bold flex items-center justify-center mb-3">2</div>
+              <h3 class="font-bold text-sm mb-1">Matched With Rated Mechanics</h3>
+              <p class="text-xs text-wire-600 dark:text-wire-400 leading-relaxed">View real-time availability badges, distance, upfront part rates, and verified customer reviews.</p>
+            </div>
+            <div class="border border-wire-300 dark:border-wire-700 p-5 rounded-lg bg-wire-50 dark:bg-wire-800/40">
+              <div class="w-8 h-8 rounded-full border-2 border-wire-900 dark:border-white font-mono font-bold flex items-center justify-center mb-3">3</div>
+              <h3 class="font-bold text-sm mb-1">Live Tracking & Service History</h3>
+              <p class="text-xs text-wire-600 dark:text-wire-400 leading-relaxed">Track technician ETA on live map, approve extra parts in-app, and log service into vehicle history.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5 Features Grid -->
+        <div class="p-6 md:p-10 border-b border-wire-300 dark:border-wire-700">
+          <h2 class="text-lg font-bold uppercase font-mono tracking-wider mb-6">Features</h2>
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 text-xs">
+            <div class="p-4 border border-wire-200 dark:border-wire-700 rounded">
+              <div class="text-red-600 font-bold mb-1">🚨 Emergency Mode</div>
+              <p class="text-wire-500">Instant dispatch and automatic 2-minute failover.</p>
+            </div>
+            <div class="p-4 border border-wire-200 dark:border-wire-700 rounded">
+              <div class="font-bold mb-1">🚗 Onsite / Offsite</div>
+              <p class="text-wire-500">Mobile service van at your door or shop visit.</p>
+            </div>
+            <div class="p-4 border border-wire-200 dark:border-wire-700 rounded">
+              <div class="font-bold mb-1">🏗️ Crane Recovery</div>
+              <p class="text-wire-500">Towing directly to the nearest verified garage.</p>
+            </div>
+            <div class="p-4 border border-wire-200 dark:border-wire-700 rounded">
+              <div class="font-bold mb-1">📊 Service History</div>
+              <p class="text-wire-500">Digital logbook with km-based maintenance alerts.</p>
+            </div>
+            <div class="p-4 border border-wire-200 dark:border-wire-700 rounded">
+              <div class="font-bold mb-1">💰 Transparent Prices</div>
+              <p class="text-wire-500">Itemized part prices and labor charges upfront.</p>
+            </div>
+          </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="p-6 border-t border-wire-300 dark:border-wire-700 bg-wire-100 dark:bg-wire-900 text-xs text-wire-500 flex flex-wrap justify-between items-center gap-4">
+          <div>© 2026 GearUp Technologies Inc. • Wireframe Reference v2.1</div>
+          <div class="flex gap-4">
+            <a href="#" class="hover:underline">Emergency Helpline: 1800-000-000</a>
+            <a href="#" class="hover:underline">Mechanic Portal</a>
+          </div>
+        </footer>
+      </section>
+
+      <!-- AUTH PROMPT MODAL -->
+      <div id="auth-prompt-modal" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+        <div class="bg-white dark:bg-wire-850 border-2 border-wire-900 dark:border-wire-300 rounded-xl p-6 max-w-sm w-full space-y-4 shadow-xl text-xs">
+          <div class="text-center space-y-1">
+            <span class="text-3xl">🔒</span>
+            <h3 class="text-sm font-bold uppercase font-mono">Sign in to Continue</h3>
+            <p id="auth-modal-reason" class="text-wire-500 text-[11px]">To request emergency roadside dispatch or book a mechanic, please log in or create your customer account.</p>
+          </div>
+          <div class="space-y-2 pt-2">
+            <button onclick="closeAuthModal(); showPage('p2-login')" class="w-full py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold uppercase tracking-wider">
+              Login to Existing Account
+            </button>
+            <button onclick="closeAuthModal(); showPage('p3-signup')" class="w-full py-2.5 border border-wire-400 rounded font-bold uppercase tracking-wider">
+              Create New Account (Sign up)
+            </button>
+            <button onclick="closeAuthModal()" class="w-full py-1.5 text-wire-400 hover:text-wire-600 text-[11px]">
+              Cancel
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 2: CUSTOMER LOGIN (LOGGED-OUT) -->
+      <!-- ========================================================================= -->
+      <section id="p2-login" class="page-view hidden flex-col flex-1 p-6 md:p-12 items-center justify-center">
+        <div class="w-full max-w-md border border-wire-300 dark:border-wire-700 rounded-xl p-6 sm:p-8 bg-white dark:bg-wire-850 shadow-sm space-y-5">
+          <div class="text-center space-y-1">
+            <div class="text-2xl font-mono font-black">⚙️ GEARUP</div>
+            <h2 class="text-xl font-bold">Customer Login</h2>
+            <p class="text-xs text-wire-500">Access your registered vehicles, maintenance alerts, and active bookings.</p>
+          </div>
+
+          <div class="space-y-4 text-xs">
+            <div>
+              <label class="block font-medium mb-1">Email or Mobile Phone</label>
+              <input type="text" placeholder="e.g. customer@example.com or phone number" class="w-full border border-wire-300 dark:border-wire-600 rounded p-2.5 bg-transparent" />
+            </div>
+
+            <div>
+              <div class="flex justify-between mb-1">
+                <label class="font-medium">Password</label>
+                <button onclick="showPage('p4-forgot')" class="text-wire-500 hover:underline">Forgot password?</button>
+              </div>
+              <div class="relative">
+                <input type="password" value="••••••••••••" class="w-full border border-wire-300 dark:border-wire-600 rounded p-2.5 bg-transparent pr-10" />
+                <button type="button" class="absolute right-2.5 top-2.5 text-wire-400 hover:text-wire-600 text-xs">👁️</button>
+              </div>
+            </div>
+
+            <div class="flex items-center justify-between">
+              <label class="flex items-center gap-2 cursor-pointer">
+                <input type="checkbox" checked class="rounded border-wire-300" />
+                <span>Remember me on this browser</span>
+              </label>
+            </div>
+
+            <button onclick="loginExistingUser()" class="w-full py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs uppercase tracking-wider hover:opacity-95">
+              Sign In ➔
+            </button>
+
+            <div class="relative flex items-center justify-center my-3">
+              <div class="border-t border-wire-300 dark:border-wire-700 w-full"></div>
+              <span class="bg-white dark:bg-wire-850 px-2 text-[11px] font-mono text-wire-400 uppercase">OR</span>
+            </div>
+
+            <button onclick="loginExistingUser()" class="w-full py-2.5 border border-wire-400 dark:border-wire-600 rounded font-medium text-xs hover:bg-wire-50 dark:hover:bg-wire-800">
+              📲 Sign In With OTP
+            </button>
+
+            <div class="text-center pt-2 border-t border-wire-200 dark:border-wire-700">
+              <span>New here? </span>
+              <button onclick="showPage('p3-signup')" class="font-bold underline">Sign up</button>
+            </div>
+
+            <div class="bg-wire-100 dark:bg-wire-800 p-2.5 rounded text-center text-[11px] text-wire-600 dark:text-wire-400">
+              Are you a mechanic? <a href="#" class="underline font-medium">Mechanic login</a>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 3: CUSTOMER SIGN UP (LOGGED-OUT) -->
+      <!-- ========================================================================= -->
+      <section id="p3-signup" class="page-view hidden flex-col flex-1 p-6 md:p-12 items-center justify-center">
+        <div class="w-full max-w-lg border border-wire-300 dark:border-wire-700 rounded-xl p-6 sm:p-8 bg-white dark:bg-wire-850 shadow-sm space-y-5">
+          <div class="text-center space-y-1">
+            <h2 class="text-xl font-bold">Customer Sign Up</h2>
+            <p class="text-xs text-wire-500">Create an account to track your vehicle maintenance and book emergency roadside assistance.</p>
+          </div>
+
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div class="sm:col-span-2">
+              <label class="block font-medium mb-1">Your Name</label>
+              <input type="text" placeholder="Enter your full name" class="w-full border border-wire-300 dark:border-wire-600 rounded p-2 bg-transparent" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Phone Number</label>
+              <input type="tel" placeholder="Mobile number" class="w-full border border-wire-300 dark:border-wire-600 rounded p-2 bg-transparent" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Email</label>
+              <input type="email" placeholder="Email address" class="w-full border border-wire-300 dark:border-wire-600 rounded p-2 bg-transparent" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Password</label>
+              <input type="password" placeholder="At least 8 characters" class="w-full border border-wire-300 dark:border-wire-600 rounded p-2 bg-transparent" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Confirm Password</label>
+              <input type="password" placeholder="Re-enter password" class="w-full border border-wire-300 dark:border-wire-600 rounded p-2 bg-transparent" />
+            </div>
+          </div>
+
+          <!-- Location Permission Explanation Card -->
+          <div class="p-3.5 border border-wire-300 dark:border-wire-700 rounded-lg bg-wire-50 dark:bg-wire-800 text-xs space-y-2">
+            <div class="font-bold flex items-center gap-1.5">
+              <span>📍</span>
+              <span>Location Permission Notice</span>
+            </div>
+            <p class="text-wire-600 dark:text-wire-400 text-[11px] leading-relaxed">
+              GearUp requires location access to find and dispatch nearby mechanics to your exact breakdown coordinates in emergencies without manual typing.
+            </p>
+            <div class="flex gap-2 pt-1">
+              <button class="px-3 py-1 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded text-[11px] font-medium">✓ Allow Location</button>
+              <button class="px-3 py-1 border border-wire-400 rounded text-[11px]">Enter Manually</button>
+            </div>
+          </div>
+
+          <button onclick="showPage('p5-add-vehicle')" class="w-full py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs uppercase tracking-wider">
+            Sign up & Add First Vehicle ➔
+          </button>
+
+          <div class="text-center pt-1 text-xs">
+            <span>Already have an account? </span>
+            <button onclick="showPage('p2-login')" class="font-bold underline">Login</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 4: FORGOT PASSWORD FLOW (LOGGED-OUT) -->
+      <!-- ========================================================================= -->
+      <section id="p4-forgot" class="page-view hidden flex-col flex-1 p-6 md:p-12 items-center justify-center">
+        <div class="w-full max-w-md border border-wire-300 dark:border-wire-700 rounded-xl p-6 bg-white dark:bg-wire-850 space-y-6">
+          <div class="flex items-center justify-between text-[11px] font-mono border-b border-wire-200 dark:border-wire-700 pb-3">
+            <span class="font-bold text-wire-900 dark:text-white">Step 2 of 4</span>
+            <span class="text-wire-500">Security Verification</span>
+          </div>
+
+          <div class="space-y-1 text-center">
+            <h2 class="text-lg font-bold">Enter OTP</h2>
+            <p class="text-xs text-wire-500">Enter email or phone > OTP > New password > Success.</p>
+          </div>
+
+          <div class="flex justify-center gap-2">
+            <input type="text" maxlength="1" value="5" class="w-10 h-12 text-center border-2 border-wire-900 dark:border-white rounded font-mono text-lg font-bold bg-transparent" />
+            <input type="text" maxlength="1" value="2" class="w-10 h-12 text-center border-2 border-wire-900 dark:border-white rounded font-mono text-lg font-bold bg-transparent" />
+            <input type="text" maxlength="1" value="8" class="w-10 h-12 text-center border-2 border-wire-900 dark:border-white rounded font-mono text-lg font-bold bg-transparent" />
+            <input type="text" maxlength="1" placeholder="•" class="w-10 h-12 text-center border border-wire-400 rounded font-mono text-lg font-bold bg-transparent" />
+            <input type="text" maxlength="1" placeholder="•" class="w-10 h-12 text-center border border-wire-400 rounded font-mono text-lg font-bold bg-transparent" />
+            <input type="text" maxlength="1" placeholder="•" class="w-10 h-12 text-center border border-wire-400 rounded font-mono text-lg font-bold bg-transparent" />
+          </div>
+
+          <div class="space-y-2">
+            <button onclick="showPage('p2-login')" class="w-full py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs uppercase tracking-wider">
+              Verify OTP & Set New Password ➔
+            </button>
+            <button onclick="showPage('p2-login')" class="w-full py-2 border border-wire-300 dark:border-wire-700 rounded text-xs text-wire-500">
+              Cancel & Return to Login
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 5: ADD FIRST VEHICLE (MINIMAL TOP BAR, ALL FIELDS BLANK, NONE SELECTED) -->
+      <!-- ========================================================================= -->
+      <section id="p5-add-vehicle" class="page-view hidden flex-col flex-1 p-6 md:p-12 items-center justify-center">
+        <div class="w-full max-w-lg border border-wire-300 dark:border-wire-700 rounded-xl p-6 sm:p-8 bg-white dark:bg-wire-850 space-y-6">
+          <div class="border-b border-wire-200 dark:border-wire-700 pb-3">
+            <span class="text-[11px] font-mono text-wire-500 uppercase">Post-Signup Onboarding</span>
+            <h2 class="text-xl font-bold">Add Your First Vehicle</h2>
+            <p class="text-xs text-wire-500 mt-0.5">Register a vehicle to enable km-based maintenance alerts and fast breakdown dispatch.</p>
+          </div>
+
+          <!-- Vehicle Type Cards: NONE selected by default -->
+          <div class="space-y-2">
+            <label class="text-xs font-medium">Select Vehicle Type</label>
+            <div class="grid grid-cols-3 gap-2">
+              <div onclick="selectVehicleTypeCard('car')" id="vt-card-car" class="border border-wire-300 dark:border-wire-700 p-3 rounded-lg text-center cursor-pointer hover:border-wire-500 transition">
+                <div class="text-xl">🚗</div>
+                <div class="text-xs font-medium mt-1">Car / 4W</div>
+              </div>
+              <div onclick="selectVehicleTypeCard('bike')" id="vt-card-bike" class="border border-wire-300 dark:border-wire-700 p-3 rounded-lg text-center cursor-pointer hover:border-wire-500 transition">
+                <div class="text-xl">🛵</div>
+                <div class="text-xs font-medium mt-1">Two-Wheeler</div>
+              </div>
+              <div onclick="selectVehicleTypeCard('comm')" id="vt-card-comm" class="border border-wire-300 dark:border-wire-700 p-3 rounded-lg text-center cursor-pointer hover:border-wire-500 transition">
+                <div class="text-xl">🚐</div>
+                <div class="text-xs font-medium mt-1">Commercial</div>
+              </div>
+            </div>
+          </div>
+
+          <!-- All Form Fields EMPTY with placeholder text only -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+            <div>
+              <label class="block font-medium mb-1">Brand / Make</label>
+              <input type="text" id="afv-brand" placeholder="e.g. Brand / Make" value="" class="w-full border border-wire-300 dark:border-wire-600 rounded p-2 bg-transparent" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Model</label>
+              <input type="text" id="afv-model" placeholder="e.g. Model name" value="" class="w-full border border-wire-300 dark:border-wire-600 rounded p-2 bg-transparent" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Registration No</label>
+              <input type="text" id="afv-reg" placeholder="e.g. Registration number" value="" class="w-full border border-wire-300 dark:border-wire-600 rounded p-2 bg-transparent uppercase font-mono font-bold" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Current km</label>
+              <input type="number" id="afv-km" placeholder="e.g. Current odometer km" value="" class="w-full border border-wire-300 dark:border-wire-600 rounded p-2 bg-transparent font-mono" />
+            </div>
+          </div>
+
+          <!-- Helper note explaining km is used for maintenance alerts -->
+          <div class="p-3 bg-wire-100 dark:bg-wire-800 rounded text-[11px] text-wire-600 dark:text-wire-400 leading-relaxed">
+            💡 <strong>Why km matters:</strong> GearUp uses your current odometer reading to calculate and schedule maintenance alerts (e.g., oil changes every 10,000 km, brake checks, fluid flushes).
+          </div>
+
+          <!-- Save Vehicle CTA (Dashboard shown only after user saves vehicle) -->
+          <button onclick="saveFirstVehicleAndGoToDashboard()" class="w-full py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs uppercase tracking-wider">
+            Save Vehicle & Enter Dashboard ➔
+          </button>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 6: CUSTOMER DASHBOARD (LOGGED-IN, NO VEHICLE CHIP IN TOP BAR) -->
+      <!-- Vehicle details appear inside page content in a dedicated vehicle card -->
+      <!-- ========================================================================= -->
+      <section id="p6-dashboard" class="page-view flex flex-col flex-1 p-4 md:p-8 space-y-6">
+        <!-- Top Km-Based Maintenance Alert Strip -->
+        <div class="border-2 border-amber-500 bg-amber-50 dark:bg-amber-950/40 p-3.5 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 text-xs">
+          <div class="flex items-center gap-3">
+            <span class="text-xl">⚠️</span>
+            <div>
+              <span class="font-bold text-amber-800 dark:text-amber-300">MAINTENANCE ALERT:</span>
+              <span class="text-wire-700 dark:text-wire-300 ml-1">Oil change due in 250 km (Due soon) for Vehicle 1.</span>
+            </div>
+          </div>
+          <button onclick="showPage('p11-booking-flow')" class="px-3.5 py-1.5 bg-amber-600 hover:bg-amber-700 text-white rounded font-bold uppercase tracking-wider text-[11px] whitespace-nowrap">
+            Book
+          </button>
+        </div>
+
+        <!-- Emergency Card on Dashboard -->
+        <div class="border border-red-300 dark:border-red-800 bg-red-50 dark:bg-red-950/30 p-5 rounded-xl flex flex-col md:flex-row items-center justify-between gap-4">
+          <div class="space-y-1">
+            <div class="flex items-center gap-2">
+              <span class="px-2 py-0.5 bg-red-600 text-white text-[10px] font-mono font-bold rounded uppercase">Emergency Mode</span>
+              <span class="text-xs text-wire-500">Auto-detects GPS</span>
+            </div>
+            <h2 class="text-base sm:text-lg font-bold text-red-700 dark:text-red-400">Vehicle broke down or need urgent roadside help?</h2>
+            <p class="text-xs text-wire-600 dark:text-wire-400">Dispatch the nearest available mobile mechanic in 3 clicks or fewer.</p>
+          </div>
+          <button onclick="showPage('p9-emergency')" class="w-full md:w-auto px-5 py-3 bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider rounded-lg shadow transition flex items-center justify-center gap-2">
+            <span>🚨</span>
+            <span>Emergency SOS</span>
+          </button>
+        </div>
+
+        <!-- Quick Actions (4 Grid) -->
+        <div>
+          <div class="text-xs font-mono uppercase text-wire-400 font-bold mb-3">Quick Actions</div>
+          <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+            <button onclick="showPage('p8-find-mechanic')" class="p-4 border border-wire-300 dark:border-wire-700 rounded-xl bg-white dark:bg-wire-850 hover:border-wire-600 text-left space-y-2 group">
+              <div class="text-2xl">🔍</div>
+              <div class="font-bold text-xs group-hover:underline">Find Mechanic</div>
+              <div class="text-[11px] text-wire-500">Choose Onsite or Offsite mode with transparent pricing.</div>
+            </button>
+            <button onclick="showPage('p13-crane-request')" class="p-4 border border-wire-300 dark:border-wire-700 rounded-xl bg-white dark:bg-wire-850 hover:border-wire-600 text-left space-y-2 group">
+              <div class="text-2xl">🏗️</div>
+              <div class="font-bold text-xs group-hover:underline">Need Crane</div>
+              <div class="text-[11px] text-wire-500">Flatbed recovery directly to the nearest verified workshop.</div>
+            </button>
+            <button onclick="showPage('p7-my-vehicles')" class="p-4 border border-wire-300 dark:border-wire-700 rounded-xl bg-white dark:bg-wire-850 hover:border-wire-600 text-left space-y-2 group">
+              <div class="text-2xl">🚗</div>
+              <div class="font-bold text-xs group-hover:underline">My Vehicles</div>
+              <div class="text-[11px] text-wire-500">Update current km & view km-based service intervals.</div>
+            </button>
+            <button onclick="showPage('p14-service-history')" class="p-4 border border-wire-300 dark:border-wire-700 rounded-xl bg-white dark:bg-wire-850 hover:border-wire-600 text-left space-y-2 group">
+              <div class="text-2xl">📋</div>
+              <div class="font-bold text-xs group-hover:underline">History</div>
+              <div class="text-[11px] text-wire-500">Itemized invoices, parts used, and upcoming services.</div>
+            </button>
+          </div>
+        </div>
+
+        <!-- Dashboard Content Grid: Vehicle Card (with km & maintenance list) + Recent Bookings -->
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          
+          <!-- VEHICLE CARD WITH VEHICLE, CURRENT KM & MAINTENANCE LIST (5 cols) -->
+          <div class="lg:col-span-5 border-2 border-wire-900 dark:border-wire-300 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-4 text-xs">
+            <div class="flex items-start justify-between border-b border-wire-200 dark:border-wire-700 pb-3">
+              <div>
+                <span class="text-[10px] font-mono uppercase bg-wire-100 dark:bg-wire-800 px-2 py-0.5 rounded font-bold">Primary Vehicle</span>
+                <h3 class="text-base font-bold mt-1">Vehicle 1 (Car Model)</h3>
+                <span class="text-wire-500 text-[11px]">Sedan • 4-Wheeler</span>
+              </div>
+              <div class="text-right">
+                <div class="font-mono font-bold text-sm">45,210 km</div>
+                <button onclick="showPage('p7-my-vehicles')" class="text-[10px] text-wire-500 underline">Update km</button>
+              </div>
+            </div>
+
+            <!-- Maintenance List (Due in km, Status Label: Text + Icon, Last Serviced km) -->
+            <div class="space-y-2">
+              <div class="font-mono text-[11px] uppercase text-wire-400 font-bold">Maintenance Status:</div>
+              
+              <!-- Row 1: Due soon -->
+              <div class="p-2.5 border border-amber-300 dark:border-amber-800 bg-amber-50/50 dark:bg-amber-950/20 rounded-lg flex items-center justify-between">
+                <div>
+                  <div class="font-bold">Oil change</div>
+                  <div class="text-[11px] text-wire-500">due in 250 km • Last: 35,500 km</div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="px-2 py-0.5 border border-amber-500 text-amber-700 dark:text-amber-300 font-bold text-[10px] rounded flex items-center gap-1">
+                    <span>⚠️</span> Due soon
+                  </span>
+                  <button onclick="showPage('p11-booking-flow')" class="px-2 py-1 bg-amber-600 text-white rounded text-[10px] font-bold">Book</button>
+                </div>
+              </div>
+
+              <!-- Row 2: OK -->
+              <div class="p-2.5 border border-wire-200 dark:border-wire-700 rounded-lg flex items-center justify-between">
+                <div>
+                  <div class="font-bold">Brake pads</div>
+                  <div class="text-[11px] text-wire-500">due in 4,200 km • Last: 40,000 km</div>
+                </div>
+                <span class="px-2 py-0.5 border border-emerald-500 text-emerald-700 dark:text-emerald-300 font-bold text-[10px] rounded flex items-center gap-1">
+                  <span>✓</span> OK
+                </span>
+              </div>
+
+              <!-- Row 3: Overdue -->
+              <div class="p-2.5 border border-red-300 dark:border-red-800 bg-red-50/50 dark:bg-red-950/20 rounded-lg flex items-center justify-between">
+                <div>
+                  <div class="font-bold">Chain lubrication</div>
+                  <div class="text-[11px] text-red-600 dark:text-red-400 font-medium">overdue by 120 km • Last: 38,000 km</div>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <span class="px-2 py-0.5 border border-red-500 text-red-700 dark:text-red-300 font-bold text-[10px] rounded flex items-center gap-1">
+                    <span>🚨</span> Overdue
+                  </span>
+                  <button onclick="showPage('p11-booking-flow')" class="px-2 py-1 bg-red-600 text-white rounded text-[10px] font-bold">Book</button>
+                </div>
+              </div>
+            </div>
+
+            <button onclick="showPage('p7-my-vehicles')" class="w-full py-2 border border-wire-300 dark:border-wire-700 rounded text-center text-xs font-medium hover:bg-wire-50 dark:hover:bg-wire-800">
+              Manage in My Vehicles ➔
+            </button>
+          </div>
+
+          <!-- Recent Bookings (7 cols) -->
+          <div class="lg:col-span-7 border border-wire-300 dark:border-wire-700 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-4 text-xs">
+            <div class="flex items-center justify-between">
+              <h3 class="font-bold text-sm">Recent Bookings</h3>
+              <button onclick="showPage('p12-booking-status')" class="text-xs text-wire-500 hover:underline">View All ›</button>
+            </div>
+
+            <!-- Active Booking Item -->
+            <div class="border border-emerald-500/50 bg-emerald-50/30 dark:bg-emerald-950/20 p-4 rounded-lg flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+              <div class="space-y-1">
+                <div class="flex items-center gap-2">
+                  <span class="font-mono font-bold text-wire-900 dark:text-white">#GU-8942</span>
+                  <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 dark:bg-emerald-900/60 dark:text-emerald-300 rounded-full font-bold text-[10px] flex items-center gap-1">
+                    <span class="w-1.5 h-1.5 rounded-full bg-emerald-500"></span>
+                    <span>Mechanic en route (ETA 12m)</span>
+                  </span>
+                </div>
+                <div class="text-wire-700 dark:text-wire-300"><strong>Workshop name #1</strong> • Onsite Brake Pad Check</div>
+                <div class="text-wire-400 text-[11px]">Vehicle: Vehicle 1</div>
+              </div>
+              <button onclick="showPage('p12-booking-status')" class="px-3.5 py-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-medium text-xs">
+                Track Live ➔
+              </button>
+            </div>
+
+            <!-- Past Completed Booking -->
+            <div class="border border-wire-200 dark:border-wire-700 p-3.5 rounded-lg flex items-center justify-between">
+              <div class="space-y-0.5">
+                <div class="font-bold text-wire-800 dark:text-wire-200">#GU-7612 • General Service & Synthetic Oil</div>
+                <div class="text-[11px] text-wire-500">24 Aug 2026 • Workshop name #2 • ₹2,450 paid</div>
+              </div>
+              <button onclick="showPage('p14-service-history')" class="px-2.5 py-1 border border-wire-300 dark:border-wire-600 rounded text-[11px]">View Receipt</button>
+            </div>
+          </div>
+
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 7: MY VEHICLES (VEHICLE DETAILS INSIDE CONTENT) -->
+      <!-- ========================================================================= -->
+      <section id="p7-my-vehicles" class="page-view hidden flex-col flex-1 p-4 md:p-8 space-y-6">
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-wire-300 dark:border-wire-700 pb-4">
+          <div>
+            <h2 class="text-xl font-bold">My Vehicles</h2>
+            <p class="text-xs text-wire-500">Manage vehicle cards, update current km, and track maintenance alerts per item.</p>
+          </div>
+          <button onclick="showPage('p5-add-vehicle')" class="px-3.5 py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs uppercase tracking-wider">
+            + Add Vehicle
+          </button>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <!-- Vehicle Card 1 (Car) -->
+          <div class="border-2 border-wire-900 dark:border-wire-300 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-4">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 bg-wire-900 text-white text-[10px] font-mono rounded uppercase">Primary</span>
+                  <span class="font-mono font-bold text-sm">Vehicle 1</span>
+                </div>
+                <h3 class="text-base font-bold mt-1">Car Model A</h3>
+                <span class="text-xs text-wire-500">Petrol • Manual • 4-Wheeler</span>
+              </div>
+              <div class="w-12 h-12 wireframe-box wireframe-cross rounded flex items-center justify-center text-xs text-wire-400">
+                [🚗]
+              </div>
+            </div>
+
+            <!-- Current km with Update km button -->
+            <div class="p-3 bg-wire-50 dark:bg-wire-800 rounded-lg flex items-center justify-between text-xs">
+              <div>
+                <div class="text-[10px] font-mono uppercase text-wire-400">Current Odometer</div>
+                <div class="font-mono font-bold text-sm">45,210 km</div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <input type="number" id="km-input-1" placeholder="Enter new km" value="45210" class="w-28 border border-wire-300 dark:border-wire-600 rounded px-2 py-1 text-xs bg-white dark:bg-wire-900 font-mono" />
+                <button onclick="alert('Wireframe Note: Odometer updated. Predictive alerts recalculated.')" class="px-2.5 py-1 bg-wire-800 text-white rounded text-xs font-medium">
+                  Update km
+                </button>
+              </div>
+            </div>
+
+            <!-- Km-Based Maintenance Status (OK / Due soon / Overdue) -->
+            <div class="space-y-2 text-xs">
+              <div class="font-mono text-[11px] uppercase text-wire-400 font-bold">Component Service Intervals:</div>
+              
+              <div class="p-2 border border-wire-200 dark:border-wire-700 rounded flex items-center justify-between">
+                <div>
+                  <span class="font-bold">Oil change:</span>
+                  <span class="text-wire-600 dark:text-wire-400 ml-1">due in 250 km (Last done at 35,500 km)</span>
+                </div>
+                <span class="px-2 py-0.5 border border-amber-500 text-amber-700 dark:text-amber-300 font-bold text-[10px] rounded flex items-center gap-1">
+                  <span>⚠️</span> Due soon
+                </span>
+              </div>
+
+              <div class="p-2 border border-wire-200 dark:border-wire-700 rounded flex items-center justify-between">
+                <div>
+                  <span class="font-bold">Brake pads:</span>
+                  <span class="text-wire-600 dark:text-wire-400 ml-1">due in 4,200 km (Last done at 40,000 km)</span>
+                </div>
+                <span class="px-2 py-0.5 border border-emerald-500 text-emerald-700 dark:text-emerald-300 font-bold text-[10px] rounded flex items-center gap-1">
+                  <span>✓</span> OK
+                </span>
+              </div>
+
+              <div class="p-2 border border-wire-200 dark:border-wire-700 rounded flex items-center justify-between">
+                <div>
+                  <span class="font-bold">Chain lubrication:</span>
+                  <span class="text-red-600 dark:text-red-400 ml-1 font-medium">overdue by 120 km (Last done at 38,000 km)</span>
+                </div>
+                <span class="px-2 py-0.5 border border-red-500 text-red-700 dark:text-red-300 font-bold text-[10px] rounded flex items-center gap-1">
+                  <span>🚨</span> Overdue
+                </span>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-wire-200 dark:border-wire-700 flex gap-2 text-xs">
+              <button onclick="showPage('p11-booking-flow')" class="flex-1 py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold">Book Service</button>
+              <button onclick="showPage('p14-service-history')" class="px-3 py-2 border border-wire-300 dark:border-wire-700 rounded">Service History</button>
+              <button class="px-3 py-2 border border-wire-300 dark:border-wire-700 rounded">Edit Vehicle</button>
+            </div>
+          </div>
+
+          <!-- Vehicle Card 2 (Two-Wheeler) -->
+          <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-4">
+            <div class="flex items-start justify-between">
+              <div>
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 bg-wire-200 dark:bg-wire-700 text-wire-800 dark:text-wire-200 text-[10px] font-mono rounded uppercase">Secondary</span>
+                  <span class="font-mono font-bold text-sm">Vehicle 2</span>
+                </div>
+                <h3 class="text-base font-bold mt-1">Bike Model B</h3>
+                <span class="text-xs text-wire-500">Petrol • Two-Wheeler</span>
+              </div>
+              <div class="w-12 h-12 wireframe-box wireframe-cross rounded flex items-center justify-center text-xs text-wire-400">
+                [🛵]
+              </div>
+            </div>
+
+            <div class="p-3 bg-wire-50 dark:bg-wire-800 rounded-lg flex items-center justify-between text-xs">
+              <div>
+                <div class="text-[10px] font-mono uppercase text-wire-400">Current Odometer</div>
+                <div class="font-mono font-bold text-sm">11,400 km</div>
+              </div>
+              <div class="flex items-center gap-1.5">
+                <input type="number" placeholder="Enter new km" value="11400" class="w-28 border border-wire-300 dark:border-wire-600 rounded px-2 py-1 text-xs bg-white dark:bg-wire-900 font-mono" />
+                <button class="px-2.5 py-1 bg-wire-800 text-white rounded text-xs font-medium">Update km</button>
+              </div>
+            </div>
+
+            <div class="space-y-2 text-xs">
+              <div class="font-mono text-[11px] uppercase text-wire-400 font-bold">Component Service Intervals:</div>
+              <div class="p-2 border border-wire-200 dark:border-wire-700 rounded flex items-center justify-between">
+                <div>
+                  <span class="font-bold">Engine Oil:</span>
+                  <span class="text-wire-600 dark:text-wire-400 ml-1">due in 1,600 km (Last done at 8,000 km)</span>
+                </div>
+                <span class="px-2 py-0.5 border border-emerald-500 text-emerald-700 dark:text-emerald-300 font-bold text-[10px] rounded flex items-center gap-1">
+                  <span>✓</span> OK
+                </span>
+              </div>
+              <div class="p-2 border border-wire-200 dark:border-wire-700 rounded flex items-center justify-between">
+                <div>
+                  <span class="font-bold">Spark Plug:</span>
+                  <span class="text-wire-600 dark:text-wire-400 ml-1">due in 3,600 km (Last done at 5,000 km)</span>
+                </div>
+                <span class="px-2 py-0.5 border border-emerald-500 text-emerald-700 dark:text-emerald-300 font-bold text-[10px] rounded flex items-center gap-1">
+                  <span>✓</span> OK
+                </span>
+              </div>
+            </div>
+
+            <div class="pt-2 border-t border-wire-200 dark:border-wire-700 flex gap-2 text-xs">
+              <button onclick="showPage('p11-booking-flow')" class="flex-1 py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold">Book Service</button>
+              <button onclick="showPage('p14-service-history')" class="px-3 py-2 border border-wire-300 dark:border-wire-700 rounded">Service History</button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 8: FIND MECHANIC (NO PRESELECTED MODE! USER MUST TAP ONE TO CONTINUE) -->
+      <!-- ========================================================================= -->
+      <section id="p8-find-mechanic" class="page-view hidden flex-col flex-1">
+        
+        <!-- SUB-STEP A: CHOOSE SERVICE MODE (BOTH CARDS UNSELECTED, CONTINUE DISABLED) -->
+        <div id="fm-step-mode" class="p-6 md:p-12 max-w-2xl mx-auto w-full space-y-6">
+          <div class="text-center space-y-1">
+            <span class="text-xs font-mono uppercase text-wire-500">Find Mechanic • Step 1 of 2</span>
+            <h2 class="text-2xl font-bold">Choose Service Mode</h2>
+            <p class="text-xs text-wire-500">Please choose whether you want the mechanic to come to you or visit a workshop.</p>
+          </div>
+
+          <!-- Two Large Mode Choice Cards (BOTH UNSELECTED BY DEFAULT) -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Card 1: Onsite (Unselected) -->
+            <div onclick="selectFindMechMode('onsite')" id="mode-card-onsite" class="border border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-850 p-5 rounded-xl cursor-pointer hover:border-wire-600 transition space-y-2 relative">
+              <div class="flex items-center justify-between">
+                <span class="text-3xl">🚐</span>
+                <span id="badge-onsite" class="text-[10px] font-mono uppercase text-wire-400">Mobile Service</span>
+              </div>
+              <h3 class="font-bold text-sm">Onsite</h3>
+              <p class="text-xs text-wire-600 dark:text-wire-300 leading-relaxed font-medium">
+                "Mechanic comes to my location"
+              </p>
+              <div class="text-[11px] text-wire-500 pt-1 border-t border-wire-200 dark:border-wire-700">
+                Mobile technician van visits home, office, or roadside with tools. Shows visit charge and ETA.
+              </div>
+            </div>
+
+            <!-- Card 2: Offsite (Unselected) -->
+            <div onclick="selectFindMechMode('offsite')" id="mode-card-offsite" class="border border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-850 p-5 rounded-xl cursor-pointer hover:border-wire-600 transition space-y-2 relative">
+              <div class="flex items-center justify-between">
+                <span class="text-3xl">🏢</span>
+                <span id="badge-offsite" class="text-[10px] font-mono uppercase text-wire-400">Workshop Visit</span>
+              </div>
+              <h3 class="font-bold text-sm">Offsite</h3>
+              <p class="text-xs text-wire-600 dark:text-wire-300 leading-relaxed font-medium">
+                "I will visit the workshop"
+              </p>
+              <div class="text-[11px] text-wire-500 pt-1 border-t border-wire-200 dark:border-wire-700">
+                Drive or drop off vehicle at certified garage. Shows workshop address, km away, and time slots.
+              </div>
+            </div>
+          </div>
+
+          <!-- Continue Button: DISABLED UNTIL A MODE IS CHOSEN -->
+          <div class="pt-2">
+            <button id="fm-continue-btn" onclick="confirmFindMechMode()" disabled class="w-full py-3 bg-wire-200 text-wire-400 dark:bg-wire-800 dark:text-wire-600 rounded-lg font-bold text-xs uppercase tracking-wider cursor-not-allowed transition">
+              Select a Mode Above to Continue ➔
+            </button>
+          </div>
+        </div>
+
+        <!-- SUB-STEP B: MECHANIC RESULTS (FILTERED BY SELECTED MODE, SMALL TOP TOGGLE) -->
+        <div id="fm-results-view" class="hidden flex-col flex-1">
+          <!-- Top Filter & Mode Switcher Bar -->
+          <div class="p-3.5 border-b border-wire-300 dark:border-wire-700 bg-wire-50 dark:bg-wire-850 flex flex-wrap items-center justify-between gap-3 text-xs">
+            <!-- Small Toggle at top to switch modes without going back -->
+            <div class="flex items-center bg-wire-200 dark:bg-wire-700 p-1 rounded-lg">
+              <button onclick="switchModeToggle('onsite')" id="toggle-btn-onsite" class="px-3 py-1 rounded font-bold bg-white dark:bg-wire-900 text-wire-900 dark:text-white shadow-sm flex items-center gap-1.5">
+                <span>🚐</span>
+                <span>Onsite (To My Location)</span>
+              </button>
+              <button onclick="switchModeToggle('offsite')" id="toggle-btn-offsite" class="px-3 py-1 rounded font-medium text-wire-600 dark:text-wire-300 hover:text-wire-900 flex items-center gap-1.5">
+                <span>🏢</span>
+                <span>Offsite (Workshop Visit)</span>
+              </button>
+            </div>
+
+            <!-- Location Bar -->
+            <div class="flex items-center gap-2 border border-wire-300 dark:border-wire-600 bg-white dark:bg-wire-800 rounded px-3 py-1">
+              <span>📍</span>
+              <span class="font-medium">Current Location (Within 10 km)</span>
+              <button class="text-wire-400 hover:underline">Change</button>
+            </div>
+
+            <!-- Mobile Map / List View Switcher -->
+            <div class="lg:hidden flex border border-wire-300 dark:border-wire-700 rounded overflow-hidden">
+              <button onclick="toggleMobileMapList('list')" id="m-btn-list" class="px-3 py-1 bg-wire-900 text-white font-bold">List</button>
+              <button onclick="toggleMobileMapList('map')" id="m-btn-map" class="px-3 py-1 bg-white text-wire-800">Map</button>
+            </div>
+          </div>
+
+          <!-- Main Split Area: Filter Sidebar + Mechanic Cards + Map Canvas -->
+          <div class="flex-1 grid grid-cols-1 lg:grid-cols-12 overflow-hidden">
+            <!-- Filter Sidebar (3 cols) -->
+            <aside class="hidden lg:block lg:col-span-3 border-r border-wire-300 dark:border-wire-700 p-4 space-y-4 text-xs bg-white dark:bg-wire-900">
+              <div class="flex items-center justify-between">
+                <span class="font-mono font-bold uppercase text-wire-500">Filter Mechanics</span>
+                <button class="text-[11px] text-wire-500 hover:underline">Reset</button>
+              </div>
+
+              <div class="space-y-2">
+                <div class="font-bold">Availability</div>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" checked class="rounded" />
+                  <span class="flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+                    <span>Available Now</span>
+                  </span>
+                </label>
+                <label class="flex items-center gap-2 cursor-pointer">
+                  <input type="checkbox" class="rounded" />
+                  <span class="flex items-center gap-1">
+                    <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+                    <span>Busy (Queue Open)</span>
+                  </span>
+                </label>
+              </div>
+
+              <div class="space-y-1">
+                <div class="flex justify-between font-bold">
+                  <span>Distance</span>
+                  <span class="font-mono text-wire-500">8.0 km</span>
+                </div>
+                <input type="range" min="1" max="25" value="8" class="w-full accent-wire-900" />
+              </div>
+
+              <div class="space-y-1">
+                <div class="font-bold">Min Rating</div>
+                <div class="grid grid-cols-3 gap-1 text-center font-mono">
+                  <button class="border border-wire-300 dark:border-wire-700 py-1 rounded">3.5+ ★</button>
+                  <button class="border-2 border-wire-900 dark:border-white py-1 rounded font-bold">4.0+ ★</button>
+                  <button class="border border-wire-300 dark:border-wire-700 py-1 rounded">4.5+ ★</button>
+                </div>
+              </div>
+
+              <div class="space-y-1">
+                <div class="font-bold">Service Type</div>
+                <label class="flex items-center gap-2"><input type="checkbox" checked /><span>Brakes & Clutch</span></label>
+                <label class="flex items-center gap-2"><input type="checkbox" checked /><span>Engine Diagnostics</span></label>
+                <label class="flex items-center gap-2"><input type="checkbox" /><span>Battery Jumpstart</span></label>
+              </div>
+            </aside>
+
+            <!-- Mechanic Results List (5 cols) -->
+            <div id="fm-list-column" class="col-span-1 lg:col-span-5 p-4 space-y-3 overflow-y-auto max-h-[700px]">
+              <div class="flex items-center justify-between text-xs text-wire-500 pb-1">
+                <span id="results-count-text">Showing verified mechanics</span>
+                <select class="border border-wire-300 dark:border-wire-700 rounded px-2 py-1 bg-transparent">
+                  <option>Sort: Distance (Nearest first)</option>
+                  <option>Sort: Rating</option>
+                </select>
+              </div>
+
+              <!-- DYNAMIC RESULTS CONTAINER (Rendered via JavaScript) -->
+              <div id="dynamic-mechanic-cards" class="space-y-3"></div>
+            </div>
+
+            <!-- Map Canvas (4 cols) -->
+            <div id="fm-map-column" class="hidden lg:block lg:col-span-4 border-l border-wire-300 dark:border-wire-700 bg-wire-100 dark:bg-wire-850 relative p-4">
+              <div class="absolute inset-0 wireframe-box wireframe-cross flex flex-col items-center justify-between p-4 pointer-events-none">
+                <div class="w-full flex justify-between pointer-events-auto">
+                  <span class="bg-white dark:bg-wire-900 border border-wire-400 px-2 py-1 rounded text-[11px] font-mono shadow-sm">
+                    [MAP: GPS Active]
+                  </span>
+                  <div class="flex flex-col gap-1">
+                    <button class="w-7 h-7 bg-white dark:bg-wire-900 border border-wire-400 rounded text-xs font-bold shadow">+</button>
+                    <button class="w-7 h-7 bg-white dark:bg-wire-900 border border-wire-400 rounded text-xs font-bold shadow">-</button>
+                  </div>
+                </div>
+
+                <!-- Simulated Pins -->
+                <div class="relative w-full h-full flex items-center justify-center pointer-events-auto">
+                  <div class="absolute flex flex-col items-center">
+                    <div class="w-6 h-6 rounded-full bg-blue-600 text-white flex items-center justify-center text-xs font-bold shadow ring-4 ring-blue-300/50">📍</div>
+                    <span class="text-[10px] font-bold bg-white px-1.5 py-0.5 rounded shadow mt-1">You</span>
+                  </div>
+                  <div class="absolute -top-12 -left-16 flex flex-col items-center">
+                    <div class="px-2 py-0.5 rounded bg-emerald-600 text-white font-mono text-[10px] font-bold shadow">
+                      ● Workshop name #1 (1.8 km)
+                    </div>
+                  </div>
+                  <div class="absolute top-20 right-12 flex flex-col items-center">
+                    <div class="px-2 py-0.5 rounded bg-emerald-600 text-white font-mono text-[10px] font-bold shadow">
+                      ● Workshop name #2 (3.2 km)
+                    </div>
+                  </div>
+                </div>
+
+                <div class="w-full bg-white/90 dark:bg-wire-900/90 border border-wire-300 dark:border-wire-700 p-2 rounded text-[10px] font-mono flex justify-around">
+                  <span class="text-emerald-600 font-bold">● Available (8)</span>
+                  <span class="text-amber-600 font-bold">■ Busy (3)</span>
+                  <span class="text-wire-500 font-bold">○ Offline (4)</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 9: EMERGENCY MODE (BREAKDOWN ASSISTANCE) -->
+      <!-- ========================================================================= -->
+      <section id="p9-emergency" class="page-view hidden flex-col flex-1 p-4 md:p-8 space-y-5 bg-red-50/20 dark:bg-red-950/10">
+        <!-- Emergency Top Alert Bar -->
+        <div class="border-2 border-red-600 bg-red-600 text-white p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 shadow-md">
+          <div class="flex items-center gap-3">
+            <span class="text-3xl animate-emerg">🚨</span>
+            <div>
+              <div class="font-mono text-xs uppercase font-extrabold tracking-wider">EMERGENCY BREAKDOWN MODE</div>
+              <h2 class="text-base sm:text-lg font-bold">Immediate Assistance Protocol Activated</h2>
+            </div>
+          </div>
+          <div class="flex items-center gap-2">
+            <span class="text-xs font-mono bg-red-800/80 px-2.5 py-1 rounded">Target Dispatch: &le; 3 Clicks</span>
+            <button onclick="showPage('p6-dashboard')" class="text-xs underline text-red-100 hover:text-white">Exit SOS</button>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div class="lg:col-span-2 space-y-4">
+            <!-- Auto-detected location -->
+            <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-850 space-y-2">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-mono uppercase font-bold text-wire-500">Auto-Detected GPS Location</span>
+                <span class="text-emerald-600 font-bold text-[11px] flex items-center gap-1">
+                  <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                  High Accuracy (&plusmn;8m)
+                </span>
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="text-2xl">📍</span>
+                <div class="flex-1 text-xs">
+                  <div class="font-bold text-sm">Highway NH-66 Bypass, Near Exit 14</div>
+                  <div class="text-wire-500">Auto-detected location coordinates</div>
+                </div>
+                <button class="px-2.5 py-1 border border-wire-300 dark:border-wire-600 rounded text-xs">Refine Pin</button>
+              </div>
+            </div>
+
+            <!-- Breakdown symptoms chips -->
+            <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-850 space-y-2">
+              <div class="text-xs font-bold">Select Breakdown Symptom:</div>
+              <div class="flex flex-wrap gap-2 text-xs">
+                <button class="px-3 py-1.5 bg-red-100 text-red-800 border-2 border-red-500 rounded-full font-bold">Engine Stalled / Won't Start</button>
+                <button class="px-3 py-1.5 border border-wire-300 rounded-full hover:border-wire-600">Flat Tyre / Blowout</button>
+                <button class="px-3 py-1.5 border border-wire-300 rounded-full hover:border-wire-600">Battery Dead</button>
+                <button class="px-3 py-1.5 border border-wire-300 rounded-full hover:border-wire-600">Overheating / Steam</button>
+              </div>
+            </div>
+
+            <!-- Filtered available mechanics -->
+            <div class="space-y-3">
+              <div class="flex items-center justify-between text-xs">
+                <span class="font-bold">Available Mobile Mechanics (Nearest First):</span>
+                <span class="font-mono text-emerald-600 font-bold">3 Online in 5km</span>
+              </div>
+
+              <!-- Top Match Mechanic Card -->
+              <div class="border-2 border-red-500 rounded-xl p-4 bg-white dark:bg-wire-850 shadow-md space-y-3">
+                <div class="flex items-start justify-between">
+                  <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 bg-red-100 text-red-700 border border-red-300 rounded-full flex items-center justify-center font-bold text-sm">
+                      1.2 km
+                    </div>
+                    <div>
+                      <div class="flex items-center gap-2">
+                        <h3 class="font-bold text-sm">Mechanic name (Mobile Unit #1)</h3>
+                        <span class="px-2 py-0.2 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">● Available</span>
+                      </div>
+                      <div class="text-xs text-wire-500">★ 4.9 (140 emergency calls) • <strong>ETA: 8-12 mins</strong></div>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="flex items-center justify-between pt-2 border-t border-wire-200 dark:border-wire-700 text-xs">
+                  <div>
+                    <span class="text-wire-400">Emergency Visit Fee:</span>
+                    <span class="font-mono font-bold"> ₹200</span>
+                  </div>
+                  <div class="flex gap-2">
+                    <button class="px-3 py-2 border border-wire-400 rounded font-bold text-xs flex items-center gap-1">
+                      <span>📞</span> Direct Call
+                    </button>
+                    <button onclick="showPage('p12-booking-status')" class="px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs uppercase tracking-wider rounded shadow flex items-center gap-1.5">
+                      <span>⚡</span> 1-Click Dispatch
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Right Column: Switch to Crane + Shop -->
+          <div class="space-y-4">
+            <div class="border-2 border-wire-800 dark:border-wire-300 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-3 text-xs">
+              <div class="flex items-center gap-2 font-mono font-bold text-sm">
+                <span>🏗️</span>
+                <span>SWITCH TO CRANE + SHOP</span>
+              </div>
+              <p class="text-wire-600 dark:text-wire-400 leading-relaxed">
+                If the vehicle cannot be fixed roadside due to heavy damage or mechanical seizure, tow it directly to a verified workshop.
+              </p>
+              <div class="p-3 bg-wire-100 dark:bg-wire-800 rounded font-mono text-[11px] space-y-1">
+                <div>• Flatbed Towing: <strong>₹800 base + ₹60/km</strong></div>
+                <div>• Destination: <strong>Nearest Verified Workshop (3.8 km)</strong></div>
+              </div>
+              <button onclick="showPage('p13-crane-request')" class="w-full py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold uppercase tracking-wider text-xs">
+                Try Crane + Shop ➔
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 10: MECHANIC PROFILE & PRICE LIST -->
+      <!-- ========================================================================= -->
+      <section id="p10-profile-mechanic" class="page-view hidden flex-col flex-1 p-4 md:p-8 space-y-6">
+        <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-5 bg-white dark:bg-wire-850 flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
+          <div class="flex items-start sm:items-center gap-4">
+            <div class="w-16 h-16 wireframe-box wireframe-cross rounded-xl flex items-center justify-center font-mono text-sm">
+              [ 👤 ]
+            </div>
+            <div class="space-y-1">
+              <div class="flex items-center gap-2">
+                <h2 class="text-lg font-bold">Workshop name #1</h2>
+                <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 text-[10px] font-bold rounded">● Available</span>
+                <span class="px-2 py-0.5 bg-wire-200 dark:bg-wire-700 text-wire-800 dark:text-wire-200 text-[10px] font-mono rounded">✓ Verified</span>
+              </div>
+              <p class="text-xs text-wire-500">Mobile service van & workshop facility • Working hours: 8:00 AM - 8:00 PM</p>
+              <div class="flex items-center gap-3 text-xs">
+                <span class="font-bold text-amber-600">★ 4.8 / 5.0 (142 Reviews)</span>
+                <span>•</span>
+                <span>📍 1.8 km away</span>
+                <span>•</span>
+                <span>Service radius: 15 km</span>
+              </div>
+            </div>
+          </div>
+          <button onclick="showPage('p11-booking-flow')" class="w-full md:w-auto px-5 py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs uppercase tracking-wider">
+            Book Mechanic ➔
+          </button>
+        </div>
+
+        <!-- Transparent Price List Table -->
+        <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-4">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="font-bold text-sm">Parts and Labor Price List</h3>
+              <p class="text-xs text-wire-500">Visit charge: ₹150 • Standard labor rate: ₹300 / hr</p>
+            </div>
+          </div>
+
+          <div class="overflow-x-auto">
+            <table class="w-full text-xs text-left">
+              <thead class="border-b border-wire-200 dark:border-wire-700 font-mono text-wire-500 uppercase text-[11px]">
+                <tr>
+                  <th class="py-2.5">Service</th>
+                  <th class="py-2.5">Labor Charge</th>
+                  <th class="py-2.5">Part Price Range</th>
+                  <th class="py-2.5">Est. Time</th>
+                  <th class="py-2.5 text-right">Action</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-wire-200 dark:divide-wire-700">
+                <tr>
+                  <td class="py-3 font-medium">Oil Change & Filter</td>
+                  <td class="py-3 font-mono">₹250</td>
+                  <td class="py-3 font-mono">₹1,400 - ₹2,000</td>
+                  <td class="py-3">30 mins</td>
+                  <td class="py-3 text-right"><button onclick="showPage('p11-booking-flow')" class="px-2.5 py-1 border border-wire-400 rounded text-[11px]">+ Add</button></td>
+                </tr>
+                <tr>
+                  <td class="py-3 font-medium">Brake Pads Replacement</td>
+                  <td class="py-3 font-mono">₹350</td>
+                  <td class="py-3 font-mono">₹850 - ₹1,400</td>
+                  <td class="py-3">45 mins</td>
+                  <td class="py-3 text-right"><button onclick="showPage('p11-booking-flow')" class="px-2.5 py-1 border border-wire-400 rounded text-[11px]">+ Add</button></td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 11: BOOKING FLOW (STEP 1: CHOOSE VEHICLE INSIDE PAGE CONTENT) -->
+      <!-- ========================================================================= -->
+      <section id="p11-booking-flow" class="page-view hidden flex-col flex-1 p-4 md:p-8 space-y-6">
+        <div class="border-b border-wire-300 dark:border-wire-700 pb-4">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-3">
+            <h2 class="text-xl font-bold">Book Service</h2>
+            <span class="font-mono text-xs text-wire-500">Step 1 of 4: Choose Vehicle & Mode</span>
+          </div>
+
+          <div class="grid grid-cols-4 gap-2 text-center text-xs font-mono">
+            <button onclick="setBookingStep(1)" id="step-tab-1" class="py-2 border-b-2 border-wire-900 dark:border-white font-bold text-wire-900 dark:text-white">1. Vehicle & Mode</button>
+            <button onclick="setBookingStep(2)" id="step-tab-2" class="py-2 border-b-2 border-wire-200 dark:border-wire-800 text-wire-400">2. Checklist & Urgency</button>
+            <button onclick="setBookingStep(3)" id="step-tab-3" class="py-2 border-b-2 border-wire-200 dark:border-wire-800 text-wire-400">3. Review</button>
+            <button onclick="setBookingStep(4)" id="step-tab-4" class="py-2 border-b-2 border-wire-200 dark:border-wire-800 text-wire-400">4. Confirmation</button>
+          </div>
+        </div>
+
+        <!-- Step 1: Choose Vehicle & Mode inside page content -->
+        <div id="booking-step-1" class="space-y-5">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <!-- Choose Vehicle Inside Page Content -->
+            <div class="border border-wire-300 dark:border-wire-700 p-5 rounded-xl space-y-3 bg-white dark:bg-wire-850 text-xs">
+              <h3 class="font-bold text-sm">Select Vehicle for Service</h3>
+              <div class="space-y-2">
+                <label class="border-2 border-wire-900 dark:border-white p-3 rounded-lg flex items-center justify-between cursor-pointer bg-wire-50 dark:bg-wire-800">
+                  <div class="flex items-center gap-3">
+                    <input type="radio" name="b-veh" checked />
+                    <div>
+                      <div class="font-bold">Vehicle 1 (Car Model)</div>
+                      <div class="text-wire-500 text-[11px]">45,210 km • Sedan</div>
+                    </div>
+                  </div>
+                  <span class="px-2 py-0.5 bg-wire-900 text-white text-[10px] rounded">Primary</span>
+                </label>
+                <label class="border border-wire-300 dark:border-wire-700 p-3 rounded-lg flex items-center justify-between cursor-pointer">
+                  <div class="flex items-center gap-3">
+                    <input type="radio" name="b-veh" />
+                    <div>
+                      <div class="font-bold">Vehicle 2 (Bike Model)</div>
+                      <div class="text-wire-500 text-[11px]">11,400 km • Two-Wheeler</div>
+                    </div>
+                  </div>
+                </label>
+              </div>
+            </div>
+
+            <!-- Choose Mode -->
+            <div class="border border-wire-300 dark:border-wire-700 p-5 rounded-xl space-y-3 bg-white dark:bg-wire-850 text-xs">
+              <h3 class="font-bold text-sm">Choose Delivery Mode</h3>
+              <div class="space-y-2">
+                <label class="border-2 border-wire-900 dark:border-white p-3.5 rounded-lg flex items-start gap-3 cursor-pointer bg-wire-50 dark:bg-wire-800">
+                  <input type="radio" name="b-mode" checked class="mt-1" />
+                  <div>
+                    <div class="font-bold">🚐 Onsite Service (Mechanic comes to me)</div>
+                    <p class="text-wire-500 text-[11px] mt-0.5">Visit charge: ₹150 + km fee. Technician arrives at your location.</p>
+                  </div>
+                </label>
+                <label class="border border-wire-300 dark:border-wire-700 p-3.5 rounded-lg flex items-start gap-3 cursor-pointer">
+                  <input type="radio" name="b-mode" class="mt-1" />
+                  <div>
+                    <div class="font-bold">🏢 Offsite (I will visit the workshop)</div>
+                    <p class="text-wire-500 text-[11px] mt-0.5">No visit charge. Bring vehicle directly to workshop garage.</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+
+          <div class="flex justify-end">
+            <button onclick="setBookingStep(2)" class="px-6 py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs uppercase tracking-wider">
+              Continue to Step 2: Checklist ➔
+            </button>
+          </div>
+        </div>
+
+        <!-- Step 2 -->
+        <div id="booking-step-2" class="hidden space-y-6">
+          <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+            <div class="lg:col-span-8 space-y-5 text-xs">
+              <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-4">
+                <h3 class="font-bold text-sm">Service Checklist & Quick Chips</h3>
+                
+                <div class="flex items-center border border-wire-300 dark:border-wire-600 rounded-lg px-3 py-2">
+                  <span class="mr-2">🔍</span>
+                  <input type="text" placeholder="Search service or issue..." class="w-full bg-transparent focus:outline-none" />
+                </div>
+
+                <div>
+                  <div class="text-[11px] font-mono uppercase text-wire-400 mb-2">Quick Chips:</div>
+                  <div class="flex flex-wrap gap-2">
+                    <button class="px-3 py-1.5 border-2 border-wire-900 dark:border-white bg-wire-100 dark:bg-wire-800 rounded-full font-bold">✓ Oil change (₹450)</button>
+                    <button class="px-3 py-1.5 border-2 border-wire-900 dark:border-white bg-wire-100 dark:bg-wire-800 rounded-full font-bold">✓ Brake pads (₹650)</button>
+                    <button class="px-3 py-1.5 border border-wire-300 dark:border-wire-600 rounded-full">+ Chain lubrication (₹150)</button>
+                    <button class="px-3 py-1.5 border border-wire-300 dark:border-wire-600 rounded-full">+ Tyre puncture (₹120)</button>
+                    <button class="px-3 py-1.5 border border-wire-300 dark:border-wire-600 rounded-full">+ Battery jumpstart (₹200)</button>
+                  </div>
+                </div>
+
+                <!-- Custom Issue Box -->
+                <div class="p-4 border border-dashed border-wire-400 dark:border-wire-600 rounded-lg bg-wire-50 dark:bg-wire-800/50 space-y-3">
+                  <div class="font-bold text-xs">Add custom issue:</div>
+                  <textarea rows="2" placeholder="Describe symptoms in text..." class="w-full border border-wire-300 dark:border-wire-600 rounded p-2 text-xs bg-white dark:bg-wire-850"></textarea>
+                  <div class="flex gap-2 text-xs">
+                    <button class="px-3 py-1.5 border border-wire-300 dark:border-wire-600 rounded bg-white dark:bg-wire-800 flex items-center gap-1.5">📷 Add Photo</button>
+                    <button class="px-3 py-1.5 border border-wire-300 dark:border-wire-600 rounded bg-white dark:bg-wire-800 flex items-center gap-1.5">🎙️ Voice Note</button>
+                  </div>
+                </div>
+              </div>
+
+              <!-- Urgency Selector -->
+              <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-3">
+                <h3 class="font-bold text-sm">Urgency Selector</h3>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+                  <label class="border-2 border-red-500 p-3 rounded-lg cursor-pointer bg-red-50 dark:bg-red-950/40">
+                    <input type="radio" name="urgency" checked class="sr-only" />
+                    <div class="font-bold text-red-700 dark:text-red-400">🚨 Emergency (Immediate)</div>
+                    <div class="text-[11px] text-wire-500 mt-0.5">Next 15-25 mins</div>
+                  </label>
+                  <label class="border border-wire-300 dark:border-wire-700 p-3 rounded-lg cursor-pointer">
+                    <input type="radio" name="urgency" class="sr-only" />
+                    <div class="font-bold">⚡ Today</div>
+                    <div class="text-[11px] text-wire-500 mt-0.5">Select time slot</div>
+                  </label>
+                  <label class="border border-wire-300 dark:border-wire-700 p-3 rounded-lg cursor-pointer">
+                    <input type="radio" name="urgency" class="sr-only" />
+                    <div class="font-bold">📅 Later</div>
+                    <div class="text-[11px] text-wire-500 mt-0.5">Pick future date</div>
+                  </label>
+                </div>
+              </div>
+            </div>
+
+            <!-- Right: Live Cost Estimate -->
+            <div class="lg:col-span-4 space-y-4 text-xs">
+              <div class="border-2 border-wire-900 dark:border-wire-300 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-4">
+                <div class="flex items-center justify-between border-b border-wire-200 dark:border-wire-700 pb-3">
+                  <h3 class="font-bold text-sm">Live Cost Estimate</h3>
+                  <span class="font-mono text-emerald-600 font-bold">Transparent</span>
+                </div>
+
+                <div class="space-y-2">
+                  <div class="text-[11px] font-mono uppercase text-wire-400">Selected Items (removable):</div>
+                  <div class="p-2 border border-wire-200 dark:border-wire-700 rounded flex justify-between items-center">
+                    <span>Oil change (Labor + Part)</span>
+                    <div class="flex items-center gap-1 font-mono"><span>₹450</span><button class="text-wire-400 hover:text-red-500">✕</button></div>
+                  </div>
+                  <div class="p-2 border border-wire-200 dark:border-wire-700 rounded flex justify-between items-center">
+                    <span>Brake pads</span>
+                    <div class="flex items-center gap-1 font-mono"><span>₹650</span><button class="text-wire-400 hover:text-red-500">✕</button></div>
+                  </div>
+                </div>
+
+                <div class="space-y-2 pt-2 border-t border-wire-200 dark:border-wire-700 text-wire-600 dark:text-wire-400">
+                  <div class="flex justify-between"><span>Onsite visit charge:</span><span class="font-mono">₹150</span></div>
+                  <div class="flex justify-between"><span>Km charge (1.8 km):</span><span class="font-mono">₹30</span></div>
+                  <div class="flex justify-between"><span>Service cost:</span><span class="font-mono">₹1,100</span></div>
+                  <div class="flex justify-between font-bold text-wire-900 dark:text-white pt-2 border-t border-wire-300 text-sm">
+                    <span>Estimated Total:</span>
+                    <span class="font-mono">₹1,280</span>
+                  </div>
+                </div>
+
+                <div class="flex gap-2">
+                  <button onclick="setBookingStep(1)" class="w-1/3 py-2.5 border border-wire-400 rounded font-medium">Back</button>
+                  <button onclick="setBookingStep(3)" class="w-2/3 py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold uppercase tracking-wider">
+                    Review ➔
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 3: Review -->
+        <div id="booking-step-3" class="hidden space-y-6 max-w-2xl mx-auto text-xs">
+          <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-6 bg-white dark:bg-wire-850 space-y-4">
+            <h3 class="font-bold text-base">Step 3: Review Summary</h3>
+            <div class="grid grid-cols-2 gap-3 p-3 bg-wire-50 dark:bg-wire-800 rounded">
+              <div><span class="text-wire-400 text-[10px]">Vehicle</span><div class="font-bold">Vehicle 1 (Car Model)</div></div>
+              <div><span class="text-wire-400 text-[10px]">Mode</span><div class="font-bold">🚐 Onsite Service</div></div>
+              <div><span class="text-wire-400 text-[10px]">Mechanic</span><div class="font-bold">Workshop name #1</div></div>
+              <div><span class="text-wire-400 text-[10px]">Total Est.</span><div class="font-bold font-mono">₹1,280</div></div>
+            </div>
+            <div class="flex gap-2 pt-2">
+              <button onclick="setBookingStep(2)" class="w-1/3 py-2 border border-wire-400 rounded">Edit</button>
+              <button onclick="setBookingStep(4)" class="w-2/3 py-2 bg-emerald-600 text-white rounded font-bold uppercase">Confirm Booking ➔</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Step 4: Confirmation -->
+        <div id="booking-step-4" class="hidden space-y-4 max-w-md mx-auto text-center text-xs">
+          <div class="border border-emerald-500 rounded-xl p-8 bg-white dark:bg-wire-850 space-y-3">
+            <div class="w-12 h-12 bg-emerald-100 text-emerald-700 rounded-full flex items-center justify-center text-2xl font-bold mx-auto">✓</div>
+            <h2 class="text-lg font-bold">Booking Confirmed!</h2>
+            <div class="font-mono bg-wire-100 dark:bg-wire-800 p-2 rounded">Booking ID: #GU-8942</div>
+            <button onclick="showPage('p12-booking-status')" class="w-full py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold uppercase">
+              Track Booking Status ➔
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 12: BOOKING STATUS (ONSITE 6 STAGES & OFFSITE 5 STAGES) -->
+      <!-- ========================================================================= -->
+      <section id="p12-booking-status" class="page-view hidden flex-col flex-1 p-4 md:p-8 space-y-6">
+        <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-850 flex flex-col md:flex-row items-start md:items-center justify-between gap-3 text-xs">
+          <div>
+            <div class="flex items-center gap-2">
+              <span class="font-mono font-bold text-base">Booking #GU-8942</span>
+              <span class="px-2 py-0.5 bg-emerald-100 text-emerald-800 font-bold rounded text-[10px]">● Active</span>
+            </div>
+            <div class="text-wire-500">Vehicle 1 • Onsite Service • Estimated Arrival: <strong>12 mins</strong></div>
+          </div>
+          <div class="p-2 border border-wire-300 dark:border-wire-700 rounded bg-wire-50 dark:bg-wire-800 text-[11px]">
+            ⏱️ Auto-forwarding to next nearest mechanic if unreplied in 01:45
+          </div>
+        </div>
+
+        <!-- Onsite Flow (6 stages) & Offsite Flow (5 stages) Comparison -->
+        <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-850 space-y-4 text-xs">
+          <div>
+            <div class="font-mono font-bold uppercase text-wire-500 text-[11px] mb-1">Onsite Flow (6 Stages):</div>
+            <div class="grid grid-cols-6 gap-1 text-center font-medium">
+              <div class="p-2 border-b-4 border-emerald-600 font-bold">1. Requested ✓</div>
+              <div class="p-2 border-b-4 border-emerald-600 font-bold">2. Accepted ✓</div>
+              <div class="p-2 border-b-4 border-emerald-600 bg-emerald-50 dark:bg-emerald-950 font-bold text-emerald-700">3. On the way 🚐</div>
+              <div class="p-2 border-b-4 border-wire-200 dark:border-wire-700 text-wire-400">4. Arrived</div>
+              <div class="p-2 border-b-4 border-wire-200 dark:border-wire-700 text-wire-400">5. In service</div>
+              <div class="p-2 border-b-4 border-wire-200 dark:border-wire-700 text-wire-400">6. Completed</div>
+            </div>
+          </div>
+
+          <div class="pt-2 border-t border-wire-200 dark:border-wire-700">
+            <div class="font-mono font-bold uppercase text-wire-400 text-[11px] mb-1">Offsite Flow (5 Stages):</div>
+            <div class="grid grid-cols-5 gap-1 text-center font-medium text-wire-400">
+              <div class="p-1.5 border-b-2 border-wire-300">1. Requested</div>
+              <div class="p-1.5 border-b-2 border-wire-300">2. Accepted</div>
+              <div class="p-1.5 border-b-2 border-wire-300">3. Vehicle received</div>
+              <div class="p-1.5 border-b-2 border-wire-300">4. In service</div>
+              <div class="p-1.5 border-b-2 border-wire-300">5. Completed</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6">
+          <div class="lg:col-span-7 border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-wire-100 dark:bg-wire-850 min-h-[300px] relative overflow-hidden flex flex-col justify-between">
+            <div class="absolute inset-0 wireframe-box wireframe-cross pointer-events-none"></div>
+            <div class="relative z-10 bg-white/95 dark:bg-wire-900/95 border border-wire-300 p-3 rounded-lg max-w-xs text-xs space-y-1 shadow">
+              <div class="font-bold flex justify-between"><span>Mechanic Mobile Van</span><span class="font-mono text-emerald-600">ETA 12m</span></div>
+              <div class="text-[11px] text-wire-500">1.4 km away on Service Road</div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 space-y-4 text-xs">
+            <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-850 space-y-3">
+              <div class="flex items-center gap-3">
+                <div class="w-12 h-12 wireframe-box rounded-full flex items-center justify-center font-bold">[ 👤 ]</div>
+                <div>
+                  <h4 class="font-bold text-sm">Workshop name #1</h4>
+                  <div class="text-wire-500 text-[11px]">Mechanic name: Technician #1</div>
+                </div>
+              </div>
+              <div class="grid grid-cols-2 gap-2 pt-2 border-t border-wire-200">
+                <button class="py-2 border border-wire-400 rounded font-bold">📞 Call</button>
+                <button class="py-2 border border-wire-400 rounded font-bold">💬 Chat</button>
+              </div>
+              <button class="w-full py-1.5 text-red-600 underline text-center">Cancel Booking</button>
+            </div>
+
+            <!-- Approve or Reject Extra Issues -->
+            <div class="border-2 border-amber-500 bg-amber-50 dark:bg-amber-950/30 rounded-xl p-4 space-y-3">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-amber-800 dark:text-amber-300">⚠️ Extra Issue Found:</span>
+                <span class="text-[10px] font-mono bg-amber-200 dark:bg-amber-900 px-1.5 py-0.5 rounded">Action</span>
+              </div>
+              <p class="text-wire-600 dark:text-wire-300 text-[11px]">
+                Mechanic found: <strong>Front Left Brake Disc Rotor heavily scored</strong>. Photo attached.
+              </p>
+              <div class="p-2 bg-white dark:bg-wire-800 border border-wire-300 rounded flex justify-between font-mono">
+                <span>Rotor replacement part:</span>
+                <strong>₹1,200</strong>
+              </div>
+              <div class="flex gap-2">
+                <button class="w-1/2 py-1.5 bg-emerald-600 text-white rounded font-bold">✓ Approve</button>
+                <button class="w-1/2 py-1.5 border border-wire-400 rounded font-medium">✕ Reject</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 13: CRANE REQUEST -->
+      <!-- ========================================================================= -->
+      <section id="p13-crane-request" class="page-view hidden flex-col flex-1 p-4 md:p-8 space-y-6">
+        <div class="border-b border-wire-300 dark:border-wire-700 pb-3">
+          <h2 class="text-xl font-bold">Crane Request & Towing</h2>
+          <p class="text-xs text-wire-500">Flatbed recovery for heavy breakdowns or non-drivable vehicles.</p>
+        </div>
+
+        <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 text-xs">
+          <div class="lg:col-span-7 border border-wire-300 dark:border-wire-700 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-4">
+            <div>
+              <label class="block font-medium mb-1">Pickup Location</label>
+              <input type="text" value="Highway NH-66 (Auto-detected GPS)" class="w-full border border-wire-300 rounded p-2 bg-transparent" />
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Drop Location (Default: Best nearby mechanic)</label>
+              <select class="w-full border border-wire-300 rounded p-2 bg-transparent">
+                <option>⭐ Recommended: Workshop name #1 (3.8 km away)</option>
+                <option>Workshop name #2 (5.1 km away)</option>
+                <option>Custom Address</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-medium mb-1">Vehicle Type</label>
+              <div class="grid grid-cols-3 gap-2">
+                <button class="border border-wire-300 py-2 rounded">🛵 Two-Wheeler</button>
+                <button class="border-2 border-wire-900 dark:border-white py-2 rounded font-bold">🚗 Sedan / Hatchback</button>
+                <button class="border border-wire-300 py-2 rounded">🚙 SUV / Van</button>
+              </div>
+            </div>
+          </div>
+
+          <div class="lg:col-span-5 border-2 border-wire-900 dark:border-wire-300 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-4">
+            <h3 class="font-bold text-sm">Fare Estimate (Base + Per km)</h3>
+            <div class="space-y-2 text-wire-600 dark:text-wire-400">
+              <div class="flex justify-between"><span>Base recovery fare:</span><span class="font-mono">₹800</span></div>
+              <div class="flex justify-between"><span>Per km fare (3.8 km @ ₹60/km):</span><span class="font-mono">₹228</span></div>
+              <div class="flex justify-between font-bold text-wire-900 dark:text-white pt-2 border-t border-wire-300 text-sm">
+                <span>Total Fare:</span>
+                <span class="font-mono">₹1,028</span>
+              </div>
+            </div>
+            <button onclick="showPage('p12-booking-status')" class="w-full py-2.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold uppercase">
+              Request Crane & Track ➔
+            </button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 14: SERVICE HISTORY (VEHICLE SELECTOR AT TOP OF CONTENT) -->
+      <!-- ========================================================================= -->
+      <section id="p14-service-history" class="page-view hidden flex-col flex-1 p-4 md:p-8 space-y-6">
+        <!-- Vehicle Selector at top of content -->
+        <div class="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 border-b border-wire-300 dark:border-wire-700 pb-4">
+          <div>
+            <div class="flex items-center gap-2">
+              <h2 class="text-xl font-bold">Service History</h2>
+              <!-- Vehicle selector dropdown in page content -->
+              <select class="border border-wire-300 dark:border-wire-600 rounded px-2.5 py-1 text-xs bg-white dark:bg-wire-800 font-bold">
+                <option>🚗 Vehicle 1 (Car Model)</option>
+                <option>🛵 Vehicle 2 (Bike Model)</option>
+              </select>
+            </div>
+            <p class="text-xs text-wire-500 mt-1">Itemized service audit trail, parts ledger, and km-based upcoming services.</p>
+          </div>
+          <div class="flex gap-2 text-xs">
+            <button onclick="alert('Wireframe Note: Exporting full vehicle logbook PDF.')" class="px-3 py-1.5 border border-wire-400 rounded flex items-center gap-1">
+              <span>📄</span> Export Full History
+            </button>
+            <button onclick="window.print()" class="px-3 py-1.5 border border-wire-400 rounded flex items-center gap-1">
+              <span>🖨️</span> Print
+            </button>
+          </div>
+        </div>
+
+        <!-- 4 Summary Cards -->
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 text-xs">
+          <div class="p-3.5 border border-wire-300 dark:border-wire-700 rounded-xl bg-white dark:bg-wire-850 space-y-1">
+            <span class="text-wire-400 font-mono uppercase text-[10px]">Total Services</span>
+            <div class="text-lg font-bold">8 Services</div>
+            <div class="text-[11px] text-wire-500">Over 24 months</div>
+          </div>
+          <div class="p-3.5 border border-wire-300 dark:border-wire-700 rounded-xl bg-white dark:bg-wire-850 space-y-1">
+            <span class="text-wire-400 font-mono uppercase text-[10px]">Total Spent</span>
+            <div class="text-lg font-bold font-mono">₹14,850</div>
+            <div class="text-[11px] text-wire-500">Labor + OEM Parts</div>
+          </div>
+          <div class="p-3.5 border border-wire-300 dark:border-wire-700 rounded-xl bg-white dark:bg-wire-850 space-y-1">
+            <span class="text-wire-400 font-mono uppercase text-[10px]">Last Service Date</span>
+            <div class="text-lg font-bold">24 Aug 2026</div>
+            <div class="text-[11px] text-wire-500">Workshop name #1</div>
+          </div>
+          <div class="p-3.5 border border-wire-300 dark:border-wire-700 rounded-xl bg-white dark:bg-wire-850 space-y-1">
+            <span class="text-wire-400 font-mono uppercase text-[10px]">Current km</span>
+            <div class="text-lg font-bold font-mono">45,210 km</div>
+            <div class="text-[11px] text-emerald-600 font-bold">Updated today</div>
+          </div>
+        </div>
+
+        <!-- Next-Service Section (due in km format with Book button) -->
+        <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-3 text-xs">
+          <div class="flex items-center justify-between">
+            <span class="font-mono font-bold uppercase text-wire-500 text-[11px]">Upcoming Next-Service Predictions (Due in km)</span>
+            <span class="text-wire-400">Current odometer: 45,210 km</span>
+          </div>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-3">
+            <div class="p-3 border-2 border-amber-500 rounded-lg bg-amber-50/40 dark:bg-amber-950/20 flex flex-col justify-between">
+              <div>
+                <div class="font-bold text-amber-800 dark:text-amber-300">Oil change & filter</div>
+                <div class="text-[11px] text-wire-600 dark:text-wire-400 mt-0.5">due in <strong>250 km</strong> (Due soon)</div>
+              </div>
+              <button onclick="showPage('p11-booking-flow')" class="mt-2.5 px-3 py-1 bg-amber-600 text-white rounded font-bold text-[11px] text-center">
+                Book Service
+              </button>
+            </div>
+            <div class="p-3 border border-wire-300 dark:border-wire-700 rounded-lg flex flex-col justify-between">
+              <div>
+                <div class="font-bold">Brake pads inspection</div>
+                <div class="text-[11px] text-wire-500 mt-0.5">due in <strong>4,200 km</strong> (OK)</div>
+              </div>
+              <button onclick="showPage('p11-booking-flow')" class="mt-2.5 px-3 py-1 border border-wire-400 rounded text-[11px] text-center">
+                Book Ahead
+              </button>
+            </div>
+            <div class="p-3 border border-wire-300 dark:border-wire-700 rounded-lg flex flex-col justify-between">
+              <div>
+                <div class="font-bold">Coolant replacement</div>
+                <div class="text-[11px] text-wire-500 mt-0.5">due in <strong>9,500 km</strong> (OK)</div>
+              </div>
+              <button onclick="showPage('p11-booking-flow')" class="mt-2.5 px-3 py-1 border border-wire-400 rounded text-[11px] text-center">
+                Schedule
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <!-- Filter Bar -->
+        <div class="p-3.5 border border-wire-300 dark:border-wire-700 rounded-xl bg-wire-50 dark:bg-wire-850 flex flex-wrap gap-2 text-xs">
+          <input type="text" placeholder="Search service, invoice #, part..." class="border border-wire-300 dark:border-wire-600 rounded px-2.5 py-1.5 bg-white dark:bg-wire-800 flex-1 min-w-[160px]" />
+          <select class="border border-wire-300 dark:border-wire-600 rounded px-2 py-1.5 bg-white dark:bg-wire-800"><option>Date: All time</option><option>Last 6 months</option><option>2026</option></select>
+          <select class="border border-wire-300 dark:border-wire-600 rounded px-2 py-1.5 bg-white dark:bg-wire-800"><option>Service: All types</option><option>Oil Change</option><option>Brakes</option><option>Emergency</option></select>
+          <select class="border border-wire-300 dark:border-wire-600 rounded px-2 py-1.5 bg-white dark:bg-wire-800"><option>Mode: Onsite & Offsite</option><option>Onsite only</option><option>Offsite only</option></select>
+          <select class="border border-wire-300 dark:border-wire-600 rounded px-2 py-1.5 bg-white dark:bg-wire-800"><option>Mechanic: All workshops</option><option>Workshop name #1</option><option>Workshop name #2</option></select>
+        </div>
+
+        <!-- Timeline Grouped by Month -->
+        <div class="space-y-6 text-xs">
+          <div class="space-y-3">
+            <div class="font-mono font-bold text-xs uppercase text-wire-500 border-b border-wire-300 dark:border-wire-700 pb-1">
+              August 2026
+            </div>
+
+            <!-- Card: EXPANDED ENTRY -->
+            <div class="border-2 border-wire-900 dark:border-wire-300 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-4 shadow-sm">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-3">
+                  <span class="font-mono font-bold text-sm">24 Aug 2026</span>
+                  <span class="px-2 py-0.5 border border-wire-400 rounded text-[10px] uppercase font-bold">🚐 Onsite</span>
+                  <span class="font-bold">Workshop name #1</span>
+                </div>
+                <div class="flex items-center gap-3 font-mono">
+                  <span>Odometer: <strong>40,120 km</strong></span>
+                  <span class="text-sm font-bold">Total: ₹2,450</span>
+                  <button class="text-wire-500 underline text-[11px]">Collapse ▲</button>
+                </div>
+              </div>
+
+              <!-- Expanded Details -->
+              <div class="pt-3 border-t border-wire-200 dark:border-wire-700 space-y-3 text-wire-600 dark:text-wire-300">
+                <div>
+                  <span class="font-bold text-wire-900 dark:text-white">Checklist items done:</span>
+                  <div class="flex gap-2 mt-1">
+                    <span class="px-2 py-0.5 bg-wire-100 dark:bg-wire-800 rounded text-[11px]">✓ Full Synthetic Oil Flush</span>
+                    <span class="px-2 py-0.5 bg-wire-100 dark:bg-wire-800 rounded text-[11px]">✓ Oil Filter Replacement</span>
+                    <span class="px-2 py-0.5 bg-wire-100 dark:bg-wire-800 rounded text-[11px]">✓ Multi-point Inspection</span>
+                  </div>
+                </div>
+
+                <div class="border border-wire-200 dark:border-wire-700 rounded p-2.5 bg-wire-50 dark:bg-wire-800/40">
+                  <div class="font-bold text-[11px] mb-1 text-wire-900 dark:text-white">Parts used with unit price:</div>
+                  <div class="space-y-1 font-mono text-[11px]">
+                    <div class="flex justify-between"><span>• Synthetic Oil 5W-30 (3.5L @ ₹450/L):</span><span>₹1,575</span></div>
+                    <div class="flex justify-between"><span>• OEM Oil Filter #FL-102:</span><span>₹325</span></div>
+                  </div>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2 font-mono text-[11px] p-2 bg-wire-100 dark:bg-wire-800 rounded">
+                  <div>Labor cost: <strong>₹400</strong></div>
+                  <div>Visit charge (Onsite): <strong>₹150</strong></div>
+                  <div>Crane fare: <strong>₹0 (None)</strong></div>
+                  <div>Total Billed: <strong>₹2,450</strong></div>
+                </div>
+
+                <div>
+                  <span class="font-bold text-wire-900 dark:text-white">Notes from mechanic:</span>
+                  <p class="text-[11px] italic">"Engine drained cleanly. Front brake pads are worn to ~4mm; plan replacement at next 45,000 km service."</p>
+                </div>
+
+                <div>
+                  <span class="font-bold text-wire-900 dark:text-white">Extra issues found & status:</span>
+                  <div class="text-[11px] flex items-center gap-1.5 mt-0.5">
+                    <span class="px-1.5 py-0.2 bg-emerald-100 text-emerald-800 rounded text-[10px] font-bold">Approved</span>
+                    <span>Minor battery terminal oxidation cleaned during visit (No extra charge).</span>
+                  </div>
+                </div>
+
+                <div class="flex items-center gap-2">
+                  <span class="font-bold text-wire-900 dark:text-white">Rating given:</span>
+                  <span class="text-amber-500 font-bold">★★★★★</span>
+                  <span class="text-[11px]">"Prompt arrival and clear explanations."</span>
+                </div>
+
+                <div class="flex gap-2 pt-2 border-t border-wire-200 dark:border-wire-700">
+                  <button class="px-3 py-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs">
+                    📄 Download Invoice
+                  </button>
+                  <button onclick="showPage('p11-booking-flow')" class="px-3 py-1.5 border border-wire-400 rounded font-bold text-xs">
+                    🔄 Book Again
+                  </button>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- February 2026 (Collapsed Card) -->
+          <div class="space-y-3">
+            <div class="font-mono font-bold text-xs uppercase text-wire-500 border-b border-wire-300 dark:border-wire-700 pb-1">
+              February 2026
+            </div>
+            <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-850 hover:border-wire-500 cursor-pointer">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-3">
+                  <span class="font-mono font-bold text-sm">12 Feb 2026</span>
+                  <span class="px-2 py-0.5 border border-wire-400 rounded text-[10px] uppercase font-bold">🏢 Offsite</span>
+                  <span class="font-bold">Workshop name #2</span>
+                </div>
+                <div class="flex items-center gap-3 font-mono">
+                  <span>Odometer: <strong>35,400 km</strong></span>
+                  <span class="text-sm font-bold">Total: ₹1,850</span>
+                  <button class="text-wire-500 underline text-[11px]">Expand ▼</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Empty State Preview -->
+        <div class="border border-dashed border-wire-400 rounded-xl p-6 text-center space-y-2">
+          <div class="text-2xl">📋</div>
+          <div class="font-bold text-xs">Empty State Example (For New Vehicles)</div>
+          <p class="text-wire-500 text-[11px]">"No services yet. Book your first service."</p>
+          <button onclick="showPage('p11-booking-flow')" class="px-4 py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs">
+            Book First Service
+          </button>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 15: RATE AND REVIEW (POST-SERVICE) -->
+      <!-- ========================================================================= -->
+      <section id="p15-rate-review" class="page-view hidden flex-col flex-1 p-6 md:p-12 items-center justify-center">
+        <div class="w-full max-w-md border border-wire-300 dark:border-wire-700 rounded-xl p-6 sm:p-8 bg-white dark:bg-wire-850 shadow-md space-y-5 text-center text-xs">
+          <h2 class="text-lg font-bold">Rate and Review</h2>
+          <p class="text-wire-500">Only accessible after a completed service. Quick stars + tags.</p>
+          <div class="p-3 bg-wire-50 dark:bg-wire-800 rounded">
+            <strong>Workshop name #1</strong> • Booking #GU-8942
+          </div>
+          <div class="flex justify-center gap-2 text-3xl cursor-pointer text-amber-500">
+            <span>★</span><span>★</span><span>★</span><span>★</span><span>★</span>
+          </div>
+          <div class="flex flex-wrap gap-1.5 justify-center">
+            <button class="px-2.5 py-1 bg-wire-900 text-white rounded-full">⚡ Rapid Arrival</button>
+            <button class="px-2.5 py-1 bg-wire-900 text-white rounded-full">💰 Transparent Price</button>
+            <button class="px-2.5 py-1 border border-wire-300 rounded-full">🧼 Clean Work</button>
+          </div>
+          <textarea rows="2" placeholder="Write feedback..." class="w-full border border-wire-300 rounded p-2 bg-transparent"></textarea>
+          <button onclick="showPage('p6-dashboard')" class="w-full py-2 bg-wire-900 text-white rounded font-bold uppercase">
+            Submit Review
+          </button>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 16: NOTIFICATIONS -->
+      <!-- ========================================================================= -->
+      <section id="p16-notifications" class="page-view hidden flex-col flex-1 p-4 md:p-8 space-y-6">
+        <h2 class="text-xl font-bold border-b border-wire-300 pb-3">Notifications</h2>
+        <div class="border border-wire-300 rounded-xl bg-white dark:bg-wire-850 divide-y divide-wire-200 text-xs">
+          <div class="p-4 flex justify-between items-center bg-red-50/40">
+            <div>
+              <div class="font-bold">🚨 Booking Update: Technician en route (ETA 12 mins)</div>
+              <div class="text-wire-600">Booking #GU-8942 confirmed for Vehicle 1.</div>
+            </div>
+            <button onclick="showPage('p12-booking-status')" class="px-2.5 py-1 bg-wire-900 text-white rounded text-[11px]">Track</button>
+          </div>
+          <div class="p-4 flex justify-between items-center">
+            <div>
+              <div class="font-bold">⚠️ Maintenance Reminder: Oil change due in 250 km</div>
+              <div class="text-wire-600">Vehicle 1 interval approaching.</div>
+            </div>
+            <button onclick="showPage('p11-booking-flow')" class="px-2.5 py-1 border border-wire-400 rounded text-[11px]">Book</button>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- SCREEN 17: PROFILE AND SETTINGS (GENERIC CUSTOMER DATA) -->
+      <!-- ========================================================================= -->
+      <section id="p17-settings" class="page-view hidden flex-col flex-1 p-4 md:p-8 space-y-6">
+        <h2 class="text-xl font-bold border-b border-wire-300 pb-3">Profile and Settings</h2>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-xs">
+          <div class="border border-wire-300 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-3">
+            <h3 class="font-bold text-sm">Personal Details</h3>
+            <div>
+              <label class="block text-wire-500 mb-1">Your Name</label>
+              <input type="text" value="Customer Name" class="w-full border border-wire-300 rounded p-2 bg-transparent" />
+            </div>
+            <div>
+              <label class="block text-wire-500 mb-1">Phone Number</label>
+              <input type="tel" value="+91 90000 00000" class="w-full border border-wire-300 rounded p-2 bg-transparent" />
+            </div>
+            <div>
+              <label class="block text-wire-500 mb-1">Email</label>
+              <input type="email" value="customer@example.com" class="w-full border border-wire-300 rounded p-2 bg-transparent" />
+            </div>
+          </div>
+
+          <div class="border border-wire-300 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-3">
+            <h3 class="font-bold text-sm">Preferences</h3>
+            <div class="flex justify-between items-center">
+              <span>Language switch:</span>
+              <select class="border border-wire-300 rounded px-2 py-1 bg-transparent"><option>English</option><option>Regional</option></select>
+            </div>
+            <div class="flex justify-between items-center pt-2 border-t border-wire-200">
+              <span>Dark mode:</span>
+              <button onclick="toggleDarkMode()" class="px-3 py-1 border border-wire-400 rounded">Toggle</button>
+            </div>
+            <div class="pt-4 border-t border-wire-200">
+              <button onclick="logoutCustomer()" class="w-full py-2 border border-red-400 text-red-600 rounded font-bold">
+                Log Out
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- DESIGN SYSTEM: COMPONENT LIBRARY -->
+      <!-- ========================================================================= -->
+      <section id="p-components" class="page-view hidden flex-col flex-1 p-6 md:p-10 space-y-6">
+        <h2 class="text-2xl font-bold">Component Library (Wireframe Tokens)</h2>
+        <div class="border border-wire-300 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-3 text-xs">
+          <h3 class="font-bold text-sm font-mono uppercase">Status Badges (Icon + Text + Color)</h3>
+          <div class="flex flex-wrap gap-3">
+            <span class="px-3 py-1 rounded-full border border-emerald-500 bg-emerald-50 text-emerald-700 font-bold">● Available</span>
+            <span class="px-3 py-1 rounded-full border border-amber-500 bg-amber-50 text-amber-700 font-bold">■ Busy</span>
+            <span class="px-3 py-1 rounded-full border border-wire-400 bg-wire-100 text-wire-600 font-bold">○ Offline</span>
+            <span class="px-3 py-1 rounded-full border border-red-500 bg-red-100 text-red-700 font-bold animate-pulse">🚨 Emergency</span>
+          </div>
+        </div>
+
+        <div class="border border-wire-300 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-3 text-xs">
+          <h3 class="font-bold text-sm font-mono uppercase">Vehicle Health Status Labels</h3>
+          <div class="flex flex-wrap gap-3">
+            <span class="px-2.5 py-1 border border-emerald-500 text-emerald-700 font-bold rounded">✓ OK (Over 300 km)</span>
+            <span class="px-2.5 py-1 border border-amber-500 text-amber-700 font-bold rounded">⚠️ Due soon (Under 300 km)</span>
+            <span class="px-2.5 py-1 border border-red-500 text-red-700 font-bold rounded">🚨 Overdue</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- DESIGN SYSTEM: SITEMAP & FLOW DIAGRAM -->
+      <!-- ========================================================================= -->
+      <section id="p-sitemap" class="page-view hidden flex-col flex-1 p-6 md:p-10 space-y-6">
+        <h2 class="text-2xl font-bold">Sitemap & Emergency User Flow</h2>
+        <div class="border border-wire-300 rounded-xl p-5 bg-white dark:bg-wire-850 space-y-4 text-xs font-mono">
+          <div class="font-bold uppercase">Breakdown to Service Flow (&le; 3 Clicks):</div>
+          <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
+            <div class="p-3 border-2 border-red-500 rounded bg-red-50 text-red-700 font-bold text-center">1. Click [🚨 SOS]</div>
+            <div class="p-3 border border-wire-400 rounded text-center font-bold">2. Select Symptom</div>
+            <div class="p-3 border-2 border-emerald-500 rounded bg-emerald-50 text-emerald-700 font-bold text-center">3. Click [1-Click Dispatch]</div>
+            <div class="p-3 border border-wire-400 rounded text-center font-bold">4. History & Alert Saved</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ========================================================================= -->
+      <!-- FLOATING EMERGENCY BUTTON (HIDDEN ON LOGGED-OUT & ONBOARDING PAGES) -->
+      <!-- ========================================================================= -->
+      <div id="floating-sos-btn" class="fixed bottom-6 right-6 z-40">
+        <button onclick="showPage('p9-emergency')" class="px-4 py-3 bg-red-600 hover:bg-red-700 text-white rounded-full font-bold text-xs uppercase tracking-wider shadow-2xl flex items-center gap-2 border-2 border-white transition transform hover:scale-105 animate-emerg">
+          <span class="text-base">🚨</span>
+          <span class="hidden sm:inline">Emergency</span>
+        </button>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- JAVASCRIPT CONTROLLERS -->
+  <script>
+    let selectedFindMechMode = null; // Unselected by default!
+    let selectedVehicleType = null;   // None selected by default!
+
+    const loggedOutPages = ['p1-landing', 'p2-login', 'p3-signup', 'p4-forgot'];
+
+    function setViewport(size) {
+      const container = document.getElementById('viewport-container');
+      const btnDesktop = document.getElementById('vp-btn-desktop');
+      const btnTablet = document.getElementById('vp-btn-tablet');
+      const btnMobile = document.getElementById('vp-btn-mobile');
+
+      [btnDesktop, btnTablet, btnMobile].forEach(btn => {
+        btn.classList.remove('bg-white', 'dark:bg-wire-700', 'shadow-sm', 'text-wire-900', 'dark:text-white');
+        btn.classList.add('text-wire-600', 'dark:text-wire-400');
+      });
+
+      if (size === 'desktop') {
+        container.style.maxWidth = '1280px';
+        btnDesktop.classList.add('bg-white', 'dark:bg-wire-700', 'shadow-sm', 'text-wire-900', 'dark:text-white');
+      } else if (size === 'tablet') {
+        container.style.maxWidth = '768px';
+        btnTablet.classList.add('bg-white', 'dark:bg-wire-700', 'shadow-sm', 'text-wire-900', 'dark:text-white');
+      } else if (size === 'mobile') {
+        container.style.maxWidth = '390px';
+        btnMobile.classList.add('bg-white', 'dark:bg-wire-700', 'shadow-sm', 'text-wire-900', 'dark:text-white');
+      }
+    }
+
+    function showPage(pageId) {
+      const isLoggedOutPage = loggedOutPages.includes(pageId);
+      const isOnboardingPage = (pageId === 'p5-add-vehicle');
+
+      const loggedOutHeader = document.getElementById('logged-out-header');
+      const onboardingHeader = document.getElementById('onboarding-header');
+      const loggedInHeader = document.getElementById('logged-in-header');
+      const floatingSos = document.getElementById('floating-sos-btn');
+
+      // Top Bar Switching (No vehicle chip in ANY header!)
+      if (isLoggedOutPage) {
+        loggedOutHeader.classList.remove('hidden');
+        onboardingHeader.classList.add('hidden');
+        loggedInHeader.classList.add('hidden');
+        floatingSos.classList.add('hidden');
+      } else if (isOnboardingPage) {
+        // Minimal top bar with ONLY GearUp logo and 'Skip for now'. No menu, no bell, no SOS.
+        loggedOutHeader.classList.add('hidden');
+        onboardingHeader.classList.remove('hidden');
+        loggedInHeader.classList.add('hidden');
+        floatingSos.classList.add('hidden');
+      } else {
+        // Logged-in full navbar (WITHOUT vehicle chip) + floating SOS
+        loggedOutHeader.classList.add('hidden');
+        onboardingHeader.classList.add('hidden');
+        loggedInHeader.classList.remove('hidden');
+        floatingSos.classList.remove('hidden');
+      }
+
+      // Hide all page bodies
+      document.querySelectorAll('.page-view').forEach(p => {
+        p.classList.add('hidden');
+        p.classList.remove('flex');
+      });
+
+      // Show requested page
+      const target = document.getElementById(pageId);
+      if (target) {
+        target.classList.remove('hidden');
+        target.classList.add('flex');
+      }
+
+      const select = document.getElementById('page-select');
+      if (select) select.value = pageId;
+
+      const drawer = document.getElementById('mobile-nav-drawer');
+      if (drawer) drawer.classList.add('hidden');
+
+      if (pageId === 'p8-find-mechanic') {
+        initFindMechanicStep();
+      }
+
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
+    function loginExistingUser() {
+      showPage('p6-dashboard');
+    }
+
+    function logoutCustomer() {
+      showPage('p1-landing');
+    }
+
+    // Vehicle Type card selection on Add First Vehicle page
+    function selectVehicleTypeCard(type) {
+      selectedVehicleType = type;
+      ['car', 'bike', 'comm'].forEach(t => {
+        const el = document.getElementById(`vt-card-${t}`);
+        if (t === type) {
+          el.className = 'border-2 border-wire-900 dark:border-white bg-wire-50 dark:bg-wire-800 p-3 rounded-lg text-center cursor-pointer font-bold shadow-sm transition';
+        } else {
+          el.className = 'border border-wire-300 dark:border-wire-700 p-3 rounded-lg text-center cursor-pointer hover:border-wire-500 transition';
+        }
+      });
+    }
+
+    function saveFirstVehicleAndGoToDashboard() {
+      // The dashboard and vehicle details are shown only after the user saves the vehicle
+      showPage('p6-dashboard');
+    }
+
+    function promptAuthModal(actionName) {
+      const modal = document.getElementById('auth-prompt-modal');
+      const reason = document.getElementById('auth-modal-reason');
+      if (modal && reason) {
+        reason.textContent = `To access ${actionName}, please login or sign up first.`;
+        modal.classList.remove('hidden');
+      }
+    }
+
+    function closeAuthModal() {
+      const modal = document.getElementById('auth-prompt-modal');
+      if (modal) modal.classList.add('hidden');
+    }
+
+    function toggleMobileNav() {
+      const drawer = document.getElementById('mobile-nav-drawer');
+      if (drawer) drawer.classList.toggle('hidden');
+    }
+
+    function toggleDarkMode() {
+      document.documentElement.classList.toggle('dark');
+    }
+
+    // FIND MECHANIC: NO PRESELECTED MODE
+    function initFindMechanicStep() {
+      selectedFindMechMode = null; // Reset to unselected
+      document.getElementById('fm-step-mode').classList.remove('hidden');
+      document.getElementById('fm-results-view').classList.add('hidden');
+
+      const cardOnsite = document.getElementById('mode-card-onsite');
+      const cardOffsite = document.getElementById('mode-card-offsite');
+      const continueBtn = document.getElementById('fm-continue-btn');
+
+      // Both cards unselected
+      cardOnsite.className = 'border border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-850 p-5 rounded-xl cursor-pointer hover:border-wire-600 transition space-y-2 relative';
+      cardOffsite.className = 'border border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-850 p-5 rounded-xl cursor-pointer hover:border-wire-600 transition space-y-2 relative';
+
+      // Continue button disabled until a mode is chosen
+      continueBtn.disabled = true;
+      continueBtn.className = 'w-full py-3 bg-wire-200 text-wire-400 dark:bg-wire-800 dark:text-wire-600 rounded-lg font-bold text-xs uppercase tracking-wider cursor-not-allowed transition';
+      continueBtn.textContent = 'Select a Mode Above to Continue ➔';
+    }
+
+    function selectFindMechMode(mode) {
+      selectedFindMechMode = mode;
+      const cardOnsite = document.getElementById('mode-card-onsite');
+      const cardOffsite = document.getElementById('mode-card-offsite');
+      const continueBtn = document.getElementById('fm-continue-btn');
+
+      if (mode === 'onsite') {
+        cardOnsite.className = 'border-2 border-wire-900 dark:border-white bg-wire-50 dark:bg-wire-800/80 p-5 rounded-xl cursor-pointer hover:shadow-md transition space-y-2 relative';
+        cardOffsite.className = 'border border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-850 p-5 rounded-xl cursor-pointer hover:border-wire-600 transition space-y-2 relative';
+      } else {
+        cardOffsite.className = 'border-2 border-wire-900 dark:border-white bg-wire-50 dark:bg-wire-800/80 p-5 rounded-xl cursor-pointer hover:shadow-md transition space-y-2 relative';
+        cardOnsite.className = 'border border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-850 p-5 rounded-xl cursor-pointer hover:border-wire-600 transition space-y-2 relative';
+      }
+
+      // Enable the Continue button once a mode is chosen
+      continueBtn.disabled = false;
+      continueBtn.className = 'w-full py-3 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded-lg font-bold text-xs uppercase tracking-wider cursor-pointer shadow-md transition hover:opacity-95';
+      continueBtn.textContent = 'Continue to Mechanics ➔';
+    }
+
+    function confirmFindMechMode() {
+      if (!selectedFindMechMode) return;
+      document.getElementById('fm-step-mode').classList.add('hidden');
+      document.getElementById('fm-results-view').classList.remove('hidden');
+      document.getElementById('fm-results-view').classList.add('flex');
+      switchModeToggle(selectedFindMechMode);
+    }
+
+    function switchModeToggle(mode) {
+      selectedFindMechMode = mode;
+      const btnOnsite = document.getElementById('toggle-btn-onsite');
+      const btnOffsite = document.getElementById('toggle-btn-offsite');
+      const countText = document.getElementById('results-count-text');
+
+      if (mode === 'onsite') {
+        btnOnsite.className = 'px-3 py-1 rounded font-bold bg-white dark:bg-wire-900 text-wire-900 dark:text-white shadow-sm flex items-center gap-1.5';
+        btnOffsite.className = 'px-3 py-1 rounded font-medium text-wire-600 dark:text-wire-300 hover:text-wire-900 flex items-center gap-1.5';
+        countText.innerHTML = 'Showing <strong>8 verified mechanics</strong> for Onsite mode';
+      } else {
+        btnOffsite.className = 'px-3 py-1 rounded font-bold bg-white dark:bg-wire-900 text-wire-900 dark:text-white shadow-sm flex items-center gap-1.5';
+        btnOnsite.className = 'px-3 py-1 rounded font-medium text-wire-600 dark:text-wire-300 hover:text-wire-900 flex items-center gap-1.5';
+        countText.innerHTML = 'Showing <strong>6 verified workshops</strong> for Offsite visit';
+      }
+
+      renderMechanicCards(mode);
+    }
+
+    function renderMechanicCards(mode) {
+      const container = document.getElementById('dynamic-mechanic-cards');
+      if (!container) return;
+
+      if (mode === 'onsite') {
+        container.innerHTML = `
+          <!-- Onsite Card 1 -->
+          <div class="border-2 border-emerald-500/60 rounded-xl p-4 bg-white dark:bg-wire-850 hover:shadow-md transition space-y-3">
+            <div class="flex items-start justify-between">
+              <div class="flex items-start gap-3">
+                <div class="w-12 h-12 wireframe-box wireframe-cross rounded-full flex items-center justify-center text-xs font-mono">[ 👤 ]</div>
+                <div>
+                  <h3 class="font-bold text-sm">Workshop name #1 (Mobile Van)</h3>
+                  <div class="flex items-center gap-2 text-xs mt-0.5">
+                    <span class="font-bold text-amber-600">★ 4.8</span>
+                    <span class="text-wire-400">(142)</span>
+                    <span>•</span>
+                    <span class="font-mono text-wire-600 dark:text-wire-300">📍 1.8 km away</span>
+                  </div>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-500 bg-emerald-50 text-emerald-700 flex items-center gap-1">
+                <span>●</span> Available
+              </span>
+            </div>
+            <!-- Onsite shows visit charge and estimated arrival time -->
+            <div class="p-2.5 bg-wire-50 dark:bg-wire-800 rounded flex justify-between text-xs font-mono">
+              <div>Visit charge: <strong>₹150</strong></div>
+              <div>Estimated arrival: <strong class="text-emerald-600">15-20 mins</strong></div>
+            </div>
+            <div class="pt-1 flex justify-between items-center text-xs">
+              <span class="text-wire-400">Mobile service van equipped</span>
+              <div class="flex gap-2">
+                <button onclick="showPage('p10-profile-mechanic')" class="px-3 py-1.5 border border-wire-300 rounded">Profile</button>
+                <button onclick="showPage('p11-booking-flow')" class="px-3.5 py-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold uppercase">Book Onsite</button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Onsite Card 2 -->
+          <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-850 space-y-3">
+            <div class="flex items-start justify-between">
+              <div class="flex items-start gap-3">
+                <div class="w-12 h-12 wireframe-box wireframe-cross rounded-full flex items-center justify-center text-xs font-mono">[ 👤 ]</div>
+                <div>
+                  <h3 class="font-bold text-sm">Mechanic name (Mobile Unit #2)</h3>
+                  <div class="flex items-center gap-2 text-xs mt-0.5">
+                    <span class="font-bold text-amber-600">★ 4.7</span>
+                    <span class="text-wire-400">(89)</span>
+                    <span>•</span>
+                    <span class="font-mono text-wire-600 dark:text-wire-300">📍 3.4 km away</span>
+                  </div>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-500 bg-emerald-50 text-emerald-700 flex items-center gap-1">
+                <span>●</span> Available
+              </span>
+            </div>
+            <div class="p-2.5 bg-wire-50 dark:bg-wire-800 rounded flex justify-between text-xs font-mono">
+              <div>Visit charge: <strong>₹180</strong></div>
+              <div>Estimated arrival: <strong class="text-emerald-600">25 mins</strong></div>
+            </div>
+            <div class="pt-1 flex justify-end gap-2 text-xs">
+              <button onclick="showPage('p10-profile-mechanic')" class="px-3 py-1.5 border border-wire-300 rounded">Profile</button>
+              <button onclick="showPage('p11-booking-flow')" class="px-3.5 py-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold uppercase">Book Onsite</button>
+            </div>
+          </div>
+        `;
+      } else {
+        // Offsite results show workshop address, distance in km, time slots
+        container.innerHTML = `
+          <!-- Offsite Card 1 -->
+          <div class="border-2 border-wire-900 dark:border-wire-300 rounded-xl p-4 bg-white dark:bg-wire-850 hover:shadow-md transition space-y-3">
+            <div class="flex items-start justify-between">
+              <div class="flex items-start gap-3">
+                <div class="w-12 h-12 wireframe-box wireframe-cross rounded flex items-center justify-center text-xs font-mono">[ 🏢 ]</div>
+                <div>
+                  <h3 class="font-bold text-sm">Workshop name #2 (Garage Facility)</h3>
+                  <div class="flex items-center gap-2 text-xs mt-0.5">
+                    <span class="font-bold text-amber-600">★ 4.9</span>
+                    <span class="text-wire-400">(210)</span>
+                    <span>•</span>
+                    <span class="font-mono text-wire-600 dark:text-wire-300">📍 2.4 km away</span>
+                  </div>
+                </div>
+              </div>
+              <span class="px-2 py-0.5 rounded-full text-[10px] font-bold border border-emerald-500 bg-emerald-50 text-emerald-700 flex items-center gap-1">
+                <span>●</span> Available
+              </span>
+            </div>
+            <div class="p-2.5 bg-wire-50 dark:bg-wire-800 rounded space-y-1 text-xs">
+              <div>📍 <strong>Workshop Address:</strong> Service Road, Highway Junction #4</div>
+              <div class="flex justify-between items-center pt-1 font-mono text-[11px]">
+                <span>Distance: <strong>2.4 km</strong></span>
+                <span>Next Slot: <strong class="text-emerald-600">Today 2:30 PM</strong></span>
+              </div>
+            </div>
+            <div class="pt-1 flex justify-between items-center text-xs">
+              <span class="text-wire-400">4 hydraulic bays • Diagnostic tools</span>
+              <div class="flex gap-2">
+                <button onclick="showPage('p10-profile-mechanic')" class="px-3 py-1.5 border border-wire-300 rounded">Profile</button>
+                <button onclick="showPage('p11-booking-flow')" class="px-3.5 py-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold uppercase">Reserve Slot</button>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+    }
+
+    function toggleMobileMapList(view) {
+      const listCol = document.getElementById('fm-list-column');
+      const mapCol = document.getElementById('fm-map-column');
+      const btnList = document.getElementById('m-btn-list');
+      const btnMap = document.getElementById('m-btn-map');
+
+      if (view === 'list') {
+        listCol.classList.remove('hidden');
+        mapCol.classList.add('hidden');
+        btnList.className = 'px-3 py-1 bg-wire-900 text-white font-bold';
+        btnMap.className = 'px-3 py-1 bg-white text-wire-800';
+      } else {
+        listCol.classList.add('hidden');
+        mapCol.classList.remove('hidden');
+        btnMap.className = 'px-3 py-1 bg-wire-900 text-white font-bold';
+        btnList.className = 'px-3 py-1 bg-white text-wire-800';
+      }
+    }
+
+    function setBookingStep(step) {
+      for (let i = 1; i <= 4; i++) {
+        const stepEl = document.getElementById(`booking-step-${i}`);
+        const tabEl = document.getElementById(`step-tab-${i}`);
+        if (stepEl) {
+          if (i === step) stepEl.classList.remove('hidden');
+          else stepEl.classList.add('hidden');
+        }
+        if (tabEl) {
+          if (i === step) tabEl.className = 'py-2 border-b-2 border-wire-900 dark:border-white font-bold text-wire-900 dark:text-white';
+          else if (i < step) tabEl.className = 'py-2 border-b-2 border-wire-400 text-wire-600 dark:text-wire-300 font-medium';
+          else tabEl.className = 'py-2 border-b-2 border-wire-200 dark:border-wire-800 text-wire-400';
+        }
+      }
+    }
+
+    // Default initialization
+    document.addEventListener('DOMContentLoaded', () => {
+      showPage('p6-dashboard');
+    });
+  </script>
+</body>
+</html>

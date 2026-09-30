@@ -1,0 +1,1367 @@
+<!DOCTYPE html>
+<html lang="en" class="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GearUp — Crane Operator & Towing Wireframe Lab</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            wire: {
+              50: '#f8fafc',
+              100: '#f1f5f9',
+              200: '#e2e8f0',
+              300: '#cbd5e1',
+              400: '#94a3b8',
+              500: '#64748b',
+              600: '#475569',
+              700: '#334155',
+              800: '#1e293b',
+              850: '#172033',
+              900: '#0f172a',
+              950: '#020617',
+            }
+          },
+          fontFamily: {
+            mono: ['ui-monospace', 'SFMono-Regular', 'Menlo', 'Monaco', 'Consolas', 'monospace'],
+            sans: ['Inter', 'system-ui', '-apple-system', 'BlinkMacSystemFont', 'Segoe UI', 'Roboto', 'sans-serif'],
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    .wire-hatch {
+      background: repeating-linear-gradient(
+        -45deg,
+        rgba(148, 163, 184, 0.12),
+        rgba(148, 163, 184, 0.12) 6px,
+        transparent 6px,
+        transparent 12px
+      );
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  </style>
+</head>
+<body class="bg-wire-100 dark:bg-wire-950 text-wire-800 dark:text-wire-100 font-sans antialiased min-h-screen">
+
+  <!-- ========================================================================= -->
+  <!-- TOP CONTROLLER BAR: WIREFRAME LAB CONTROLS                                -->
+  <!-- ========================================================================= -->
+  <header class="sticky top-0 z-50 bg-white dark:bg-wire-900 border-b border-wire-300 dark:border-wire-700 px-4 py-2.5 flex flex-wrap items-center justify-between gap-3 shadow-sm">
+    <div class="flex items-center gap-3">
+      <div class="flex items-center gap-1.5 font-mono font-black text-sm tracking-wider text-wire-900 dark:text-white">
+        <span class="bg-amber-600 text-white px-1.5 py-0.5 rounded text-xs">🏗️ CRANE</span>
+        <span>GEARUP WIREFRAME LAB</span>
+      </div>
+      <span class="hidden md:inline-block text-xs font-mono text-wire-500 dark:text-wire-400">| Crane & Towing Fleet Portal</span>
+      
+      <!-- Quick Portal Switchers -->
+      <div class="hidden lg:flex items-center gap-2 border-l border-wire-300 dark:border-wire-700 pl-3 text-xs">
+        <a href="index.html" class="text-wire-500 hover:text-wire-900 dark:hover:text-white underline">‹ Customer</a>
+        <span class="text-wire-300">•</span>
+        <a href="mechanic_index.html" class="text-wire-500 hover:text-wire-900 dark:hover:text-white underline">Mechanic Portal ›</a>
+      </div>
+    </div>
+
+    <!-- Viewport Switcher Controls -->
+    <div class="flex items-center bg-wire-100 dark:bg-wire-900 p-1 rounded-lg border border-wire-300 dark:border-wire-700 text-xs">
+      <button onclick="setViewport('desktop')" id="vp-btn-desktop" class="px-2.5 py-1 rounded font-medium transition bg-white dark:bg-wire-700 shadow-sm text-wire-900 dark:text-white flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.75 17L9 20l-1 1h8l-1-1-.75-3M3 13h18M5 17h14a2 2 0 002-2V5a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"/></svg>
+        <span>Desktop (1280px)</span>
+      </button>
+      <button onclick="setViewport('tablet')" id="vp-btn-tablet" class="px-2.5 py-1 rounded font-medium transition text-wire-600 dark:text-wire-400 hover:text-wire-900 dark:hover:text-white flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M7 21h10a2 2 0 002-2V5a2 2 0 00-2-2H7a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        <span>Tablet (768px)</span>
+      </button>
+      <button onclick="setViewport('mobile')" id="vp-btn-mobile" class="px-2.5 py-1 rounded font-medium transition text-wire-600 dark:text-wire-400 hover:text-wire-900 dark:hover:text-white flex items-center gap-1.5">
+        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 18h.01M8 21h8a2 2 0 002-2V5a2 2 0 00-2-2H8a2 2 0 00-2 2v14a2 2 0 002 2z"/></svg>
+        <span>Mobile (390px)</span>
+      </button>
+    </div>
+
+    <!-- Screen Navigator Select -->
+    <div class="flex items-center gap-2">
+      <label for="page-select" class="text-xs text-wire-500 dark:text-wire-400 font-mono hidden lg:inline">PAGE:</label>
+      <select id="page-select" onchange="showPage(this.value)" class="text-xs bg-white dark:bg-wire-800 border border-wire-300 dark:border-wire-700 rounded px-2.5 py-1.5 font-medium text-wire-900 dark:text-wire-100 focus:outline-none focus:ring-1 focus:ring-wire-800">
+        <optgroup label="Logged-Out & Onboarding">
+          <option value="c-login">1. Crane Operator Login</option>
+          <option value="c-signup">2. Crane Partner Sign Up (5-Step Stepper)</option>
+          <option value="c-forgot">3. Forgot Password Flow</option>
+          <option value="c-pending">4. Pending Fleet Verification</option>
+        </optgroup>
+        <optgroup label="Live Dispatch Operations">
+          <option value="c-dashboard" selected>5. Crane Fleet Dashboard</option>
+          <option value="c-requests">6. Incoming Tow Requests (Timer & Fast Accept)</option>
+          <option value="c-job-details">7. Active Tow Job (5-Stage Recovery Stepper)</option>
+          <option value="c-handover">8. Vehicle Handover & Trip Completion</option>
+        </optgroup>
+        <optgroup label="Fleet Management & Earnings">
+          <option value="c-fleet-rates">9. Tow Rates & Radius Configuration</option>
+          <option value="c-trip-logs">10. Trip Logs & Handover Invoices</option>
+          <option value="c-reviews">11. Verified Driver Reviews</option>
+          <option value="c-earnings">12. Towing Earnings & Toll Claims</option>
+          <option value="c-availability">13. Duty Hours & Standby Settings</option>
+          <option value="c-profile">14. Fleet Profile & RTO Permits</option>
+          <option value="c-notifications">15. Notifications Center</option>
+        </optgroup>
+        <optgroup label="Architecture & Flow">
+          <option value="c-sitemap">16. Crane Sitemap & Recovery Lifecycle</option>
+        </optgroup>
+      </select>
+
+      <!-- Theme Toggle -->
+      <button onclick="toggleDarkMode()" title="Toggle Dark/Light Mode" class="p-1.5 border border-wire-300 dark:border-wire-700 rounded hover:bg-wire-100 dark:hover:bg-wire-700 text-wire-700 dark:text-wire-300">
+        <svg id="theme-icon-sun" class="w-4 h-4 hidden dark:block" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 3v1m0 16v1m9-9h-1M4 12H3m15.364 6.364l-.707-.707M6.343 6.343l-.707-.707m12.728 0l-.707.707M6.343 17.657l-.707.707M16 12a4 4 0 11-8 0 4 4 0 018 0z"/></svg>
+        <svg id="theme-icon-moon" class="w-4 h-4 block dark:hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20.354 15.354A9 9 0 018.646 3.646 9.003 9.003 0 0012 21a9.003 9.003 0 008.354-5.646z"/></svg>
+      </button>
+    </div>
+  </header>
+
+  <!-- ========================================================================= -->
+  <!-- MAIN WORKSPACE CONTAINER                                                  -->
+  <!-- ========================================================================= -->
+  <main class="py-6 px-2 sm:px-4 flex justify-center min-h-[calc(100vh-60px)]">
+    <div id="viewport-container" class="w-full max-w-[1280px] transition-all duration-300 bg-white dark:bg-wire-950 border border-wire-300 dark:border-wire-700 rounded-xl shadow-lg overflow-hidden flex flex-col relative min-h-[750px]">
+
+      <!-- ===================================================================== -->
+      <!-- A. LOGGED-OUT TOP BAR (SINGLE CLEAN BAR: LOGO, LOGIN, SIGNUP, LANG)   -->
+      <!-- ===================================================================== -->
+      <div id="logged-out-header" class="hidden border-b border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-900 px-6 py-3.5 flex items-center justify-between">
+        <button onclick="showPage('c-login')" class="flex items-center gap-2 font-mono font-black text-lg tracking-wider text-wire-900 dark:text-white">
+          <span class="border border-wire-900 dark:border-white p-0.5 rounded">⚙️</span>
+          <span>GEARUP <span class="text-xs bg-amber-100 text-amber-900 dark:bg-amber-950 dark:text-amber-200 px-1.5 py-0.5 rounded font-normal font-sans">CRANE & TOWING</span></span>
+        </button>
+
+        <div class="flex items-center gap-3 text-xs">
+          <!-- Language Selector -->
+          <div class="flex items-center gap-1 border border-wire-300 dark:border-wire-700 rounded px-2 py-1 text-wire-600 dark:text-wire-300 cursor-pointer">
+            <span>🌐</span>
+            <span>EN</span>
+            <span class="text-wire-400">▾</span>
+          </div>
+          <!-- Login & Sign up buttons -->
+          <button onclick="showPage('c-login')" class="px-3 py-1.5 border border-wire-400 dark:border-wire-600 rounded font-medium hover:border-wire-900 dark:hover:border-white">
+            Operator Login
+          </button>
+          <button onclick="showPage('c-signup')" class="px-3.5 py-1.5 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold hover:opacity-90">
+            Sign Up Fleet Truck
+          </button>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- B. LOGGED-IN TOP BAR (DUTY SWITCH, NOTIFICATIONS, PROFILE)            -->
+      <!-- ===================================================================== -->
+      <div id="logged-in-header" class="border-b border-wire-300 dark:border-wire-700 bg-white dark:bg-wire-900 px-4 py-2.5 flex items-center justify-between">
+        <div class="flex items-center gap-3">
+          <!-- Mobile Sidebar Drawer Toggle -->
+          <button onclick="toggleSidebarDrawer()" class="md:hidden p-1.5 text-wire-700 dark:text-wire-300 border border-wire-300 dark:border-wire-700 rounded">
+            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/></svg>
+          </button>
+
+          <button onclick="showPage('c-dashboard')" class="flex items-center gap-2 font-mono font-black text-base md:text-lg tracking-wider text-wire-900 dark:text-white">
+            <span class="border border-wire-900 dark:border-white p-0.5 rounded">⚙️</span>
+            <span>GEARUP <span class="text-[10px] bg-amber-600 text-white px-1 py-0.5 rounded ml-1 font-sans">CRANE OPS</span></span>
+          </button>
+        </div>
+
+        <!-- Center: Crane Operator Duty Switch -->
+        <div class="flex items-center bg-wire-100 dark:bg-wire-800 p-0.5 rounded-lg border border-wire-300 dark:border-wire-700 text-xs font-medium">
+          <button onclick="setCraneDutyStatus('available')" id="duty-btn-available" class="px-2.5 py-1 rounded-md flex items-center gap-1.5 bg-white dark:bg-wire-700 shadow-sm text-emerald-700 dark:text-emerald-400 font-bold">
+            <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+            <span>On-Duty</span>
+          </button>
+          <button onclick="setCraneDutyStatus('towing')" id="duty-btn-towing" class="px-2.5 py-1 rounded-md flex items-center gap-1.5 text-wire-600 dark:text-wire-400 hover:text-wire-900">
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+            <span>Towing</span>
+          </button>
+          <button onclick="confirmGoOffDuty()" id="duty-btn-offduty" class="px-2.5 py-1 rounded-md flex items-center gap-1.5 text-wire-600 dark:text-wire-400 hover:text-wire-900">
+            <span class="w-2 h-2 rounded-full bg-wire-400"></span>
+            <span>Off-Duty</span>
+          </button>
+        </div>
+
+        <!-- Right: Notifications & Profile Pill -->
+        <div class="flex items-center gap-2 sm:gap-3">
+          <div class="hidden sm:flex items-center gap-1 text-xs border border-wire-300 dark:border-wire-700 rounded px-2 py-1 text-wire-600 dark:text-wire-300 cursor-pointer">
+            <span>🌐</span>
+            <span>EN</span>
+            <span class="text-wire-400">▾</span>
+          </div>
+
+          <button onclick="showPage('c-notifications')" class="relative p-1.5 text-wire-700 dark:text-wire-300 hover:text-wire-900 border border-wire-300 dark:border-wire-700 rounded">
+            <span>🔔</span>
+            <span class="absolute -top-1 -right-1 w-4 h-4 bg-red-600 text-white rounded-full text-[10px] font-bold flex items-center justify-center">2</span>
+          </button>
+
+          <!-- Generic Crane Fleet Profile (No Personal Names) -->
+          <button onclick="showPage('c-profile')" class="flex items-center gap-1.5 border border-wire-300 dark:border-wire-700 rounded-full pl-1.5 pr-2.5 py-1 text-xs text-wire-800 dark:text-wire-200 hover:border-wire-500">
+            <span class="w-6 h-6 rounded-full bg-amber-100 dark:bg-amber-950 text-amber-800 dark:text-amber-200 flex items-center justify-center text-xs font-mono font-bold">🏗️</span>
+            <span class="font-medium hidden sm:inline">Recovery Unit #1</span>
+            <span class="text-wire-400">▾</span>
+          </button>
+        </div>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- C. VERIFICATION BANNER (CONDITIONAL FOR PENDING OPERATORS)             -->
+      <!-- ===================================================================== -->
+      <div id="crane-verification-banner" class="hidden bg-amber-50 dark:bg-amber-950/40 border-b border-amber-300 dark:border-amber-800 px-4 py-2.5 flex items-center justify-between text-xs text-amber-900 dark:text-amber-200">
+        <div class="flex items-center gap-2">
+          <span class="text-amber-600 dark:text-amber-400 text-base">⚠️</span>
+          <span><strong>Commercial Tow Truck Verification in Progress:</strong> RTO permit and heavy driving license under audit. Receiving roadside tow dispatch requests is disabled until approved.</span>
+        </div>
+        <button onclick="showPage('c-profile')" class="underline font-semibold hover:text-amber-950 ml-2 whitespace-nowrap">View Permit Status ›</button>
+      </div>
+
+      <!-- ===================================================================== -->
+      <!-- D. APP BODY LAYOUT: SIDEBAR (DESKTOP) + SCROLL CONTENT + BOTTOM NAV   -->
+      <!-- ===================================================================== -->
+      <div class="flex flex-1 relative overflow-hidden">
+
+        <!-- DESKTOP SIDEBAR -->
+        <aside id="desktop-sidebar" class="hidden md:flex flex-col w-56 border-r border-wire-300 dark:border-wire-700 bg-wire-50/50 dark:bg-wire-900/50 p-3 space-y-1 text-xs font-medium shrink-0">
+          <div class="px-3 py-2 text-[10px] font-mono uppercase tracking-wider text-wire-400 dark:text-wire-500">Dispatch Ops</div>
+          
+          <button onclick="showPage('c-dashboard')" id="nav-btn-c-dashboard" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg bg-wire-200 dark:bg-wire-800 text-wire-900 dark:text-white font-bold transition">
+            <span class="flex items-center gap-2.5">
+              <span>📊</span>
+              <span>Fleet Dashboard</span>
+            </span>
+          </button>
+
+          <button onclick="showPage('c-requests')" id="nav-btn-c-requests" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>🚨</span>
+              <span>Tow Requests</span>
+            </span>
+            <span class="px-1.5 py-0.5 rounded-full bg-red-600 text-white text-[10px] font-bold animate-pulse">1</span>
+          </button>
+
+          <button onclick="showPage('c-job-details')" id="nav-btn-c-job-details" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>📍</span>
+              <span>Active Recovery</span>
+            </span>
+            <span class="w-2 h-2 rounded-full bg-amber-500"></span>
+          </button>
+
+          <button onclick="showPage('c-handover')" id="nav-btn-c-handover" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>📋</span>
+              <span>Complete Handover</span>
+            </span>
+          </button>
+
+          <div class="pt-3 px-3 py-2 text-[10px] font-mono uppercase tracking-wider text-wire-400 dark:text-wire-500">Fleet & Earnings</div>
+
+          <button onclick="showPage('c-fleet-rates')" id="nav-btn-c-fleet-rates" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>🏷️</span>
+              <span>Rates & Tow Radius</span>
+            </span>
+          </button>
+
+          <button onclick="showPage('c-trip-logs')" id="nav-btn-c-trip-logs" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>📄</span>
+              <span>Trip Logs & Handover</span>
+            </span>
+          </button>
+
+          <button onclick="showPage('c-reviews')" id="nav-btn-c-reviews" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>⭐</span>
+              <span>Driver Reviews</span>
+            </span>
+            <span class="text-[10px] font-mono text-wire-500">4.9</span>
+          </button>
+
+          <button onclick="showPage('c-earnings')" id="nav-btn-c-earnings" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>💰</span>
+              <span>Towing Earnings</span>
+            </span>
+          </button>
+
+          <button onclick="showPage('c-availability')" id="nav-btn-c-availability" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>🕒</span>
+              <span>Duty Hours</span>
+            </span>
+          </button>
+
+          <button onclick="showPage('c-profile')" id="nav-btn-c-profile" class="sidebar-nav-btn w-full flex items-center justify-between px-3 py-2 rounded-lg text-wire-600 dark:text-wire-300 hover:bg-wire-100 dark:hover:bg-wire-800 transition">
+            <span class="flex items-center gap-2.5">
+              <span>🚛</span>
+              <span>Truck & Permits</span>
+            </span>
+            <span class="px-1.5 py-0.5 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[9px] font-bold">VERIFIED</span>
+          </button>
+
+          <div class="pt-4 mt-auto border-t border-wire-200 dark:border-wire-800">
+            <div class="p-2.5 bg-wire-100 dark:bg-wire-800/60 rounded-lg text-[11px] text-wire-600 dark:text-wire-400 flex items-center justify-between">
+              <div>
+                <div class="font-bold text-wire-900 dark:text-white">24/7 Night Standby</div>
+                <div class="text-[10px]">+25% surcharge active</div>
+              </div>
+              <input type="checkbox" checked class="w-4 h-4 rounded text-wire-900 focus:ring-0">
+            </div>
+          </div>
+        </aside>
+
+        <!-- MAIN SCROLLABLE CONTENT VIEWPORT -->
+        <div id="content-scroll-container" class="flex-1 overflow-y-auto no-scrollbar pb-16 md:pb-6">
+
+          <!-- ================================================================= -->
+          <!-- 1. CRANE OPERATOR LOGIN                                           -->
+          <!-- ================================================================= -->
+          <section id="c-login" class="page-view hidden p-6 md:p-10 flex-col items-center justify-center min-h-[600px]">
+            <div class="w-full max-w-4xl grid md:grid-cols-12 border border-wire-300 dark:border-wire-700 rounded-xl overflow-hidden shadow-sm bg-white dark:bg-wire-900">
+              
+              <!-- Left: Recovery Network Benefits -->
+              <div class="md:col-span-5 bg-amber-50/50 dark:bg-amber-950/20 p-6 md:p-8 border-b md:border-b-0 md:border-r border-wire-300 dark:border-wire-700 flex flex-col justify-between">
+                <div>
+                  <div class="inline-flex items-center gap-1.5 bg-amber-600 text-white px-2.5 py-1 rounded text-xs font-mono font-bold uppercase mb-4">
+                    <span>🏗️ Recovery Network Portal</span>
+                  </div>
+                  <h2 class="text-xl font-bold text-wire-900 dark:text-white mb-2">Connect your Tow Truck to GearUp Dispatch</h2>
+                  <p class="text-xs text-wire-600 dark:text-wire-400 mb-6 leading-relaxed">
+                    Receive high-paying roadside vehicle recovery orders, highway breakdown towing, and direct garage transfers with transparent per-km payouts.
+                  </p>
+
+                  <div class="space-y-3 text-xs">
+                    <div class="flex items-start gap-2.5">
+                      <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 flex items-center justify-center font-bold text-[11px] shrink-0">✓</span>
+                      <span><strong>Dual Dispatch Feed:</strong> Jobs from stranded motorists and certified garage referrals.</span>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                      <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 flex items-center justify-center font-bold text-[11px] shrink-0">✓</span>
+                      <span><strong>Transparent Pricing:</strong> Base hookup fee + distance fare (₹/km) + toll claims.</span>
+                    </div>
+                    <div class="flex items-start gap-2.5">
+                      <span class="w-5 h-5 rounded-full bg-emerald-100 text-emerald-700 dark:bg-emerald-950 dark:text-emerald-400 flex items-center justify-center font-bold text-[11px] shrink-0">✓</span>
+                      <span><strong>Digital Handover Protocol:</strong> 4-point damage photo checklist protects operators against claims.</span>
+                    </div>
+                  </div>
+                </div>
+
+                <div class="pt-6 border-t border-wire-200 dark:border-wire-800 mt-6 text-xs text-wire-500">
+                  <span>Recovery Fleet Dispatch Desk: <strong class="font-mono text-wire-800 dark:text-wire-200">1800-TOW-GEAR</strong></span>
+                </div>
+              </div>
+
+              <!-- Right: Operator Login Form -->
+              <div class="md:col-span-7 p-6 md:p-8 flex flex-col justify-center">
+                <div class="mb-6">
+                  <h3 class="text-lg font-bold text-wire-900 dark:text-white">Tow Operator Sign In</h3>
+                  <p class="text-xs text-wire-500">Sign in to your truck dispatch terminal</p>
+                </div>
+
+                <div class="flex border border-wire-300 dark:border-wire-700 rounded-lg p-1 mb-4 text-xs font-medium bg-wire-50 dark:bg-wire-800">
+                  <button onclick="switchCraneLoginMode('pwd')" id="c-login-tab-pwd" class="flex-1 py-1.5 text-center rounded bg-white dark:bg-wire-700 shadow-sm font-bold text-wire-900 dark:text-white">Password Login</button>
+                  <button onclick="switchCraneLoginMode('otp')" id="c-login-tab-otp" class="flex-1 py-1.5 text-center rounded text-wire-600 dark:text-wire-400 hover:text-wire-900">OTP Login</button>
+                </div>
+
+                <form onsubmit="event.preventDefault(); showPage('c-dashboard');" class="space-y-4 text-xs">
+                  <div>
+                    <label class="block font-medium text-wire-700 dark:text-wire-300 mb-1">Registered Phone Number or Driver ID</label>
+                    <input type="text" placeholder="e.g. +91 98765 00000 or DRV-410" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800 text-wire-900 dark:text-white" required>
+                  </div>
+
+                  <div id="c-login-pwd-field">
+                    <div class="flex justify-between items-center mb-1">
+                      <label class="font-medium text-wire-700 dark:text-wire-300">Operator Password</label>
+                      <button type="button" onclick="showPage('c-forgot')" class="text-wire-600 dark:text-wire-400 underline hover:text-wire-900">Forgot password?</button>
+                    </div>
+                    <div class="relative">
+                      <input type="password" id="c-login-pass" value="••••••••••••" class="w-full px-3 py-2 border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800 pr-10">
+                      <button type="button" onclick="togglePasswordVisibility('c-login-pass', this)" class="absolute right-3 top-2.5 text-wire-400 text-xs">👁️</button>
+                    </div>
+                  </div>
+
+                  <div id="c-login-otp-field" class="hidden">
+                    <div class="flex justify-between items-center mb-1">
+                      <label class="font-medium text-wire-700 dark:text-wire-300">Enter 6-digit Dispatch OTP</label>
+                      <button type="button" class="text-wire-600 underline">Send OTP</button>
+                    </div>
+                    <input type="text" placeholder="• • • • • •" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800 text-center font-mono tracking-widest text-sm">
+                  </div>
+
+                  <div class="flex items-center justify-between pt-1">
+                    <label class="flex items-center gap-2 cursor-pointer text-wire-600 dark:text-wire-400">
+                      <input type="checkbox" checked class="w-3.5 h-3.5 rounded text-wire-900">
+                      <span>Stay logged in on this vehicle unit</span>
+                    </label>
+                  </div>
+
+                  <button type="submit" class="w-full py-2.5 bg-amber-600 hover:bg-amber-700 text-white font-bold rounded-lg transition text-sm">
+                    Go On-Duty & Open Terminal ➔
+                  </button>
+                </form>
+
+                <div class="mt-6 pt-4 border-t border-wire-200 dark:border-wire-800 flex flex-col sm:flex-row items-center justify-between text-xs gap-2">
+                  <span class="text-wire-500">Own a recovery crane? <button onclick="showPage('c-signup')" class="font-bold underline text-wire-900 dark:text-white">Register Truck</button></span>
+                  <div class="flex gap-2">
+                    <a href="index.html" class="text-wire-500 hover:underline">Customer ›</a>
+                    <span>•</span>
+                    <a href="mechanic_index.html" class="text-wire-500 hover:underline">Mechanic ›</a>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 2. CRANE SIGN UP (5-STEP PROGRESS STEPPER)                        -->
+          <!-- ================================================================= -->
+          <section id="c-signup" class="page-view hidden p-4 md:p-8 flex-col items-center">
+            <div class="w-full max-w-3xl border border-wire-300 dark:border-wire-700 rounded-xl bg-white dark:bg-wire-900 p-6 shadow-sm">
+              
+              <div class="border-b border-wire-200 dark:border-wire-800 pb-4 mb-6">
+                <div class="flex items-center justify-between mb-2">
+                  <h2 class="text-base md:text-lg font-bold text-wire-900 dark:text-white">Register Recovery Tow Truck / Fleet</h2>
+                  <span class="text-xs font-mono text-wire-500" id="crane-step-indicator-text">Step 1 of 5</span>
+                </div>
+                
+                <!-- 5-Step Visual Progress Bar -->
+                <div class="grid grid-cols-5 gap-2">
+                  <div id="c-prog-bar-1" class="h-1.5 rounded-full bg-amber-600 transition-all"></div>
+                  <div id="c-prog-bar-2" class="h-1.5 rounded-full bg-wire-200 dark:bg-wire-800 transition-all"></div>
+                  <div id="c-prog-bar-3" class="h-1.5 rounded-full bg-wire-200 dark:bg-wire-800 transition-all"></div>
+                  <div id="c-prog-bar-4" class="h-1.5 rounded-full bg-wire-200 dark:bg-wire-800 transition-all"></div>
+                  <div id="c-prog-bar-5" class="h-1.5 rounded-full bg-wire-200 dark:bg-wire-800 transition-all"></div>
+                </div>
+
+                <div class="grid grid-cols-5 text-[10px] text-wire-500 font-medium text-center mt-1">
+                  <span>1. Driver</span>
+                  <span>2. Truck Spec</span>
+                  <span>3. Rates & Km</span>
+                  <span>4. RTO Permits</span>
+                  <span>5. Review</span>
+                </div>
+              </div>
+
+              <!-- STEP 1: OPERATOR DETAILS -->
+              <div id="c-signup-step-1" class="c-signup-step space-y-4 text-xs">
+                <h3 class="font-bold text-sm text-wire-900 dark:text-white">Step 1: Recovery Operator & Driver Info</h3>
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block font-medium mb-1">Driver / Agency Legal Name *</label>
+                    <input type="text" placeholder="e.g. Your name" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800">
+                  </div>
+                  <div>
+                    <label class="block font-medium mb-1">Mobile Phone (for live dispatch) *</label>
+                    <input type="tel" placeholder="+91 98765 00000" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800">
+                  </div>
+                  <div>
+                    <label class="block font-medium mb-1">Commercial Driver License # *</label>
+                    <input type="text" placeholder="e.g. KL-07-2019-0012345 (Heavy Rigid)" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800 font-mono">
+                  </div>
+                  <div>
+                    <label class="block font-medium mb-1">Create Access Password *</label>
+                    <input type="password" placeholder="At least 8 characters" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800">
+                  </div>
+                </div>
+                <div class="flex justify-end pt-4">
+                  <button onclick="setCraneSignupStep(2)" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded font-bold">
+                    Next: Truck Specifications ➔
+                  </button>
+                </div>
+              </div>
+
+              <!-- STEP 2: TRUCK & CAPABILITY DETAILS -->
+              <div id="c-signup-step-2" class="c-signup-step hidden space-y-4 text-xs">
+                <h3 class="font-bold text-sm text-wire-900 dark:text-white">Step 2: Recovery Truck Type & Winch Equipment</h3>
+                
+                <div>
+                  <label class="block font-bold mb-2">Primary Truck Recovery Type *</label>
+                  <div class="grid sm:grid-cols-3 gap-3">
+                    <label class="border-2 border-amber-600 rounded-lg p-3 bg-amber-50/40 dark:bg-amber-950/20 cursor-pointer flex flex-col justify-between">
+                      <div>
+                        <div class="font-bold text-amber-900 dark:text-amber-200 flex items-center justify-between">
+                          <span>🛏️ Hydraulic Flatbed</span>
+                          <input type="radio" name="truck-type" checked class="text-amber-600">
+                        </div>
+                        <p class="text-[11px] text-wire-500 mt-1">Rollback bed. Zero-drag recovery for luxury cars, EVs, and All-Wheel Drive.</p>
+                      </div>
+                      <span class="text-[10px] font-mono text-emerald-600 font-bold mt-2">Max Capacity: 3.5 Tons</span>
+                    </label>
+
+                    <label class="border border-wire-300 dark:border-wire-700 rounded-lg p-3 bg-white dark:bg-wire-800 cursor-pointer flex flex-col justify-between">
+                      <div>
+                        <div class="font-bold text-wire-900 dark:text-white flex items-center justify-between">
+                          <span>🚜 Wheel-Lift Underlift</span>
+                          <input type="radio" name="truck-type" class="text-amber-600">
+                        </div>
+                        <p class="text-[11px] text-wire-500 mt-1">Lifts drive wheels. Fast clearance for tight city roads and basements.</p>
+                      </div>
+                      <span class="text-[10px] font-mono text-wire-500 font-bold mt-2">Max Capacity: 2.5 Tons</span>
+                    </label>
+
+                    <label class="border border-wire-300 dark:border-wire-700 rounded-lg p-3 bg-white dark:bg-wire-800 cursor-pointer flex flex-col justify-between">
+                      <div>
+                        <div class="font-bold text-wire-900 dark:text-white flex items-center justify-between">
+                          <span>🏗️ Heavy Boom Crane</span>
+                          <input type="radio" name="truck-type" class="text-amber-600">
+                        </div>
+                        <p class="text-[11px] text-wire-500 mt-1">Rotator & boom arm for rollover recoveries, ditch extraction, commercial vehicles.</p>
+                      </div>
+                      <span class="text-[10px] font-mono text-wire-500 font-bold mt-2">Max Capacity: 10+ Tons</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div>
+                    <label class="block font-medium mb-1">Truck Registration Plate Number *</label>
+                    <input type="text" placeholder="e.g. KL-07-EE-9090" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800 font-mono font-bold">
+                  </div>
+                  <div>
+                    <label class="block font-medium mb-1">Hydraulic Winch Rating *</label>
+                    <select class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800">
+                      <option>4-Ton Electric Winch</option>
+                      <option>8-Ton Hydraulic Winch with Synthetic Rope</option>
+                      <option>12-Ton Heavy Duty Commercial Winch</option>
+                    </select>
+                  </div>
+                  <div class="sm:col-span-2">
+                    <label class="block font-medium mb-1">Home Yard / Base Station Location *</label>
+                    <input type="text" placeholder="Base parking depot or garage hub address" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800">
+                  </div>
+                </div>
+
+                <div class="flex justify-between pt-4">
+                  <button onclick="setCraneSignupStep(1)" class="px-4 py-2 border border-wire-300 rounded">‹ Back</button>
+                  <button onclick="setCraneSignupStep(3)" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded font-bold">Next: Rates & Km ➔</button>
+                </div>
+              </div>
+
+              <!-- STEP 3: RATES & SERVICE RADIUS -->
+              <div id="c-signup-step-3" class="c-signup-step hidden space-y-4 text-xs">
+                <h3 class="font-bold text-sm text-wire-900 dark:text-white">Step 3: Tow Rates, Transit Charges & Service Boundary</h3>
+                
+                <div class="grid sm:grid-cols-3 gap-3 p-4 bg-wire-50 dark:bg-wire-850 border border-wire-200 dark:border-wire-700 rounded-lg">
+                  <div>
+                    <label class="block font-bold mb-1">Base Hookup / Dispatch Fare *</label>
+                    <div class="flex items-center gap-1">
+                      <span class="text-wire-500">₹</span>
+                      <input type="number" value="1200" class="w-24 px-2 py-1.5 border border-wire-300 rounded bg-white dark:bg-wire-800 font-mono font-bold">
+                    </div>
+                    <span class="text-[10px] text-wire-500">Includes first 5 km transit</span>
+                  </div>
+
+                  <div>
+                    <label class="block font-bold mb-1">Per-Kilometer Towing Rate *</label>
+                    <div class="flex items-center gap-1">
+                      <span class="text-wire-500">₹</span>
+                      <input type="number" value="60" class="w-20 px-2 py-1.5 border border-wire-300 rounded bg-white dark:bg-wire-800 font-mono font-bold">
+                      <span class="text-wire-500">/ km</span>
+                    </div>
+                    <span class="text-[10px] text-wire-500">Applied beyond 5 km</span>
+                  </div>
+
+                  <div>
+                    <label class="block font-bold mb-1">Max Operational Radius *</label>
+                    <div class="flex items-center gap-1">
+                      <input type="number" value="40" class="w-20 px-2 py-1.5 border border-wire-300 rounded bg-white dark:bg-wire-800 font-mono font-bold">
+                      <span class="text-wire-500">km from base</span>
+                    </div>
+                    <span class="text-[10px] text-wire-500">Highway & city coverage</span>
+                  </div>
+                </div>
+
+                <!-- Night Surcharge & Winch Extraction -->
+                <div class="p-3 border border-wire-300 dark:border-wire-700 rounded-lg bg-white dark:bg-wire-900 space-y-2">
+                  <div class="font-bold text-wire-900 dark:text-white">Additional Recovery Surcharges</div>
+                  <div class="grid sm:grid-cols-2 gap-3 text-[11px]">
+                    <label class="flex items-center gap-2">
+                      <input type="checkbox" checked class="w-4 h-4 rounded text-amber-600">
+                      <span>Nighttime Emergency Standby (+25% between 10 PM - 6 AM)</span>
+                    </label>
+                    <label class="flex items-center gap-2">
+                      <input type="checkbox" checked class="w-4 h-4 rounded text-amber-600">
+                      <span>Off-Road / Ditch Winch Extraction Fee (+₹500 flat)</span>
+                    </label>
+                  </div>
+                </div>
+
+                <div class="flex justify-between pt-4">
+                  <button onclick="setCraneSignupStep(2)" class="px-4 py-2 border border-wire-300 rounded">‹ Back</button>
+                  <button onclick="setCraneSignupStep(4)" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded font-bold">Next: Verification Documents ➔</button>
+                </div>
+              </div>
+
+              <!-- STEP 4: VERIFICATION -->
+              <div id="c-signup-step-4" class="c-signup-step hidden space-y-4 text-xs">
+                <h3 class="font-bold text-sm text-wire-900 dark:text-white">Step 4: Commercial Vehicle Documents & Insurance</h3>
+                <p class="text-wire-500">Mandatory verification to receive legal breakdown towing orders under Motor Vehicles Act.</p>
+
+                <div class="grid sm:grid-cols-2 gap-4">
+                  <div class="border-2 border-dashed border-wire-300 dark:border-wire-700 rounded-lg p-5 text-center bg-wire-50/50 dark:bg-wire-850">
+                    <div class="text-2xl mb-1">📄</div>
+                    <div class="font-bold text-wire-900 dark:text-white mb-1">RTO Commercial Tow Truck Permit & Fitness</div>
+                    <div class="text-[11px] text-wire-500 mb-2">Valid fitness certificate (Form 38)</div>
+                    <span class="text-[10px] text-emerald-600 font-bold">✓ rto_tow_permit_2026.pdf attached</span>
+                  </div>
+
+                  <div class="border-2 border-dashed border-wire-300 dark:border-wire-700 rounded-lg p-5 text-center bg-wire-50/50 dark:bg-wire-850">
+                    <div class="text-2xl mb-1">📸</div>
+                    <div class="font-bold text-wire-900 dark:text-white mb-1">Tow Truck Front & Hydraulic Bed Photo</div>
+                    <div class="text-[11px] text-wire-500 mb-2">Showing commercial yellow plate & winch gear</div>
+                    <span class="text-[10px] text-emerald-600 font-bold">✓ flatbed_truck_exterior.jpg attached</span>
+                  </div>
+                </div>
+
+                <div class="flex justify-between pt-4">
+                  <button onclick="setCraneSignupStep(3)" class="px-4 py-2 border border-wire-300 rounded">‹ Back</button>
+                  <button onclick="setCraneSignupStep(5)" class="px-5 py-2 bg-amber-600 hover:bg-amber-700 text-white rounded font-bold">Next: Review & Agreement ➔</button>
+                </div>
+              </div>
+
+              <!-- STEP 5: REVIEW & CODE OF CONDUCT -->
+              <div id="c-signup-step-5" class="c-signup-step hidden space-y-4 text-xs">
+                <h3 class="font-bold text-sm text-wire-900 dark:text-white">Step 5: Review Application & Safe Towing Agreement</h3>
+                
+                <div class="p-3.5 bg-wire-50 dark:bg-wire-850 rounded-lg border border-wire-300 dark:border-wire-700 text-[11px] space-y-2">
+                  <div class="grid grid-cols-2 gap-2">
+                    <div><span class="text-wire-500">Operator:</span> <strong>Your name</strong></div>
+                    <div><span class="text-wire-500">Truck:</span> <strong>Hydraulic Flatbed (3.5T)</strong></div>
+                    <div><span class="text-wire-500">Plate:</span> <span class="font-mono font-bold">KL-07-EE-9090</span></div>
+                    <div><span class="text-wire-500">Rates:</span> <span>₹1,200 base + ₹60/km</span></div>
+                  </div>
+                </div>
+
+                <label class="flex items-start gap-2 cursor-pointer p-3 border border-wire-200 dark:border-wire-800 rounded-lg">
+                  <input type="checkbox" checked class="w-4 h-4 rounded text-amber-600 mt-0.5">
+                  <span class="text-wire-600 dark:text-wire-300 leading-normal text-[11px]">
+                    I agree to the GearUp Recovery Partner Code: mandatory 4-angle vehicle damage photography prior to winch hookup, non-negotiable transparent per-km billing, and safe delivery handover with digital confirmation.
+                  </span>
+                </label>
+
+                <div class="flex justify-between pt-4">
+                  <button onclick="setCraneSignupStep(4)" class="px-4 py-2 border border-wire-300 rounded">‹ Back</button>
+                  <button onclick="submitCraneSignupAndShowPending()" class="px-6 py-2.5 bg-emerald-700 text-white rounded font-bold hover:bg-emerald-800">
+                    Submit Recovery Fleet Application ✓
+                  </button>
+                </div>
+              </div>
+
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 3. FORGOT PASSWORD FLOW                                           -->
+          <!-- ================================================================= -->
+          <section id="c-forgot" class="page-view hidden p-6 flex-col items-center justify-center min-h-[500px]">
+            <div class="w-full max-w-md border border-wire-300 dark:border-wire-700 rounded-xl bg-white dark:bg-wire-900 p-6 shadow-sm text-xs">
+              <h3 class="text-lg font-bold text-wire-900 dark:text-white mb-2">Reset Driver Account Password</h3>
+              <p class="text-wire-500 mb-4">Enter your registered driver phone number to receive a recovery code.</p>
+
+              <div id="c-forgot-step-a" class="space-y-4">
+                <div>
+                  <label class="block font-medium mb-1">Registered Mobile Number</label>
+                  <input type="text" value="+91 98765 00000" class="w-full px-3 py-2 border border-wire-300 rounded bg-white dark:bg-wire-800">
+                </div>
+                <button onclick="setCraneForgotStep('b')" class="w-full py-2 bg-amber-600 text-white rounded font-bold hover:bg-amber-700">Send Recovery Code ➔</button>
+              </div>
+
+              <div id="c-forgot-step-b" class="hidden space-y-4">
+                <div>
+                  <label class="block font-medium mb-1">Enter 6-Digit Code</label>
+                  <input type="text" placeholder="• • • • • •" class="w-full px-3 py-2 border border-wire-300 rounded text-center font-mono">
+                </div>
+                <button onclick="setCraneForgotStep('c')" class="w-full py-2 bg-amber-600 text-white rounded font-bold">Verify Code ➔</button>
+              </div>
+
+              <div id="c-forgot-step-c" class="hidden space-y-4">
+                <div>
+                  <label class="block font-medium mb-1">New Password</label>
+                  <input type="password" placeholder="At least 8 characters" class="w-full px-3 py-2 border border-wire-300 rounded">
+                </div>
+                <button onclick="showPage('c-login')" class="w-full py-2 bg-emerald-700 text-white rounded font-bold">Update Password & Log In ✓</button>
+              </div>
+
+              <div class="mt-4 pt-3 border-t border-wire-200 text-center">
+                <button onclick="showPage('c-login')" class="text-wire-500 underline">‹ Back to Login</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 4. PENDING VERIFICATION STATE                                     -->
+          <!-- ================================================================= -->
+          <section id="c-pending" class="page-view hidden p-6 flex-col items-center justify-center min-h-[500px]">
+            <div class="w-full max-w-md border border-amber-300 dark:border-amber-800 rounded-xl bg-amber-50/40 dark:bg-amber-950/20 p-6 text-center text-xs">
+              <div class="text-3xl mb-2">⏳</div>
+              <h3 class="text-lg font-bold text-wire-900 dark:text-white mb-2">Tow Truck Verification in Progress</h3>
+              <p class="text-wire-600 dark:text-wire-400 mb-6">Our RTO audit team is checking your commercial fitness certificate and winch load rating. Live breakdown dispatch orders are paused until approved.</p>
+              <div class="flex gap-2 justify-center">
+                <button onclick="simulateCraneApproval()" class="px-4 py-2 bg-emerald-700 text-white rounded font-bold">Simulate RTO Approval (Demo) ✓</button>
+                <button onclick="showPage('c-dashboard')" class="px-4 py-2 border border-wire-300 rounded font-medium">Dashboard ›</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 5. CRANE FLEET DASHBOARD                                          -->
+          <!-- ================================================================= -->
+          <section id="c-dashboard" class="page-view p-4 md:p-6 space-y-6">
+            
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-wire-50 dark:bg-wire-900 border border-wire-300 dark:border-wire-700 rounded-xl p-4 md:p-5">
+              <div>
+                <div class="flex items-center gap-2">
+                  <h2 class="text-lg md:text-xl font-bold text-wire-900 dark:text-white">Tow Dispatch Dashboard</h2>
+                  <span class="px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 text-[10px] font-bold">ON-DUTY</span>
+                </div>
+                <p class="text-xs text-wire-500">Unit: <strong>Flatbed #1 (KL-07-EE-9090)</strong> • GPS Radar: <strong>40 km active</strong></p>
+              </div>
+
+              <!-- Big Visual Duty Switch -->
+              <button onclick="toggleCraneBigDuty()" id="c-big-status-btn" class="px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold text-xs flex items-center gap-2 shadow-sm">
+                <span class="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
+                <span id="c-big-status-text">ON-DUTY & BROADCASTING</span>
+              </button>
+            </div>
+
+            <!-- 4 Metrics: New Dispatches, Active Tows, Towed Today, Earnings -->
+            <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+              <div onclick="showPage('c-requests')" class="cursor-pointer border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 hover:border-red-400 transition">
+                <div class="text-xs font-medium text-wire-500">New Tow Requests</div>
+                <div class="flex items-baseline gap-2 mt-1">
+                  <span class="text-2xl font-bold font-mono text-wire-900 dark:text-white">1</span>
+                  <span class="text-[10px] text-red-600 font-bold bg-red-50 px-1 rounded">01:45 left</span>
+                </div>
+                <div class="text-[10px] text-wire-500 mt-1">Stranded on Bypass Highway</div>
+              </div>
+
+              <div onclick="showPage('c-job-details')" class="cursor-pointer border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 hover:border-wire-500 transition">
+                <div class="text-xs font-medium text-wire-500">Active Recovery Job</div>
+                <div class="text-2xl font-bold font-mono text-wire-900 dark:text-white">1</div>
+                <div class="text-[10px] text-amber-600 font-bold mt-1">Stage 3: Loaded on Flatbed</div>
+              </div>
+
+              <div onclick="showPage('c-trip-logs')" class="cursor-pointer border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 hover:border-wire-500 transition">
+                <div class="text-xs font-medium text-wire-500">Vehicles Towed Today</div>
+                <div class="text-2xl font-bold font-mono text-wire-900 dark:text-white">3</div>
+                <div class="text-[10px] text-wire-500 mt-1">Total transit: 48.5 km</div>
+              </div>
+
+              <div onclick="showPage('c-earnings')" class="cursor-pointer border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 hover:border-wire-500 transition">
+                <div class="text-xs font-medium text-wire-500">Today's Tow Revenue</div>
+                <div class="text-2xl font-bold font-mono text-wire-900 dark:text-white">₹5,400</div>
+                <div class="text-[10px] text-emerald-600 font-bold mt-1">+₹320 toll reimbursement</div>
+              </div>
+            </div>
+
+            <!-- Urgent Incoming Tow Dispatch Card -->
+            <div class="border-2 border-red-500/80 rounded-xl p-4 bg-red-50/30 dark:bg-red-950/20 space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-red-600 text-white text-[10px] font-bold uppercase animate-pulse">
+                    🚨 HIGHWAY BREAKDOWN TOW DISPATCH
+                  </span>
+                  <span class="text-xs font-bold text-wire-900 dark:text-white">Pickup 5.4 km away</span>
+                </div>
+                <span class="font-mono text-xs font-bold text-red-700 bg-white dark:bg-wire-900 px-2 py-0.5 rounded border border-red-300" id="crane-dash-timer">01:45</span>
+              </div>
+
+              <div class="grid md:grid-cols-4 gap-2 text-xs bg-white dark:bg-wire-900 p-3 rounded-lg border border-red-200">
+                <div>
+                  <div class="text-[10px] text-wire-400 font-mono">STRANDED VEHICLE</div>
+                  <div class="font-bold text-wire-900 dark:text-white">Innova Crysta (Automatic)</div>
+                  <div class="text-wire-500 font-mono text-[11px]">Transmission locked • Needs Flatbed</div>
+                </div>
+
+                <div>
+                  <div class="text-[10px] text-wire-400 font-mono">PICKUP POINT (GPS)</div>
+                  <div class="font-bold text-wire-900 dark:text-white">Bypass Highway, Near Exit 8</div>
+                  <div class="text-wire-500 text-[11px]">Stranded on left shoulder</div>
+                </div>
+
+                <div>
+                  <div class="text-[10px] text-wire-400 font-mono">DROP-OFF DESTINATION</div>
+                  <div class="font-bold text-wire-900 dark:text-white">Workshop #1 (City Garage)</div>
+                  <div class="text-wire-500 text-[11px]">Total tow distance: <strong>14.2 km</strong></div>
+                </div>
+
+                <div>
+                  <div class="text-[10px] text-wire-400 font-mono">GUARANTEED FARE</div>
+                  <div class="font-bold text-emerald-700 dark:text-emerald-400 text-sm font-mono">₹1,752</div>
+                  <div class="text-[10px] text-wire-500">Base ₹1,200 + 9.2 km transit</div>
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-2">
+                <button onclick="confirmRejectCraneRequest('TOW-401')" class="px-3 py-1.5 border border-wire-300 rounded text-xs hover:bg-wire-100">Pass</button>
+                <button onclick="acceptCraneRequestAndOpen('TOW-401')" class="px-5 py-1.5 bg-emerald-700 text-white rounded font-bold text-xs hover:bg-emerald-800">
+                  Accept Towing Job (1-Tap) ➔
+                </button>
+              </div>
+            </div>
+
+            <!-- Active Job Overview & Quick Route -->
+            <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3 text-xs">
+              <div class="flex items-center justify-between pb-2 border-b border-wire-200">
+                <h3 class="font-bold text-sm text-wire-900 dark:text-white">Active Recovery: Swift Dzire (#TOW-398)</h3>
+                <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 font-bold text-[10px]">TOWING IN TRANSIT</span>
+              </div>
+              
+              <div class="flex flex-col sm:flex-row justify-between gap-3 items-center">
+                <div>
+                  <div>Currently en route to: <strong>Workshop #1 (Service Road)</strong></div>
+                  <div class="text-wire-500 text-[11px]">Remaining transit: <strong>4.8 km (approx 12 mins)</strong></div>
+                </div>
+                <button onclick="showPage('c-job-details')" class="px-4 py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold">
+                  Open Recovery Live Stepper ➔
+                </button>
+              </div>
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 6. INCOMING TOW REQUESTS                                          -->
+          <!-- ================================================================= -->
+          <section id="c-requests" class="page-view hidden p-4 md:p-6 space-y-4">
+            <div class="flex items-center justify-between pb-3 border-b border-wire-300 dark:border-wire-700">
+              <div>
+                <h2 class="text-lg font-bold text-wire-900 dark:text-white">Incoming Tow Requests</h2>
+                <p class="text-xs text-wire-500">Live breakdown recovery alerts dispatched to your 3.5T Flatbed.</p>
+              </div>
+              <span class="font-mono text-xs font-bold text-red-600 bg-red-50 p-1.5 rounded border border-red-300" id="crane-req-countdown">01:45</span>
+            </div>
+
+            <!-- Live Request Card -->
+            <div id="c-request-card-live" class="border-2 border-wire-900 dark:border-white rounded-xl p-5 bg-white dark:bg-wire-900 space-y-4">
+              <div class="flex flex-wrap items-center justify-between gap-2">
+                <div class="flex items-center gap-2">
+                  <span class="px-2 py-0.5 rounded bg-red-600 text-white text-xs font-bold">🚨 EMERGENCY RECOVERY</span>
+                  <span class="px-2 py-0.5 rounded bg-amber-100 text-amber-800 text-xs font-bold">🛏️ Flatbed Required</span>
+                  <span class="text-xs font-mono text-wire-500">Pickup 5.4 km away</span>
+                </div>
+              </div>
+
+              <div class="grid md:grid-cols-3 gap-4 text-xs">
+                <div class="p-3 bg-wire-50 dark:bg-wire-850 rounded-lg space-y-1">
+                  <div class="text-[10px] text-wire-400 font-mono">VEHICLE CONDITION</div>
+                  <div class="font-bold text-wire-900 dark:text-white">Innova Crysta (Automatic)</div>
+                  <div class="text-wire-500">Plate: <strong>KL-07-ZZ-5050</strong></div>
+                  <div class="text-red-600 font-medium">Transmission locked • Cannot roll</div>
+                </div>
+
+                <div class="p-3 bg-wire-50 dark:bg-wire-850 rounded-lg space-y-1">
+                  <div class="text-[10px] text-wire-400 font-mono">RECOVERY ROUTE</div>
+                  <div>From: <strong>Bypass Highway Exit 8</strong></div>
+                  <div>To: <strong>Workshop #1 (Certified Garage)</strong></div>
+                  <div class="text-wire-500 font-mono">Transit Distance: 14.2 km</div>
+                </div>
+
+                <div class="p-3 bg-wire-50 dark:bg-wire-850 rounded-lg space-y-1">
+                  <div class="text-[10px] text-wire-400 font-mono">PAYOUT ESTIMATE</div>
+                  <div class="text-lg font-bold font-mono text-emerald-700 dark:text-emerald-400">₹1,752</div>
+                  <div class="text-[10px] text-wire-500">₹1,200 base (5 km) + ₹60/km for 9.2 km</div>
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-3 pt-2 border-t border-wire-200">
+                <button onclick="confirmRejectCraneRequest('TOW-401')" class="px-4 py-2 border border-wire-300 rounded font-medium text-xs hover:bg-wire-100">Reject / Pass</button>
+                <button onclick="acceptCraneRequestAndOpen('TOW-401')" class="px-6 py-2 bg-emerald-700 text-white rounded font-bold text-xs hover:bg-emerald-800">
+                  Accept Tow Job (1-Tap) ➔
+                </button>
+              </div>
+            </div>
+
+            <!-- Forwarded / Expired Card -->
+            <div class="border border-dashed border-wire-300 rounded-xl p-4 bg-wire-50/50 text-xs opacity-75">
+              <div class="flex items-center justify-between">
+                <span class="font-bold text-wire-600">#TOW-395 (Expired): Honda City • North Bridge</span>
+                <span class="text-[10px] bg-wire-200 px-2 py-0.5 rounded text-wire-600">Auto-forwarded to Recovery Unit #2</span>
+              </div>
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 7. ACTIVE TOW JOB (5-STAGE RECOVERY STEPPER)                      -->
+          <!-- ================================================================= -->
+          <section id="c-job-details" class="page-view hidden p-4 md:p-6 space-y-5">
+            
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-wire-300 dark:border-wire-700">
+              <div>
+                <h2 class="text-lg font-bold text-wire-900 dark:text-white">Active Recovery #TOW-398</h2>
+                <p class="text-xs text-wire-500">Swift Dzire (KL-07-CC-1234) • Destination: Workshop #1</p>
+              </div>
+
+              <div class="flex items-center gap-2 text-xs">
+                <a href="tel:+919876512345" class="px-3 py-1.5 bg-emerald-600 text-white rounded font-bold flex items-center gap-1">
+                  <span>📞 Call Motorist</span>
+                </a>
+              </div>
+            </div>
+
+            <!-- 5-STAGE CRANE RECOVERY STEPPER -->
+            <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+              <div class="text-xs font-bold text-wire-900 dark:text-white flex justify-between">
+                <span>Towing Progression Lifecycle</span>
+                <span class="text-amber-600 font-mono text-[11px]" id="crane-stage-label">Stage 3 of 5: Vehicle Hooked & Loaded</span>
+              </div>
+
+              <div class="grid grid-cols-5 gap-2 text-center text-xs">
+                <div class="p-2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200 font-bold">
+                  1. Accepted
+                </div>
+                <div class="p-2 rounded bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200 font-bold">
+                  2. En Route
+                </div>
+                <div class="p-2 rounded bg-amber-500 text-white font-bold shadow">
+                  3. Loaded / Hooked
+                </div>
+                <div class="p-2 rounded bg-wire-100 dark:bg-wire-800 text-wire-500 font-bold">
+                  4. In Transit
+                </div>
+                <div class="p-2 rounded bg-wire-100 dark:bg-wire-800 text-wire-500 font-bold">
+                  5. Delivered
+                </div>
+              </div>
+
+              <div class="flex flex-wrap justify-between items-center pt-3 border-t border-wire-200 gap-2">
+                <div class="text-[11px] text-wire-500">Customer is tracking your recovery truck on live GPS.</div>
+                <div class="flex gap-2">
+                  <button onclick="advanceCraneStage('in_transit')" class="px-4 py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs">
+                    Start Towing Transit ➔
+                  </button>
+                  <button onclick="showPage('c-handover')" class="px-4 py-2 bg-emerald-700 text-white rounded font-bold text-xs">
+                    Arrived at Destination / Handover ➔
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Pre-Tow Inspection & 4-Angle Damage Photos -->
+            <div class="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3 text-xs">
+              <div class="font-bold text-wire-900 dark:text-white">Pre-Hookup Inspection & Damage Documentation</div>
+              <p class="text-wire-500 text-[11px]">Take 4 photos before winching onto flatbed to protect operator against existing scratch/dents.</p>
+
+              <div class="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                <div class="border border-dashed border-wire-300 rounded-lg p-3 text-center bg-wire-50 dark:bg-wire-850">
+                  <div class="text-base mb-1">📸</div>
+                  <div class="font-bold text-[11px]">Front Bumper</div>
+                  <span class="text-[10px] text-emerald-600">✓ front_damaged.jpg</span>
+                </div>
+                <div class="border border-dashed border-wire-300 rounded-lg p-3 text-center bg-wire-50 dark:bg-wire-850">
+                  <div class="text-base mb-1">📸</div>
+                  <div class="font-bold text-[11px]">Driver Side</div>
+                  <span class="text-[10px] text-emerald-600">✓ left_flank.jpg</span>
+                </div>
+                <div class="border border-dashed border-wire-300 rounded-lg p-3 text-center bg-wire-50 dark:bg-wire-850">
+                  <div class="text-base mb-1">📸</div>
+                  <div class="font-bold text-[11px]">Rear Bumper</div>
+                  <span class="text-[10px] text-emerald-600">✓ rear_intact.jpg</span>
+                </div>
+                <div class="border border-dashed border-wire-300 rounded-lg p-3 text-center bg-wire-50 dark:bg-wire-850">
+                  <div class="text-base mb-1">📸</div>
+                  <div class="font-bold text-[11px]">Passenger Side</div>
+                  <span class="text-[10px] text-emerald-600">✓ right_side.jpg</span>
+                </div>
+              </div>
+            </div>
+
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 8. VEHICLE HANDOVER & TRIP COMPLETION                             -->
+          <!-- ================================================================= -->
+          <section id="c-handover" class="page-view hidden p-4 md:p-6 space-y-5">
+            <div class="flex items-center justify-between pb-3 border-b border-wire-300">
+              <h2 class="text-lg font-bold text-wire-900 dark:text-white">Trip Handover & Receipt Generation</h2>
+              <span class="text-xs font-mono font-bold text-emerald-600">Step 5: Final Delivery</span>
+            </div>
+
+            <div class="grid lg:grid-cols-12 gap-5 text-xs">
+              <div class="lg:col-span-8 space-y-4">
+                
+                <!-- Odometer / GPS Km Verification -->
+                <div class="border border-wire-300 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                  <div class="font-bold text-sm">1. Tow Mileage Audit</div>
+                  <div class="grid sm:grid-cols-3 gap-3 font-mono">
+                    <div class="p-2 border rounded">Start Km: <strong>14,210 km</strong></div>
+                    <div class="p-2 border rounded">End Km: <strong>14,228 km</strong></div>
+                    <div class="p-2 border rounded bg-wire-50 font-bold">Total Towed: 18.0 km</div>
+                  </div>
+                </div>
+
+                <!-- Toll & Surcharge Claims -->
+                <div class="border border-wire-300 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                  <div class="flex justify-between items-center">
+                    <div class="font-bold text-sm">2. Highway Toll & Extra Charges</div>
+                    <button class="underline font-bold">+ Add Toll Receipt</button>
+                  </div>
+                  <div class="p-2.5 border rounded flex justify-between font-mono">
+                    <span>Highway Toll Plaza #3 (FASTag receipt)</span>
+                    <span class="font-bold">₹120</span>
+                  </div>
+                </div>
+
+                <!-- Handover Recipient Signature / OTP -->
+                <div class="border border-wire-300 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3">
+                  <div class="font-bold text-sm">3. Delivery Handover Confirmation</div>
+                  <p class="text-wire-500 text-[11px]">Enter the 4-digit handover OTP from the receiving garage manager or customer.</p>
+                  <div class="flex gap-2 items-center">
+                    <input type="text" placeholder="• • • •" value="8421" class="w-32 p-2 border rounded text-center font-mono text-base font-bold">
+                    <span class="text-emerald-600 font-bold">✓ OTP Verified: Garage Received</span>
+                  </div>
+                </div>
+
+              </div>
+
+              <!-- Payout Summary Card -->
+              <div class="lg:col-span-4">
+                <div class="border-2 border-wire-900 rounded-xl p-4 bg-white dark:bg-wire-900 space-y-3 shadow-sm">
+                  <div class="font-bold text-sm border-b pb-2">Tow Invoice #TOW-2026-891</div>
+                  <div class="space-y-1 font-mono text-[11px]">
+                    <div class="flex justify-between"><span>Base Hookup Fare:</span> <span>₹1,200</span></div>
+                    <div class="flex justify-between"><span>Transit Fare (13 km @ ₹60):</span> <span>₹780</span></div>
+                    <div class="flex justify-between"><span>Toll Plaza Fastag:</span> <span>₹120</span></div>
+                    <div class="flex justify-between font-bold text-sm pt-2 border-t"><span>Total Payout:</span> <span class="text-emerald-700">₹2,100</span></div>
+                  </div>
+                  <button onclick="finalizeCraneHandover()" class="w-full py-2.5 bg-emerald-700 text-white rounded font-bold hover:bg-emerald-800">
+                    Complete Job & Release Payout ✓
+                  </button>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 9. RATES & RADIUS SETTINGS                                        -->
+          <!-- ================================================================= -->
+          <section id="c-fleet-rates" class="page-view hidden p-4 md:p-6 space-y-4">
+            <h2 class="text-lg font-bold">Towing Rates & Service Boundary</h2>
+            <div class="border border-wire-300 rounded-xl bg-white dark:bg-wire-900 p-4 text-xs space-y-3">
+              <div class="grid sm:grid-cols-3 gap-3">
+                <div class="p-3 border rounded"><div class="text-wire-500">Base Hookup (First 5 km)</div><div class="text-xl font-bold font-mono">₹1,200</div></div>
+                <div class="p-3 border rounded"><div class="text-wire-500">Per-Km Beyond 5 km</div><div class="text-xl font-bold font-mono">₹60 / km</div></div>
+                <div class="p-3 border rounded"><div class="text-wire-500">Max Dispatch Radius</div><div class="text-xl font-bold font-mono">40 km</div></div>
+              </div>
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 10. TRIP LOGS                                                     -->
+          <!-- ================================================================= -->
+          <section id="c-trip-logs" class="page-view hidden p-4 md:p-6 space-y-4">
+            <h2 class="text-lg font-bold">Trip Logs & Recovery Invoices</h2>
+            <div class="p-3.5 border rounded-xl bg-white dark:bg-wire-900 text-xs flex justify-between items-center">
+              <div>
+                <span class="font-mono font-bold">29 Sep 2026</span> • Swift Dzire • 18.0 km towed
+              </div>
+              <div class="flex items-center gap-3">
+                <span class="font-mono font-bold text-emerald-700">₹2,100</span>
+                <button class="underline">Receipt 📄</button>
+              </div>
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 11. REVIEWS                                                       -->
+          <!-- ================================================================= -->
+          <section id="c-reviews" class="page-view hidden p-4 md:p-6 space-y-4">
+            <h2 class="text-lg font-bold">Verified Driver Reviews (4.9 ★)</h2>
+            <div class="p-4 border rounded-xl bg-white dark:bg-wire-900 text-xs space-y-2">
+              <div class="flex justify-between font-bold">
+                <span>Motorist (Innova Crysta)</span>
+                <span class="text-amber-500">★★★★★</span>
+              </div>
+              <p class="text-wire-600">"Flatbed arrived within 15 minutes. Professional winch operator who took photos before loading."</p>
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 12. EARNINGS                                                      -->
+          <!-- ================================================================= -->
+          <section id="c-earnings" class="page-view hidden p-4 md:p-6 space-y-4">
+            <h2 class="text-lg font-bold">Recovery Earnings & Toll Claims</h2>
+            <div class="grid grid-cols-3 gap-3 text-xs">
+              <div class="p-4 border rounded-xl bg-white"><div class="text-wire-500">Today</div><div class="text-xl font-bold font-mono">₹5,400</div></div>
+              <div class="p-4 border rounded-xl bg-white"><div class="text-wire-500">This Week</div><div class="text-xl font-bold font-mono">₹31,200</div></div>
+              <div class="p-4 border rounded-xl bg-white"><div class="text-wire-500">This Month</div><div class="text-xl font-bold font-mono">₹1,24,800</div></div>
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 13. AVAILABILITY                                                  -->
+          <!-- ================================================================= -->
+          <section id="c-availability" class="page-view hidden p-4 md:p-6 space-y-4">
+            <h2 class="text-lg font-bold">Duty Hours & Night Surcharge Rules</h2>
+            <div class="p-4 border rounded-xl bg-white text-xs space-y-3">
+              <label class="flex items-center gap-2"><input type="checkbox" checked> <span>Auto-busy while towing on active job</span></label>
+              <label class="flex items-center gap-2"><input type="checkbox" checked> <span>24/7 Highway emergency standby</span></label>
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 14. PROFILE                                                       -->
+          <!-- ================================================================= -->
+          <section id="c-profile" class="page-view hidden p-4 md:p-6 space-y-4">
+            <h2 class="text-lg font-bold">Tow Truck & Permit Profile</h2>
+            <div class="p-4 border rounded-xl bg-white text-xs space-y-2">
+              <div class="font-bold text-base">Recovery Unit #1 (Hydraulic Flatbed)</div>
+              <div class="text-emerald-700 font-bold">✓ GEARUP VERIFIED RECOVERY FLEET</div>
+              <div class="text-wire-500">Commercial Fitness Approved • RTO Permit Active</div>
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 15. NOTIFICATIONS                                                 -->
+          <!-- ================================================================= -->
+          <section id="c-notifications" class="page-view hidden p-4 md:p-6 space-y-4">
+            <h2 class="text-lg font-bold">Fleet Notifications</h2>
+            <div class="p-3 border-l-4 border-red-600 border rounded bg-white text-xs">
+              <strong>🚨 Breakdown Towing Request:</strong> 5.4 km away on Highway Exit 8.
+            </div>
+          </section>
+
+          <!-- ================================================================= -->
+          <!-- 16. SITEMAP & FLOW                                                -->
+          <!-- ================================================================= -->
+          <section id="c-sitemap" class="page-view hidden p-4 md:p-6 space-y-4">
+            <h2 class="text-lg font-bold">Crane Recovery Lifecycle</h2>
+            <div class="p-4 border rounded-xl bg-white text-xs">
+              <div class="font-bold mb-2">5-Stage Recovery Flow:</div>
+              <div class="space-y-1 text-wire-700">
+                1. Tow Alert Received (1:45 countdown) ➔ 2. 1-Tap Accept ➔ 3. En Route to Stranded Vehicle ➔ 4. Pre-Tow 4-Angle Photos & Loading ➔ 5. Tow Transit to Garage ➔ 6. Delivery Handover & Toll Payout
+              </div>
+            </div>
+          </section>
+
+        </div>
+      </div>
+
+      <!-- MOBILE BOTTOM NAV -->
+      <nav id="mobile-bottom-nav" class="md:hidden border-t border-wire-300 bg-white grid grid-cols-5 text-[10px] font-medium text-center py-2 fixed bottom-0 left-0 right-0 z-40">
+        <button onclick="showPage('c-dashboard')"><span>📊</span><br>Dashboard</button>
+        <button onclick="showPage('c-requests')"><span>🚨</span><br>Requests</button>
+        <button onclick="showPage('c-job-details')"><span>📍</span><br>Tow Job</button>
+        <button onclick="showPage('c-handover')"><span>📋</span><br>Handover</button>
+        <button onclick="toggleSidebarDrawer()"><span>☰</span><br>More</button>
+      </nav>
+
+      <!-- MOBILE SLIDE DRAWER -->
+      <div id="mobile-drawer" class="hidden fixed inset-0 z-50 bg-black/50 md:hidden flex justify-end">
+        <div class="w-64 bg-white h-full p-4 space-y-3 overflow-y-auto text-xs">
+          <div class="flex justify-between font-bold border-b pb-2"><span>Fleet Menu</span><button onclick="toggleSidebarDrawer()">✕</button></div>
+          <button onclick="showPage('c-fleet-rates'); toggleSidebarDrawer();" class="w-full text-left p-2">🏷️ Rates & Radius</button>
+          <button onclick="showPage('c-trip-logs'); toggleSidebarDrawer();" class="w-full text-left p-2">📄 Trip Logs</button>
+          <button onclick="showPage('c-reviews'); toggleSidebarDrawer();" class="w-full text-left p-2">⭐ Reviews</button>
+          <button onclick="showPage('c-earnings'); toggleSidebarDrawer();" class="w-full text-left p-2">💰 Earnings</button>
+          <button onclick="showPage('c-availability'); toggleSidebarDrawer();" class="w-full text-left p-2">🕒 Duty Hours</button>
+          <button onclick="showPage('c-profile'); toggleSidebarDrawer();" class="w-full text-left p-2">🚛 Truck Profile</button>
+          <button onclick="showPage('c-sitemap'); toggleSidebarDrawer();" class="w-full text-left p-2">🗺️ Recovery Flow</button>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <!-- MODALS -->
+  <div id="modal-crane-reject" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl p-5 max-w-sm w-full space-y-3 text-xs">
+      <div class="font-bold text-red-600">Decline Tow Dispatch</div>
+      <p>Pass on this breakdown? It will immediately forward to the next nearest tow operator.</p>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeModal('modal-crane-reject')" class="px-3 py-1 border rounded">Cancel</button>
+        <button onclick="executeRejectCraneRequest()" class="px-3 py-1 bg-red-600 text-white rounded font-bold">Confirm Pass</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="modal-crane-offduty" class="hidden fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-xl p-5 max-w-sm w-full space-y-3 text-xs">
+      <div class="font-bold text-amber-600">Go Off-Duty Confirmation</div>
+      <p>You have active roadside requests nearby. Going off-duty hides your truck from emergency dispatch.</p>
+      <div class="flex justify-end gap-2">
+        <button onclick="closeModal('modal-crane-offduty')" class="px-3 py-1 border rounded">Stay On-Duty</button>
+        <button onclick="executeGoOffDuty()" class="px-3 py-1 bg-wire-900 text-white rounded font-bold">Go Off-Duty</button>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    let craneTimerSeconds = 105;
+    let craneInterval = null;
+
+    function startCraneCountdown() {
+      if (craneInterval) clearInterval(craneInterval);
+      craneInterval = setInterval(() => {
+        if (craneTimerSeconds > 0) {
+          craneTimerSeconds--;
+          const mins = Math.floor(craneTimerSeconds / 60).toString().padStart(2, '0');
+          const secs = (craneTimerSeconds % 60).toString().padStart(2, '0');
+          const str = `${mins}:${secs}`;
+          if (document.getElementById('crane-dash-timer')) document.getElementById('crane-dash-timer').innerText = str;
+          if (document.getElementById('crane-req-countdown')) document.getElementById('crane-req-countdown').innerText = str;
+        } else {
+          clearInterval(craneInterval);
+        }
+      }, 1000);
+    }
+
+    function setViewport(mode) {
+      const container = document.getElementById('viewport-container');
+      const bD = document.getElementById('vp-btn-desktop');
+      const bT = document.getElementById('vp-btn-tablet');
+      const bM = document.getElementById('vp-btn-mobile');
+      [bD, bT, bM].forEach(b => b.className = "px-2.5 py-1 rounded font-medium transition text-wire-600 hover:text-wire-900 flex items-center gap-1.5");
+      const active = "px-2.5 py-1 rounded font-medium transition bg-white shadow-sm text-wire-900 flex items-center gap-1.5";
+      if (mode === 'desktop') { container.style.maxWidth = '1280px'; bD.className = active; }
+      else if (mode === 'tablet') { container.style.maxWidth = '768px'; bT.className = active; }
+      else if (mode === 'mobile') { container.style.maxWidth = '390px'; bM.className = active; }
+    }
+
+    function showPage(pageId) {
+      document.querySelectorAll('.page-view').forEach(el => el.classList.add('hidden'));
+      const target = document.getElementById(pageId);
+      if (target) target.classList.remove('hidden');
+      const sel = document.getElementById('page-select');
+      if (sel) sel.value = pageId;
+
+      const loggedOutHeader = document.getElementById('logged-out-header');
+      const loggedInHeader = document.getElementById('logged-in-header');
+      const desktopSidebar = document.getElementById('desktop-sidebar');
+      const mobileBottomNav = document.getElementById('mobile-bottom-nav');
+
+      if (['c-login', 'c-signup', 'c-forgot'].includes(pageId)) {
+        loggedOutHeader.classList.remove('hidden');
+        loggedInHeader.classList.add('hidden');
+        desktopSidebar.classList.add('hidden');
+        mobileBottomNav.classList.add('hidden');
+      } else {
+        loggedOutHeader.classList.add('hidden');
+        loggedInHeader.classList.remove('hidden');
+        desktopSidebar.classList.remove('hidden');
+        mobileBottomNav.classList.remove('hidden');
+      }
+
+      document.querySelectorAll('.sidebar-nav-btn').forEach(btn => {
+        btn.classList.remove('bg-wire-200', 'font-bold', 'text-wire-900');
+        btn.classList.add('text-wire-600');
+      });
+      const activeBtn = document.getElementById(`nav-btn-${pageId}`);
+      if (activeBtn) {
+        activeBtn.classList.remove('text-wire-600');
+        activeBtn.classList.add('bg-wire-200', 'font-bold', 'text-wire-900');
+      }
+      document.getElementById('content-scroll-container').scrollTop = 0;
+    }
+
+    function setCraneDutyStatus(status) {
+      const bAv = document.getElementById('duty-btn-available');
+      const bTow = document.getElementById('duty-btn-towing');
+      const bOff = document.getElementById('duty-btn-offduty');
+      [bAv, bTow, bOff].forEach(b => b.className = "px-2.5 py-1 rounded-md flex items-center gap-1.5 text-wire-600 hover:text-wire-900");
+
+      if (status === 'available') {
+        bAv.className = "px-2.5 py-1 rounded-md flex items-center gap-1.5 bg-white shadow-sm text-emerald-700 font-bold";
+        document.getElementById('c-big-status-btn').className = "px-4 py-2 bg-emerald-600 text-white rounded-lg font-bold text-xs flex items-center gap-2 shadow-sm";
+        document.getElementById('c-big-status-text').innerText = "ON-DUTY & BROADCASTING";
+      } else if (status === 'towing') {
+        bTow.className = "px-2.5 py-1 rounded-md flex items-center gap-1.5 bg-white shadow-sm text-amber-700 font-bold";
+        document.getElementById('c-big-status-btn').className = "px-4 py-2 bg-amber-600 text-white rounded-lg font-bold text-xs flex items-center gap-2 shadow-sm";
+        document.getElementById('c-big-status-text').innerText = "TOWING IN TRANSIT";
+      } else if (status === 'offduty') {
+        bOff.className = "px-2.5 py-1 rounded-md flex items-center gap-1.5 bg-white shadow-sm text-wire-800 font-bold";
+        document.getElementById('c-big-status-btn').className = "px-4 py-2 bg-wire-700 text-white rounded-lg font-bold text-xs flex items-center gap-2 shadow-sm";
+        document.getElementById('c-big-status-text').innerText = "OFF-DUTY (PAUSED)";
+      }
+    }
+
+    function toggleCraneBigDuty() {
+      if (document.getElementById('c-big-status-text').innerText.includes("ON-DUTY")) confirmGoOffDuty();
+      else setCraneDutyStatus('available');
+    }
+
+    function confirmGoOffDuty() { document.getElementById('modal-crane-offduty').classList.remove('hidden'); }
+    function executeGoOffDuty() { closeModal('modal-crane-offduty'); setCraneDutyStatus('offduty'); }
+    function closeModal(id) { document.getElementById(id).classList.add('hidden'); }
+
+    function confirmRejectCraneRequest() { document.getElementById('modal-crane-reject').classList.remove('hidden'); }
+    function executeRejectCraneRequest() {
+      closeModal('modal-crane-reject');
+      document.getElementById('c-request-card-live').innerHTML = "<div class='p-4 text-center text-wire-500 font-bold'>Dispatch passed and forwarded to next nearest recovery unit.</div>";
+    }
+
+    function acceptCraneRequestAndOpen() {
+      alert("✅ Tow Job Accepted! Starting navigation to stranded vehicle...");
+      setCraneDutyStatus('towing');
+      showPage('c-job-details');
+    }
+
+    function advanceCraneStage(stage) { alert(`Recovery progressed to: ${stage}`); }
+
+    function finalizeCraneHandover() {
+      alert("✅ Handover confirmed via OTP! Payout of ₹2,100 released to fleet wallet.");
+      setCraneDutyStatus('available');
+      showPage('c-trip-logs');
+    }
+
+    function setCraneSignupStep(step) {
+      document.querySelectorAll('.c-signup-step').forEach(el => el.classList.add('hidden'));
+      document.getElementById(`c-signup-step-${step}`).classList.remove('hidden');
+      document.getElementById('crane-step-indicator-text').innerText = `Step ${step} of 5`;
+      for (let i = 1; i <= 5; i++) {
+        document.getElementById(`c-prog-bar-${i}`).className = i <= step ? "h-1.5 rounded-full bg-amber-600 transition-all" : "h-1.5 rounded-full bg-wire-200 transition-all";
+      }
+    }
+
+    function submitCraneSignupAndShowPending() {
+      showPage('c-pending');
+      document.getElementById('crane-verification-banner').classList.remove('hidden');
+    }
+
+    function simulateCraneApproval() {
+      alert("🎉 Commercial Tow Truck Approved & Verified!");
+      document.getElementById('crane-verification-banner').classList.add('hidden');
+      showPage('c-dashboard');
+    }
+
+    function setCraneForgotStep(s) {
+      ['a', 'b', 'c'].forEach(x => { if (document.getElementById(`c-forgot-step-${x}`)) document.getElementById(`c-forgot-step-${x}`).classList.add('hidden'); });
+      document.getElementById(`c-forgot-step-${s}`).classList.remove('hidden');
+    }
+
+    function switchCraneLoginMode(m) {
+      if (m === 'pwd') {
+        document.getElementById('c-login-pwd-field').classList.remove('hidden');
+        document.getElementById('c-login-otp-field').classList.add('hidden');
+        document.getElementById('c-login-tab-pwd').className = "flex-1 py-1.5 text-center rounded bg-white shadow-sm font-bold text-wire-900";
+        document.getElementById('c-login-tab-otp').className = "flex-1 py-1.5 text-center rounded text-wire-600";
+      } else {
+        document.getElementById('c-login-pwd-field').classList.add('hidden');
+        document.getElementById('c-login-otp-field').classList.remove('hidden');
+        document.getElementById('c-login-tab-otp').className = "flex-1 py-1.5 text-center rounded bg-white shadow-sm font-bold text-wire-900";
+        document.getElementById('c-login-tab-pwd').className = "flex-1 py-1.5 text-center rounded text-wire-600";
+      }
+    }
+
+    function togglePasswordVisibility(id, btn) {
+      const el = document.getElementById(id);
+      el.type = el.type === 'password' ? 'text' : 'password';
+    }
+
+    function toggleSidebarDrawer() { document.getElementById('mobile-drawer').classList.toggle('hidden'); }
+    function toggleDarkMode() { document.documentElement.classList.toggle('dark'); }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      startCraneCountdown();
+      showPage('c-dashboard');
+    });
+  </script>
+</body>
+</html>
