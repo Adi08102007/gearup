@@ -27,6 +27,9 @@ interface AppContextType {
   updateTowStatus: (dispatchId: string, status: CraneTowDispatch["status"]) => Promise<void> | void;
   toggleTowPhoto: (dispatchId: string, angle: "front" | "rear" | "left" | "right") => Promise<void> | void;
   verifyTowOtp: (dispatchId: string, otp: string) => boolean;
+  addTowToll: (dispatchId: string, amount: number) => void;
+  cancelTowDispatch: (dispatchId: string) => void;
+  simulateIncomingTow: () => string;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
@@ -449,6 +452,57 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
     return false;
   };
 
+  const addTowToll = (dispatchId: string, amount: number) => {
+    setTowDispatches((prev) =>
+      prev.map((t) =>
+        t.id === dispatchId
+          ? {
+              ...t,
+              tollAmount: (t.tollAmount || 0) + amount,
+              totalFare: t.totalFare + amount,
+            }
+          : t
+      )
+    );
+  };
+
+  const cancelTowDispatch = (dispatchId: string) => {
+    setTowDispatches((prev) => prev.filter((t) => t.id !== dispatchId));
+  };
+
+  const simulateIncomingTow = (): string => {
+    const id = `tow-${Date.now()}`;
+    const newDispatch: CraneTowDispatch = {
+      id,
+      dispatchNumber: `TOW-2026-${Math.floor(100 + Math.random() * 900)}`,
+      customerId: "cust-motorist",
+      customerPhone: "+91 98470 55432",
+      vehicleInfo: {
+        make: "Toyota",
+        model: "Innova Crysta (Automatic)",
+        regNumber: "KL-07-ZZ-5050",
+        condition: "wheels_locked",
+      },
+      pickupAddress: "Bypass Highway Exit 8 (Near Kalamassery Toll)",
+      destinationShopId: shops[0]?.id || "shop-1",
+      destinationShopName: shops[0]?.name || "Workshop #1",
+      destinationAddress: shops[0]?.address || "Bypass Service Road",
+      distanceKm: 14.2,
+      baseFare: 1500,
+      perKmRate: 65,
+      totalFare: 1500 + Math.round(14.2 * 65),
+      status: "searching",
+      photos: {},
+      handoverOtp: "8421",
+      driverName: "Recovery Unit #1",
+      driverPhone: "+91 98460 00001",
+      truckPlate: "KL-07-EE-9090",
+      createdAt: new Date().toISOString().replace("T", " ").substring(0, 16),
+    };
+    setTowDispatches((prev) => [newDispatch, ...prev]);
+    return id;
+  };
+
   return (
     <AppContext.Provider
       value={{
@@ -473,6 +527,9 @@ export function AppProvider({ children }: { children: React.ReactNode }) {
         updateTowStatus,
         toggleTowPhoto,
         verifyTowOtp,
+        addTowToll,
+        cancelTowDispatch,
+        simulateIncomingTow,
       }}
     >
       {children}

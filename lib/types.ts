@@ -128,4 +128,6 @@ export interface CraneTowDispatch {
   driverPhone: string;
   truckPlate: string;
   createdAt: string;
+  tollAmount?: number;
+  notes?: string;
 }
