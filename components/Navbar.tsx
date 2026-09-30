@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { Wrench, ShieldAlert, Truck, Car, Home, Database, Cloud, User as UserIcon, LogIn, LogOut } from "lucide-react";
+import { Wrench, ShieldAlert, Truck, Car, Home, Database, Cloud, User as UserIcon, LogIn, LogOut, Search, Clock, History as HistoryIcon, Calendar } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { useApp } from "@/lib/app-context";
 
@@ -10,58 +10,94 @@ export default function Navbar() {
   const pathname = usePathname();
   const { isCloudConnected, currentUser, logout } = useApp();
 
-  const links = [
-    { href: "/", label: "Home", icon: Home },
-    { href: "/customer", label: "Customer Portal", icon: Car },
-    { href: "/mechanic", label: "Mechanic Portal", icon: Wrench },
-    { href: "/crane", label: "Crane Recovery", icon: Truck },
+  const isCustomer = pathname.startsWith("/customer");
+  const isMechanic = pathname.startsWith("/mechanic");
+  const isCrane = pathname.startsWith("/crane");
+
+  const portals = [
+    { href: "/customer", label: "Customer", icon: Car },
+    { href: "/mechanic", label: "Mechanic", icon: Wrench },
+    { href: "/crane", label: "Crane Ops", icon: Truck },
+  ];
+
+  const customerNavLinks = [
+    { href: "/customer/find-mechanic", label: "Find Mechanic" },
+    { href: "/customer/sos", label: "Crane" },
+    { href: "/customer/my-vehicles", label: "My Vehicles" },
+    { href: "/customer/history", label: "Service History" },
+    { href: "/customer#bookings", label: "Bookings" },
   ];
 
   return (
-    <header className="sticky top-0 z-50 bg-[#0c101c]/90 backdrop-blur-md border-b border-slate-800">
+    <header className="sticky top-0 z-50 bg-[#0c101c]/95 backdrop-blur-md border-b border-wire-300 dark:border-wire-700">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 h-16 flex items-center justify-between">
-        <Link href="/" className="flex items-center gap-2.5 group">
-          <div className="w-9 h-9 rounded-lg bg-emerald-500/10 border border-emerald-500/30 flex items-center justify-center text-emerald-400 group-hover:scale-105 transition-transform">
-            <Wrench className="w-5 h-5" />
-          </div>
-          <div>
-            <div className="flex items-center gap-1.5">
-              <span className="font-bold text-lg tracking-tight text-white">GearUp</span>
-              <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/20">
-                v1.0
-              </span>
+        
+        {/* Left: Brand Logo (NO VEHICLE CHIP in top bar as specified in wireframe) */}
+        <div className="flex items-center gap-6">
+          <Link href="/" className="flex items-center gap-2.5 group">
+            <div className="w-8 h-8 rounded-lg bg-wire-900 text-white dark:bg-white dark:text-wire-900 flex items-center justify-center font-bold text-sm">
+              ⚙️
             </div>
-            <p className="text-[11px] text-slate-400 -mt-1 hidden sm:block">Vehicle Care, Garages & Recovery Fleet</p>
-          </div>
-        </Link>
+            <div>
+              <div className="flex items-center gap-1.5 font-mono font-bold text-base tracking-wider text-wire-900 dark:text-white">
+                <span>GEARUP</span>
+                <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 font-sans">
+                  {isMechanic ? "PRO" : isCrane ? "CRANE" : "v2.1"}
+                </span>
+              </div>
+            </div>
+          </Link>
 
-        {/* Portal Switcher Nav */}
-        <nav className="flex items-center gap-1 sm:gap-2">
-          {links.map(({ href, label, icon: Icon }) => {
-            const isActive = href === "/" ? pathname === "/" : pathname.startsWith(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  "flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs sm:text-sm font-medium transition-all",
-                  isActive
-                    ? "bg-slate-800 text-white border border-slate-700 shadow-sm"
-                    : "text-slate-400 hover:text-slate-200 hover:bg-slate-850"
-                )}
-              >
-                <Icon className={cn("w-4 h-4", isActive ? "text-emerald-400" : "text-slate-400")} />
-                <span className="hidden md:inline">{label}</span>
-              </Link>
-            );
-          })}
-        </nav>
+          {/* Customer Specific Sub-nav links (Matches Wireframe 3) */}
+          {isCustomer && (
+            <nav className="hidden lg:flex items-center gap-5 text-xs font-medium text-wire-600 dark:text-wire-300">
+              {customerNavLinks.map(({ href, label }) => {
+                const isActive = pathname === href;
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={cn(
+                      "transition-colors hover:text-wire-900 dark:hover:text-white",
+                      isActive ? "text-wire-900 dark:text-white font-bold" : ""
+                    )}
+                  >
+                    {label}
+                  </Link>
+                );
+              })}
+            </nav>
+          )}
+        </div>
 
+        {/* Portal Switcher Dropdown / Pills */}
         <div className="flex items-center gap-2">
+          {/* Portal Switcher */}
+          <div className="flex items-center bg-wire-100 dark:bg-wire-850 p-1 rounded-lg border border-wire-300 dark:border-wire-700 text-xs">
+            {portals.map(({ href, label, icon: Icon }) => {
+              const active = pathname.startsWith(href);
+              return (
+                <Link
+                  key={href}
+                  href={href}
+                  className={cn(
+                    "px-2.5 py-1 rounded font-medium transition flex items-center gap-1",
+                    active
+                      ? "bg-white dark:bg-wire-700 shadow-sm text-wire-900 dark:text-white font-bold"
+                      : "text-wire-600 dark:text-wire-400 hover:text-wire-900 dark:hover:text-white"
+                  )}
+                >
+                  <Icon className="w-3.5 h-3.5" />
+                  <span className="hidden sm:inline">{label}</span>
+                </Link>
+              );
+            })}
+          </div>
+
           {/* Cloud DB Status */}
           <div
             className={cn(
-              "hidden md:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border",
+              "hidden xl:flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-[11px] font-medium border",
               isCloudConnected
                 ? "bg-emerald-500/10 text-emerald-400 border-emerald-500/20"
                 : "bg-slate-800/80 text-slate-400 border-slate-700"
@@ -72,21 +108,21 @@ export default function Navbar() {
                 : "Using local demo database (Add Supabase keys in .env.local to sync cloud)"
             }
           >
-            {isCloudConnected ? <Cloud className="w-3.5 h-3.5 text-emerald-400" /> : <Database className="w-3.5 h-3.5 text-slate-400" />}
+            {isCloudConnected ? <Cloud className="w-3 h-3 text-emerald-400" /> : <Database className="w-3 h-3 text-slate-400" />}
             <span>{isCloudConnected ? "Supabase Cloud" : "Local DB"}</span>
           </div>
 
           {/* User Account / Role Pill */}
           {currentUser ? (
-            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-slate-800/90 border border-slate-700 text-xs">
-              <UserIcon className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="font-semibold text-white max-w-[120px] truncate hidden sm:inline">
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-wire-100 dark:bg-wire-800 border border-wire-300 dark:border-wire-700 text-xs">
+              <UserIcon className="w-3.5 h-3.5 text-wire-600 dark:text-wire-300" />
+              <span className="font-semibold text-wire-900 dark:text-white max-w-[120px] truncate hidden md:inline">
                 {currentUser.name}
               </span>
               <button
                 onClick={logout}
                 title="Sign out"
-                className="text-slate-400 hover:text-red-400 transition-colors p-0.5"
+                className="text-wire-400 hover:text-red-500 transition-colors p-0.5"
               >
                 <LogOut className="w-3 h-3" />
               </button>
@@ -94,22 +130,23 @@ export default function Navbar() {
           ) : (
             <Link
               href="/login"
-              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-slate-800 hover:bg-slate-700 border border-slate-700 text-slate-200 text-xs sm:text-sm font-medium transition-all"
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-wire-900 text-white dark:bg-white dark:text-wire-900 text-xs font-bold transition-all shadow-sm"
             >
-              <LogIn className="w-3.5 h-3.5 text-emerald-400" />
-              <span>Sign In</span>
+              <LogIn className="w-3.5 h-3.5" />
+              <span>Login</span>
             </Link>
           )}
 
-          {/* Quick Emergency SOS shortcut */}
+          {/* Quick Emergency SOS button */}
           <Link
             href="/customer/sos"
-            className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-red-500/15 hover:bg-red-500/25 border border-red-500/30 text-red-400 text-xs sm:text-sm font-semibold transition-all hover:scale-[1.02]"
+            className="flex items-center gap-1 px-3 py-1.5 rounded-lg bg-red-600 hover:bg-red-700 text-white text-xs font-bold uppercase tracking-wider transition-all shadow-sm animate-emerg"
           >
-            <ShieldAlert className="w-4 h-4 animate-pulse" />
-            <span>SOS Crane</span>
+            <span>🚨</span>
+            <span className="hidden sm:inline">Emergency SOS</span>
           </Link>
         </div>
+
       </div>
     </header>
   );

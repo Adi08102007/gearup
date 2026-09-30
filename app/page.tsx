@@ -1,150 +1,173 @@
+"use client";
+
 import Link from "next/link";
-import { Car, Wrench, Truck, ArrowRight, ShieldCheck, Clock, Zap, MapPin } from "lucide-react";
+import { ArrowRight, Wrench, ShieldAlert, Truck, Star, Search, Clock, CheckCircle2 } from "lucide-react";
 
 export default function HomePage() {
-  const portals = [
-    {
-      title: "Customer Portal",
-      badge: "Vehicle Owners",
-      badgeColor: "bg-blue-500/10 text-blue-400 border-blue-500/20",
-      description: "Manage maintenance schedules by odometer, find verified local workshops, and request instant emergency towing.",
-      href: "/customer",
-      icon: Car,
-      accent: "hover:border-blue-500/40 hover:shadow-blue-500/5",
-      features: [
-        "Live Odometer & Service Tracker",
-        "Transparent Workshop Price Estimates",
-        "1-Tap Highway Emergency SOS Tow",
-        "Digital Vehicle Maintenance Log",
-      ],
-      cta: "Open Customer Portal",
-      ctaBg: "bg-blue-600 hover:bg-blue-500 text-white",
-    },
-    {
-      title: "Mechanic Portal",
-      badge: "Garages & Techs",
-      badgeColor: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
-      description: "Workshop management dashboard. Accept incoming service bookings within 2 minutes, manage repair bays, and log odometer readings.",
-      href: "/mechanic",
-      icon: Wrench,
-      accent: "hover:border-emerald-500/40 hover:shadow-emerald-500/5",
-      features: [
-        "Incoming Bookings with 2-min Countdown",
-        "4-Stage Repair Stepper & Bay Assignment",
-        "Mandatory Service Odometer Logging",
-        "Decoupled from Tow Operations",
-      ],
-      cta: "Open Mechanic Portal",
-      ctaBg: "bg-emerald-600 hover:bg-emerald-500 text-white",
-    },
-    {
-      title: "Crane Operator Portal",
-      badge: "Recovery Fleet",
-      badgeColor: "bg-amber-500/10 text-amber-400 border-amber-500/20",
-      description: "Dedicated highway recovery & flatbed fleet portal. Real-time tow dispatches, 4-angle photo damage checks, and OTP customer handover.",
-      href: "/crane",
-      icon: Truck,
-      accent: "hover:border-amber-500/40 hover:shadow-amber-500/5",
-      features: [
-        "Live Highway Emergency Dispatches",
-        "Transparent Base + Per-KM Rate Formula",
-        "4-Angle Pre-Tow Damage Photo Checklist",
-        "Garage Drop-Off Handover with OTP",
-      ],
-      cta: "Open Crane Portal",
-      ctaBg: "bg-amber-600 hover:bg-amber-500 text-white",
-    },
-  ];
-
   return (
-    <div className="space-y-12 py-4">
-      {/* Hero Section */}
-      <div className="text-center max-w-3xl mx-auto space-y-4">
-        <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full bg-slate-800/80 border border-slate-700/80 text-xs font-medium text-slate-300">
-          <Zap className="w-3.5 h-3.5 text-emerald-400" />
-          <span>Next.js 15 App Architecture • 3 Unified Portals</span>
-        </div>
-        <h1 className="text-3xl sm:text-5xl font-extrabold tracking-tight text-white leading-tight">
-          The Connected Automotive <br className="hidden sm:inline" />
-          <span className="bg-clip-text text-transparent bg-gradient-to-r from-emerald-400 via-teal-300 to-blue-500">
-            Care & Recovery Platform
+    <div className="space-y-12 py-2">
+      {/* 1. Hero Section (Matches Wireframe Screen 1) */}
+      <div className="p-6 md:p-12 border border-wire-300 dark:border-wire-700 rounded-2xl bg-wire-50/50 dark:bg-wire-900/30 space-y-6">
+        <div className="max-w-3xl space-y-4">
+          <span className="inline-block px-2.5 py-1 text-xs font-mono border border-wire-300 dark:border-wire-700 rounded bg-white dark:bg-wire-800 text-wire-700 dark:text-wire-300">
+            [WIREFRAME] Responsive Automotive Platform • GearUp Ecosystem
           </span>
-        </h1>
-        <p className="text-base sm:text-lg text-slate-400 max-w-2xl mx-auto">
-          One system connecting everyday motorists with certified independent garages and on-demand heavy recovery crane fleets.
-        </p>
-      </div>
 
-      {/* 3 Portal Selection Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        {portals.map((portal) => {
-          const Icon = portal.icon;
-          return (
-            <div
-              key={portal.title}
-              className={`flex flex-col justify-between p-6 rounded-2xl bg-[#0f1422] border border-slate-800 transition-all duration-300 shadow-lg ${portal.accent}`}
-            >
-              <div className="space-y-4">
-                <div className="flex items-center justify-between">
-                  <div className="w-12 h-12 rounded-xl bg-slate-800/90 border border-slate-700 flex items-center justify-center text-white">
-                    <Icon className="w-6 h-6" />
-                  </div>
-                  <span className={`text-[11px] font-semibold uppercase tracking-wider px-2.5 py-1 rounded-full border ${portal.badgeColor}`}>
-                    {portal.badge}
-                  </span>
-                </div>
+          <h1 className="text-3xl sm:text-4xl lg:text-5xl font-extrabold tracking-tight text-wire-900 dark:text-white leading-tight">
+            Find a trusted, rated mechanic near you.
+          </h1>
 
-                <div>
-                  <h2 className="text-xl font-bold text-white">{portal.title}</h2>
-                  <p className="text-sm text-slate-400 mt-1 leading-relaxed">
-                    {portal.description}
-                  </p>
-                </div>
+          <p className="text-sm sm:text-base text-wire-600 dark:text-wire-300 leading-relaxed">
+            Book doorstep onsite service, schedule workshop visits, or request emergency roadside towing with real-time tracking and transparent part & labor prices.
+          </p>
 
-                <div className="space-y-2 pt-2 border-t border-slate-800/70">
-                  <span className="text-[11px] uppercase tracking-wider font-semibold text-slate-500">Core Capabilities:</span>
-                  <ul className="space-y-1.5 text-xs text-slate-300">
-                    {portal.features.map((feat, i) => (
-                      <li key={i} className="flex items-center gap-2">
-                        <span className="w-1.5 h-1.5 rounded-full bg-slate-500" />
-                        <span>{feat}</span>
-                      </li>
-                    ))}
-                  </ul>
+          {/* Search Box */}
+          <div className="p-4 bg-white dark:bg-wire-800 border-2 border-wire-900 dark:border-wire-300 rounded-xl shadow-md space-y-3">
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
+              <div className="space-y-1">
+                <label className="text-[11px] font-mono uppercase text-wire-500">1. Current Location</label>
+                <div className="flex items-center border border-wire-300 dark:border-wire-600 rounded px-2.5 py-2 text-xs bg-transparent">
+                  <span className="mr-2">📍</span>
+                  <input
+                    type="text"
+                    defaultValue="Kochi Central / NH 66 Bypass"
+                    className="w-full bg-transparent focus:outline-none text-wire-900 dark:text-white"
+                  />
                 </div>
               </div>
 
-              <div className="pt-6">
+              <div className="space-y-1">
+                <label className="text-[11px] font-mono uppercase text-wire-500">2. Service Needed</label>
+                <select className="w-full border border-wire-300 dark:border-wire-600 rounded px-2.5 py-2 text-xs bg-white dark:bg-wire-800 text-wire-900 dark:text-white">
+                  <option>General Service & Oil Change</option>
+                  <option>Brake / Clutch Inspection</option>
+                  <option>Battery Jumpstart / Replace</option>
+                  <option>Flat Tyre / Puncture Repair</option>
+                </select>
+              </div>
+
+              <div className="space-y-1">
+                <label className="text-[11px] font-mono uppercase text-wire-500">3. Action</label>
                 <Link
-                  href={portal.href}
-                  className={`w-full flex items-center justify-center gap-2 py-2.5 px-4 rounded-xl text-sm font-medium transition-all shadow-md ${portal.ctaBg}`}
+                  href="/customer/find-mechanic"
+                  className="w-full py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs uppercase tracking-wider hover:opacity-90 flex items-center justify-center gap-1.5 h-[34px]"
                 >
-                  <span>{portal.cta}</span>
-                  <ArrowRight className="w-4 h-4" />
+                  <span>Find Mechanics</span>
+                  <ArrowRight className="w-3.5 h-3.5" />
                 </Link>
               </div>
             </div>
-          );
-        })}
+
+            {/* Breakdown Banner Card */}
+            <div className="mt-4 pt-3 border-t border-wire-200 dark:border-wire-700 flex flex-col sm:flex-row items-center justify-between gap-3 bg-red-50 dark:bg-red-950/40 p-3 rounded-lg border border-red-300 dark:border-red-800">
+              <div className="flex items-center gap-3">
+                <span className="text-2xl animate-emerg">🚨</span>
+                <div>
+                  <div className="text-xs font-bold text-red-700 dark:text-red-400">
+                    VEHICLE BROKE DOWN? GET HELP NOW
+                  </div>
+                  <div className="text-[11px] text-wire-600 dark:text-wire-400">
+                    Emergency auto-dispatch to the nearest available technician in ≤ 3 clicks.
+                  </div>
+                </div>
+              </div>
+              <Link
+                href="/customer/sos"
+                className="w-full sm:w-auto px-4 py-2 bg-red-600 hover:bg-red-700 text-white font-bold text-xs rounded uppercase tracking-wider transition whitespace-nowrap shadow-sm"
+              >
+                Vehicle broke down? Get help now ➔
+              </Link>
+            </div>
+          </div>
+        </div>
       </div>
 
-      {/* Network Stats Bar */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 p-5 rounded-2xl bg-[#0d121f] border border-slate-800 text-center">
-        <div>
-          <div className="text-2xl font-bold text-emerald-400">100%</div>
-          <div className="text-xs text-slate-400 mt-0.5">Decoupled Architecture</div>
+      {/* 2. How GearUp Works (3 Steps) */}
+      <div className="p-6 md:p-10 border border-wire-300 dark:border-wire-700 rounded-2xl bg-white dark:bg-wire-900 space-y-6">
+        <h2 className="text-lg font-bold uppercase font-mono tracking-wider text-center text-wire-900 dark:text-white">
+          How GearUp Works (In 3 Simple Steps)
+        </h2>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="border border-wire-300 dark:border-wire-700 p-5 rounded-xl bg-wire-50 dark:bg-wire-800/40 space-y-2">
+            <div className="w-8 h-8 rounded-full border-2 border-wire-900 dark:border-white font-mono font-bold flex items-center justify-center text-wire-900 dark:text-white">
+              1
+            </div>
+            <h3 className="font-bold text-sm text-wire-900 dark:text-white">Select Issue or Breakdown</h3>
+            <p className="text-xs text-wire-600 dark:text-wire-400 leading-relaxed">
+              Choose from verified service checklists, add custom symptoms, and choose onsite or shop visit.
+            </p>
+          </div>
+
+          <div className="border border-wire-300 dark:border-wire-700 p-5 rounded-xl bg-wire-50 dark:bg-wire-800/40 space-y-2">
+            <div className="w-8 h-8 rounded-full border-2 border-wire-900 dark:border-white font-mono font-bold flex items-center justify-center text-wire-900 dark:text-white">
+              2
+            </div>
+            <h3 className="font-bold text-sm text-wire-900 dark:text-white">Matched With Rated Mechanics</h3>
+            <p className="text-xs text-wire-600 dark:text-wire-400 leading-relaxed">
+              View real-time availability badges, distance, upfront part rates, and verified customer reviews.
+            </p>
+          </div>
+
+          <div className="border border-wire-300 dark:border-wire-700 p-5 rounded-xl bg-wire-50 dark:bg-wire-800/40 space-y-2">
+            <div className="w-8 h-8 rounded-full border-2 border-wire-900 dark:border-white font-mono font-bold flex items-center justify-center text-wire-900 dark:text-white">
+              3
+            </div>
+            <h3 className="font-bold text-sm text-wire-900 dark:text-white">Live Tracking & Service History</h3>
+            <p className="text-xs text-wire-600 dark:text-wire-400 leading-relaxed">
+              Track technician ETA on live map, approve extra parts in-app, and log service into vehicle history.
+            </p>
+          </div>
         </div>
-        <div>
-          <div className="text-2xl font-bold text-blue-400">&lt; 15 min</div>
-          <div className="text-xs text-slate-400 mt-0.5">Average Crane Dispatch</div>
+      </div>
+
+      {/* 3. 5 Features Grid */}
+      <div className="p-6 md:p-8 border border-wire-300 dark:border-wire-700 rounded-2xl bg-white dark:bg-wire-900 space-y-4">
+        <h2 className="text-lg font-bold uppercase font-mono tracking-wider text-wire-900 dark:text-white">
+          Features
+        </h2>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 text-xs">
+          <div className="p-4 border border-wire-200 dark:border-wire-700 rounded-xl space-y-1">
+            <div className="text-red-600 font-bold">🚨 Emergency Mode</div>
+            <p className="text-wire-500">Instant dispatch and automatic 2-minute failover.</p>
+          </div>
+          <div className="p-4 border border-wire-200 dark:border-wire-700 rounded-xl space-y-1">
+            <div className="font-bold text-wire-900 dark:text-white">🚗 Onsite / Offsite</div>
+            <p className="text-wire-500">Mobile service van at your door or shop visit.</p>
+          </div>
+          <div className="p-4 border border-wire-200 dark:border-wire-700 rounded-xl space-y-1">
+            <div className="font-bold text-wire-900 dark:text-white">🏗️ Crane Recovery</div>
+            <p className="text-wire-500">Towing directly to the nearest verified garage.</p>
+          </div>
+          <div className="p-4 border border-wire-200 dark:border-wire-700 rounded-xl space-y-1">
+            <div className="font-bold text-wire-900 dark:text-white">📊 Service History</div>
+            <p className="text-wire-500">Digital logbook with km-based maintenance alerts.</p>
+          </div>
+          <div className="p-4 border border-wire-200 dark:border-wire-700 rounded-xl space-y-1">
+            <div className="font-bold text-wire-900 dark:text-white">💰 Transparent Prices</div>
+            <p className="text-wire-500">Itemized part prices and labor charges upfront.</p>
+          </div>
         </div>
-        <div>
-          <div className="text-2xl font-bold text-amber-400">2 min</div>
-          <div className="text-xs text-slate-400 mt-0.5">Mechanic SLA Acceptance</div>
+      </div>
+
+      {/* 4. Quick Portal Switcher Banner (For Evaluators & Operators) */}
+      <div className="p-4 rounded-xl border border-wire-300 dark:border-wire-700 bg-wire-100 dark:bg-wire-850 flex flex-col sm:flex-row items-center justify-between gap-4 text-xs">
+        <div className="space-y-0.5">
+          <div className="font-bold text-wire-900 dark:text-white">Are you a Garage Owner or Crane Fleet Operator?</div>
+          <div className="text-wire-500">Log into your specialized operations dispatch board.</div>
         </div>
-        <div>
-          <div className="text-2xl font-bold text-purple-400">OTP-Secured</div>
-          <div className="text-xs text-slate-400 mt-0.5">Drop-off & Handover</div>
+        <div className="flex gap-2">
+          <Link
+            href="/mechanic"
+            className="px-3.5 py-1.5 border border-wire-400 dark:border-wire-600 rounded bg-white dark:bg-wire-800 font-bold text-wire-900 dark:text-white hover:bg-wire-50"
+          >
+            🛠️ Mechanic Portal ›
+          </Link>
+          <Link
+            href="/crane"
+            className="px-3.5 py-1.5 border border-amber-400 bg-amber-500/10 text-amber-700 dark:text-amber-300 rounded font-bold hover:bg-amber-500/20"
+          >
+            🏗️ Crane Ops ›
+          </Link>
         </div>
       </div>
     </div>

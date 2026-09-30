@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useApp } from "@/lib/app-context";
 import { formatCurrency, formatDistance } from "@/lib/utils";
 import { Truck, Navigation, Camera, ShieldCheck, MapPin, CheckCircle, Clock, Phone, AlertTriangle, Key } from "lucide-react";
@@ -8,18 +8,35 @@ import { CraneTowDispatch } from "@/lib/types";
 
 export default function CraneFleetDashboard() {
   const { towDispatches, updateTowStatus, toggleTowPhoto, verifyTowOtp } = useApp();
+  const [dutyStatus, setDutyStatus] = useState<"available" | "towing" | "offduty">("available");
   const [otpInputs, setOtpInputs] = useState<Record<string, string>>({});
   const [otpError, setOtpError] = useState<Record<string, string>>({});
+
+  // 1:45 countdown timer
+  const [secondsLeft, setSecondsLeft] = useState(105);
+
+  useEffect(() => {
+    const timer = setInterval(() => {
+      setSecondsLeft((prev) => (prev > 0 ? prev - 1 : 0));
+    }, 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  const formatTimer = (sec: number) => {
+    const m = Math.floor(sec / 60).toString().padStart(2, "0");
+    const s = (sec % 60).toString().padStart(2, "0");
+    return `${m}:${s}`;
+  };
 
   const activeDispatches = towDispatches.filter((t) => t.status !== "completed");
   const completedDispatches = towDispatches.filter((t) => t.status === "completed");
 
   const stages: { key: CraneTowDispatch["status"]; label: string }[] = [
-    { key: "dispatched", label: "1. Mobilized" },
-    { key: "arrived", label: "2. Arrived On-Site" },
-    { key: "loaded", label: "3. Flatbed Secured" },
-    { key: "handover_pending", label: "4. Shop Drop-Off" },
-    { key: "completed", label: "5. OTP Handover" },
+    { key: "dispatched", label: "1. Accepted" },
+    { key: "arrived", label: "2. En Route" },
+    { key: "loaded", label: "3. Loaded / Hooked" },
+    { key: "handover_pending", label: "4. In Transit" },
+    { key: "completed", label: "5. Delivered" },
   ];
 
   const handleNextStage = (t: CraneTowDispatch) => {
@@ -34,272 +51,280 @@ export default function CraneFleetDashboard() {
     const input = otpInputs[dispatchId] || "";
     const success = verifyTowOtp(dispatchId, input);
     if (!success) {
-      setOtpError((prev) => ({ ...prev, [dispatchId]: "Invalid OTP code. Check with customer." }));
+      setOtpError((prev) => ({ ...prev, [dispatchId]: "Invalid OTP code. Please check with customer or receiving garage." }));
     } else {
       setOtpError((prev) => ({ ...prev, [dispatchId]: "" }));
     }
   };
 
   return (
-    <div className="space-y-8">
-      {/* Fleet Operations Header */}
-      <div className="p-6 rounded-2xl bg-[#0f1422] border border-slate-800 flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="space-y-1.5">
+    <div className="space-y-6">
+      {/* 1. Header: Welcome + Big Duty Switch (Matches Crane Wireframe 5) */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 bg-wire-50 dark:bg-wire-900 border border-wire-300 dark:border-wire-700 rounded-xl p-4 md:p-5">
+        <div>
           <div className="flex items-center gap-2">
-            <span className="text-xs uppercase font-bold tracking-wider text-amber-400">Recovery Fleet Command</span>
-            <span className="text-slate-600">•</span>
-            <span className="inline-flex items-center gap-1.5 text-xs text-amber-400 font-medium bg-amber-500/10 px-2 py-0.5 rounded-full border border-amber-500/20">
-              <span className="w-1.5 h-1.5 rounded-full bg-amber-400 animate-pulse" />
-              Heavy Recovery Dispatch Active
+            <h1 className="text-lg md:text-xl font-bold text-wire-900 dark:text-white">
+              Tow Dispatch Dashboard
+            </h1>
+            <span className="px-2 py-0.5 rounded-full bg-emerald-100 dark:bg-emerald-950 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold">
+              ON-DUTY
             </span>
           </div>
-          <h1 className="text-2xl sm:text-3xl font-bold text-white">24/7 Highway Crane & Flatbed Fleet</h1>
-          <p className="text-xs text-slate-400">
-            Regulated ₹1,500 Base + ₹65/km Tariff • Pre-Tow 4-Point Photo Inspection System
+          <p className="text-xs text-wire-500">
+            Unit: <strong>Flatbed #1 (KL-07-EE-9090)</strong> • GPS Radar: <strong>40 km active</strong>
           </p>
         </div>
 
-        {/* Fleet Quick Status */}
-        <div className="flex items-center gap-4 border-t md:border-t-0 md:border-l border-slate-800 pt-4 md:pt-0 md:pl-6">
-          <div className="text-center">
-            <div className="text-2xl font-bold text-emerald-400 font-mono">3/4</div>
-            <div className="text-xs text-slate-400">Trucks Active</div>
+        {/* Big Visual Duty Switch */}
+        <button
+          onClick={() =>
+            setDutyStatus((prev) =>
+              prev === "available" ? "towing" : prev === "towing" ? "offduty" : "available"
+            )
+          }
+          className={`px-4 py-2 rounded-lg font-bold text-xs flex items-center gap-2 shadow-sm transition ${
+            dutyStatus === "available"
+              ? "bg-emerald-600 hover:bg-emerald-700 text-white"
+              : dutyStatus === "towing"
+              ? "bg-amber-600 hover:bg-amber-700 text-white"
+              : "bg-wire-700 text-white"
+          }`}
+        >
+          <span className="w-2.5 h-2.5 rounded-full bg-white animate-ping"></span>
+          <span>
+            {dutyStatus === "available"
+              ? "ON-DUTY & BROADCASTING"
+              : dutyStatus === "towing"
+              ? "TOWING IN TRANSIT"
+              : "OFF-DUTY (PAUSED)"}
+          </span>
+        </button>
+      </div>
+
+      {/* 2. 4 Metrics: New Requests, Active Tows, Towed Today, Earnings */}
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+        <div className="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900">
+          <div className="text-xs font-medium text-wire-500">New Tow Requests</div>
+          <div className="flex items-baseline gap-2 mt-1">
+            <span className="text-2xl font-bold font-mono text-wire-900 dark:text-white">1</span>
+            <span className="text-[10px] text-red-600 font-bold bg-red-50 px-1 rounded">
+              {formatTimer(secondsLeft)} left
+            </span>
           </div>
-          <div className="w-px h-8 bg-slate-800" />
-          <div className="text-center">
-            <div className="text-2xl font-bold text-amber-400 font-mono">
-              {activeDispatches.length}
-            </div>
-            <div className="text-xs text-slate-400">Live Dispatches</div>
+          <div className="text-[10px] text-wire-500 mt-1">Stranded on Bypass Highway</div>
+        </div>
+
+        <div className="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900">
+          <div className="text-xs font-medium text-wire-500">Active Recovery Job</div>
+          <div className="text-2xl font-bold font-mono text-wire-900 dark:text-white">
+            {activeDispatches.length}
           </div>
-          <div className="w-px h-8 bg-slate-800" />
-          <div className="text-center">
-            <div className="text-2xl font-bold text-purple-400 font-mono">
-              {completedDispatches.length}
-            </div>
-            <div className="text-xs text-slate-400">Completed Tows</div>
-          </div>
+          <div className="text-[10px] text-amber-600 font-bold mt-1">Stage 3: Loaded on Flatbed</div>
+        </div>
+
+        <div className="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900">
+          <div className="text-xs font-medium text-wire-500">Vehicles Towed Today</div>
+          <div className="text-2xl font-bold font-mono text-wire-900 dark:text-white">3</div>
+          <div className="text-[10px] text-wire-500 mt-1">Total transit: 48.5 km</div>
+        </div>
+
+        <div className="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-900">
+          <div className="text-xs font-medium text-wire-500">Today&apos;s Tow Revenue</div>
+          <div className="text-2xl font-bold font-mono text-wire-900 dark:text-white">₹5,400</div>
+          <div className="text-[10px] text-emerald-600 font-bold mt-1">+₹320 toll reimbursement</div>
         </div>
       </div>
 
-      {/* Active Dispatches */}
-      <div className="space-y-4">
-        <div className="flex items-center justify-between">
-          <h2 className="text-lg font-bold text-white flex items-center gap-2">
-            <Truck className="w-5 h-5 text-amber-400" />
-            <span>Active Highway Tow Dispatches</span>
-          </h2>
-          <span className="text-xs text-slate-500">{activeDispatches.length} mission(s) running</span>
-        </div>
-
-        {activeDispatches.length === 0 ? (
-          <div className="p-8 rounded-2xl bg-[#0f1422] border border-slate-800 text-center text-slate-400 text-sm">
-            All assigned tow missions are completed. Standby for next highway emergency.
+      {/* 3. Urgent Incoming Tow Dispatch Card */}
+      {activeDispatches.length > 0 && (
+        <div className="border-2 border-red-500/80 rounded-xl p-4 bg-red-50/30 dark:bg-red-950/20 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <span className="px-2 py-0.5 rounded bg-red-600 text-white text-[10px] font-bold uppercase animate-pulse">
+                🚨 HIGHWAY BREAKDOWN TOW DISPATCH
+              </span>
+              <span className="text-xs font-bold text-wire-900 dark:text-white">
+                Pickup 5.4 km away
+              </span>
+            </div>
+            <span className="font-mono text-xs font-bold text-red-700 bg-white dark:bg-wire-900 px-2 py-0.5 rounded border border-red-300">
+              {formatTimer(secondsLeft)}
+            </span>
           </div>
-        ) : (
-          <div className="grid grid-cols-1 gap-6">
-            {activeDispatches.map((t) => {
-              const allPhotosTaken = t.photos.front && t.photos.rear && t.photos.left && t.photos.right;
-              return (
-                <div
-                  key={t.id}
-                  className="p-6 rounded-2xl bg-[#0f1422] border border-slate-800 space-y-6 shadow-xl"
-                >
-                  {/* Top Bar: Mission, Vehicle, Rate */}
-                  <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
-                    <div className="space-y-1">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-mono px-2 py-0.5 rounded bg-slate-800 text-amber-400 border border-slate-700">
-                          {t.dispatchNumber}
-                        </span>
-                        <span className="text-xs text-slate-400">Unit: <strong>{t.driverName}</strong> ({t.truckPlate})</span>
-                      </div>
-                      <h3 className="text-xl font-bold text-white">
-                        {t.vehicleInfo.make} {t.vehicleInfo.model}
-                      </h3>
-                      <div className="text-xs text-slate-300 flex items-center gap-2">
-                        <span className="font-mono bg-slate-800 px-2 py-0.5 rounded border border-slate-700">{t.vehicleInfo.regNumber}</span>
-                        <span>•</span>
-                        <span className="text-red-400 font-semibold uppercase">Condition: {t.vehicleInfo.condition.replace(/_/g, " ")}</span>
-                      </div>
-                    </div>
 
-                    <div className="text-right sm:border-l sm:border-slate-800 sm:pl-4">
-                      <div className="text-xs text-slate-400">Calculated Tow Fare</div>
-                      <div className="text-2xl font-bold text-amber-400 font-mono">
-                        {formatCurrency(t.totalFare)}
-                      </div>
-                      <div className="text-[11px] text-slate-500">
-                        {t.distanceKm} km (₹{t.baseFare} base + ₹{t.perKmRate}/km)
-                      </div>
-                    </div>
-                  </div>
-
-                  {/* 5-Stage Stepper Component */}
-                  <div className="space-y-2">
-                    <div className="text-xs font-semibold text-slate-400">Recovery Workflow Stage:</div>
-                    <div className="grid grid-cols-2 sm:grid-cols-5 gap-2">
-                      {stages.map((stage, idx) => {
-                        const stageKeys: CraneTowDispatch["status"][] = ["dispatched", "arrived", "loaded", "handover_pending", "completed"];
-                        const curIdx = stageKeys.indexOf(t.status);
-                        const isDone = idx <= curIdx;
-                        const isCurrent = idx === curIdx;
-
-                        return (
-                          <div
-                            key={stage.key}
-                            className={`p-2.5 rounded-xl border text-center text-xs font-medium transition-all ${
-                              isCurrent
-                                ? "bg-amber-500/15 border-amber-500 text-amber-400 shadow-sm ring-1 ring-amber-500/20"
-                                : isDone
-                                ? "bg-emerald-500/10 border-emerald-500/30 text-emerald-400"
-                                : "bg-slate-900 border-slate-800 text-slate-500"
-                            }`}
-                          >
-                            {stage.label}
-                          </div>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Route & Destination Information */}
-                  <div className="grid grid-cols-1 md:grid-cols-2 gap-4 p-4 rounded-xl bg-slate-900/80 border border-slate-800 text-xs">
-                    <div className="space-y-1">
-                      <div className="text-slate-400 flex items-center gap-1.5">
-                        <MapPin className="w-3.5 h-3.5 text-red-400" />
-                        <span className="font-semibold text-slate-200">Pickup Breakdown Site:</span>
-                      </div>
-                      <p className="text-slate-300 pl-5">{t.pickupAddress}</p>
-                      <div className="pl-5 text-slate-400">Caller: {t.customerPhone}</div>
-                    </div>
-
-                    <div className="space-y-1 border-t md:border-t-0 md:border-l border-slate-800 pt-2 md:pt-0 md:pl-4">
-                      <div className="text-slate-400 flex items-center gap-1.5">
-                        <Navigation className="w-3.5 h-3.5 text-emerald-400" />
-                        <span className="font-semibold text-slate-200">Drop-off Workshop:</span>
-                      </div>
-                      <p className="text-slate-300 pl-5 font-bold">{t.destinationShopName}</p>
-                      <p className="text-slate-400 pl-5">{t.destinationAddress}</p>
-                    </div>
-                  </div>
-
-                  {/* 4-Point Damage Photo Capture Checklist */}
-                  <div className="space-y-2 p-4 rounded-xl bg-[#141b2d] border border-slate-800">
-                    <div className="flex items-center justify-between">
-                      <label className="text-xs font-bold text-white flex items-center gap-1.5">
-                        <Camera className="w-4 h-4 text-blue-400" />
-                        <span>Pre-Tow 4-Point Damage Inspection (Liability Protection)</span>
-                      </label>
-                      <span className="text-[11px] text-slate-400">
-                        {allPhotosTaken ? (
-                          <span className="text-emerald-400 font-semibold flex items-center gap-1">
-                            <CheckCircle className="w-3 h-3" /> All 4 angles documented
-                          </span>
-                        ) : (
-                          "Tap to toggle verified photo upload"
-                        )}
-                      </span>
-                    </div>
-
-                    <div className="grid grid-cols-2 sm:grid-cols-4 gap-2 pt-1">
-                      {(["front", "rear", "left", "right"] as const).map((angle) => {
-                        const isCaptured = t.photos[angle];
-                        return (
-                          <button
-                            key={angle}
-                            type="button"
-                            onClick={() => toggleTowPhoto(t.id, angle)}
-                            className={`p-2.5 rounded-xl border text-xs font-semibold flex items-center justify-between transition-all ${
-                              isCaptured
-                                ? "bg-emerald-500/10 border-emerald-500/40 text-emerald-400"
-                                : "bg-slate-900 border-slate-800 text-slate-400 hover:border-slate-700"
-                            }`}
-                          >
-                            <span className="capitalize">{angle} View</span>
-                            {isCaptured ? <CheckCircle className="w-3.5 h-3.5 text-emerald-400" /> : <Camera className="w-3.5 h-3.5 text-slate-500" />}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  </div>
-
-                  {/* Next Step Controls & Secure Handover OTP */}
-                  <div className="flex flex-col sm:flex-row items-center justify-between gap-4 pt-2 border-t border-slate-800">
-                    {t.status !== "handover_pending" ? (
-                      <div className="flex items-center gap-3 w-full sm:w-auto">
-                        <button
-                          onClick={() => handleNextStage(t)}
-                          className="w-full sm:w-auto px-6 py-2.5 rounded-xl bg-amber-600 hover:bg-amber-500 text-white font-semibold text-xs transition-all shadow-md shadow-amber-600/20"
-                        >
-                          Advance to Next Recovery Stage
-                        </button>
-                        <span className="text-xs text-slate-400 hidden sm:inline">
-                          Updates customer & receiving garage in real time
-                        </span>
-                      </div>
-                    ) : (
-                      /* OTP Confirmation Form */
-                      <div className="w-full flex flex-col sm:flex-row items-center gap-3">
-                        <div className="flex-1 space-y-1">
-                          <label className="text-xs font-semibold text-slate-300 flex items-center gap-1.5">
-                            <Key className="w-3.5 h-3.5 text-purple-400" />
-                            <span>Verify Customer / Garage Handover OTP:</span>
-                          </label>
-                          <div className="flex items-center gap-2">
-                            <input
-                              type="text"
-                              maxLength={4}
-                              placeholder="4-digit OTP"
-                              value={otpInputs[t.id] || ""}
-                              onChange={(e) => setOtpInputs({ ...otpInputs, [t.id]: e.target.value })}
-                              className="bg-slate-900 border border-slate-700 text-white text-sm rounded-xl px-3 py-2 w-36 outline-none font-mono focus:border-purple-500"
-                            />
-                            <button
-                              onClick={() => handleOtpSubmit(t.id)}
-                              className="px-4 py-2 bg-purple-600 hover:bg-purple-500 text-white text-xs font-semibold rounded-xl transition-all"
-                            >
-                              Verify & Settle Tow
-                            </button>
-                            <span className="text-[11px] text-slate-500">Hint: {t.handoverOtp}</span>
-                          </div>
-                          {otpError[t.id] && <p className="text-xs text-red-400">{otpError[t.id]}</p>}
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-      </div>
-
-      {/* Completed Tows Log */}
-      {completedDispatches.length > 0 && (
-        <div className="space-y-4">
-          <h2 className="text-lg font-bold text-white">Archived Tow Deliveries</h2>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {completedDispatches.map((t) => (
-              <div key={t.id} className="p-4 rounded-xl bg-[#0f1422] border border-slate-800 space-y-2">
-                <div className="flex items-center justify-between text-xs">
-                  <span className="font-mono text-slate-400">{t.dispatchNumber}</span>
-                  <span className="px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-400 border border-emerald-500/20 font-bold">
-                    Successfully Delivered
-                  </span>
-                </div>
-                <h4 className="font-bold text-white text-sm">
-                  {t.vehicleInfo.make} {t.vehicleInfo.model} ({t.vehicleInfo.regNumber})
-                </h4>
-                <div className="text-xs text-slate-400 flex justify-between">
-                  <span>Delivered to: {t.destinationShopName}</span>
-                  <span className="font-mono font-bold text-emerald-400">{formatCurrency(t.totalFare)}</span>
-                </div>
+          <div className="grid md:grid-cols-4 gap-2 text-xs bg-white dark:bg-wire-900 p-3 rounded-lg border border-red-200">
+            <div>
+              <div className="text-[10px] text-wire-400 font-mono">STRANDED VEHICLE</div>
+              <div className="font-bold text-wire-900 dark:text-white">
+                {activeDispatches[0].vehicleInfo.make} {activeDispatches[0].vehicleInfo.model}
               </div>
-            ))}
+              <div className="text-wire-500 font-mono text-[11px]">
+                Condition: {activeDispatches[0].vehicleInfo.condition.replace(/_/g, " ")}
+              </div>
+            </div>
+
+            <div>
+              <div className="text-[10px] text-wire-400 font-mono">PICKUP POINT (GPS)</div>
+              <div className="font-bold text-wire-900 dark:text-white">
+                {activeDispatches[0].pickupAddress}
+              </div>
+              <div className="text-wire-500 text-[11px]">Stranded on left shoulder</div>
+            </div>
+
+            <div>
+              <div className="text-[10px] text-wire-400 font-mono">DROP-OFF DESTINATION</div>
+              <div className="font-bold text-wire-900 dark:text-white">
+                {activeDispatches[0].destinationShopName}
+              </div>
+              <div className="text-wire-500 text-[11px]">
+                Tow distance: <strong>{activeDispatches[0].distanceKm} km</strong>
+              </div>
+            </div>
+
+            <div>
+              <div className="text-[10px] text-wire-400 font-mono">GUARANTEED FARE</div>
+              <div className="font-bold text-emerald-700 dark:text-emerald-400 text-sm font-mono">
+                {formatCurrency(activeDispatches[0].totalFare)}
+              </div>
+              <div className="text-[10px] text-wire-500">
+                Base ₹{activeDispatches[0].baseFare} + ₹{activeDispatches[0].perKmRate}/km
+              </div>
+            </div>
           </div>
         </div>
       )}
+
+      {/* 4. Active Recovery Job (5-Stage Recovery Stepper + 4-Point Photo Inspection) */}
+      <div className="space-y-4">
+        {activeDispatches.map((t) => (
+          <div
+            key={t.id}
+            className="border border-wire-300 dark:border-wire-700 rounded-xl p-5 bg-white dark:bg-wire-900 space-y-5 shadow-sm"
+          >
+            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-wire-200 dark:border-wire-800">
+              <div>
+                <h3 className="font-bold text-sm text-wire-900 dark:text-white">
+                  Active Recovery #{t.dispatchNumber}
+                </h3>
+                <p className="text-xs text-wire-500">
+                  {t.vehicleInfo.make} {t.vehicleInfo.model} ({t.vehicleInfo.regNumber}) • Destination: {t.destinationShopName}
+                </p>
+              </div>
+
+              <div className="flex items-center gap-2 text-xs">
+                <a
+                  href={`tel:${t.customerPhone}`}
+                  className="px-3 py-1.5 bg-emerald-600 text-white rounded font-bold flex items-center gap-1 hover:bg-emerald-700"
+                >
+                  <Phone className="w-3.5 h-3.5" />
+                  <span>Call Motorist</span>
+                </a>
+              </div>
+            </div>
+
+            {/* 5-Stage Stepper */}
+            <div className="space-y-2">
+              <div className="text-xs font-bold text-wire-900 dark:text-white flex justify-between">
+                <span>Towing Progression Lifecycle</span>
+                <span className="text-amber-600 font-mono text-[11px]">
+                  Stage: {t.status.toUpperCase()}
+                </span>
+              </div>
+
+              <div className="grid grid-cols-2 sm:grid-cols-5 gap-2 text-center text-xs">
+                {stages.map((stage, idx) => {
+                  const stageKeys: CraneTowDispatch["status"][] = ["dispatched", "arrived", "loaded", "handover_pending", "completed"];
+                  const curIdx = stageKeys.indexOf(t.status);
+                  const isDone = idx <= curIdx;
+                  const isCurrent = idx === curIdx;
+
+                  return (
+                    <div
+                      key={stage.key}
+                      className={`p-2 rounded-lg font-bold transition ${
+                        isCurrent
+                          ? "bg-amber-500 text-white shadow"
+                          : isDone
+                          ? "bg-emerald-100 dark:bg-emerald-950 text-emerald-900 dark:text-emerald-200"
+                          : "bg-wire-100 dark:bg-wire-800 text-wire-400"
+                      }`}
+                    >
+                      {stage.label}
+                    </div>
+                  );
+                })}
+              </div>
+
+              <div className="flex flex-wrap justify-between items-center pt-3 border-t border-wire-200 dark:border-wire-800 gap-2">
+                <div className="text-[11px] text-wire-500">Customer is tracking your recovery truck on live GPS.</div>
+                {t.status !== "handover_pending" ? (
+                  <button
+                    onClick={() => handleNextStage(t)}
+                    className="px-4 py-2 bg-wire-900 text-white dark:bg-white dark:text-wire-900 rounded font-bold text-xs hover:opacity-90"
+                  >
+                    Advance Recovery Stage ➔
+                  </button>
+                ) : (
+                  /* OTP Handover Verification */
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      maxLength={4}
+                      placeholder="4-digit OTP"
+                      value={otpInputs[t.id] || ""}
+                      onChange={(e) => setOtpInputs({ ...otpInputs, [t.id]: e.target.value })}
+                      className="border border-wire-400 rounded px-2.5 py-1 text-xs font-mono w-28 text-center bg-transparent"
+                    />
+                    <button
+                      onClick={() => handleOtpSubmit(t.id)}
+                      className="px-4 py-1.5 bg-emerald-700 text-white rounded font-bold text-xs hover:bg-emerald-800"
+                    >
+                      Verify Handover & Release Payout
+                    </button>
+                    <span className="text-[10px] text-wire-400">Hint: {t.handoverOtp}</span>
+                  </div>
+                )}
+              </div>
+              {otpError[t.id] && <p className="text-xs text-red-500">{otpError[t.id]}</p>}
+            </div>
+
+            {/* Pre-Tow 4-Point Photo Inspection */}
+            <div className="border border-wire-300 dark:border-wire-700 rounded-xl p-4 bg-white dark:bg-wire-850 space-y-3 text-xs">
+              <div className="font-bold text-wire-900 dark:text-white flex items-center justify-between">
+                <span>Pre-Hookup Inspection & Damage Documentation</span>
+                <span className="text-[11px] text-wire-500">Tap to toggle verified photo upload</span>
+              </div>
+              <p className="text-wire-500 text-[11px]">
+                Take 4 photos before winching onto flatbed to protect operator against existing scratch/dents.
+              </p>
+
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+                {(["front", "rear", "left", "right"] as const).map((angle) => {
+                  const isCaptured = t.photos[angle];
+                  return (
+                    <button
+                      key={angle}
+                      type="button"
+                      onClick={() => toggleTowPhoto(t.id, angle)}
+                      className={`border border-dashed rounded-lg p-3 text-center transition ${
+                        isCaptured
+                          ? "bg-emerald-50 dark:bg-emerald-950/40 border-emerald-500 text-emerald-700 dark:text-emerald-300 font-bold"
+                          : "bg-wire-50 dark:bg-wire-850 border-wire-300 text-wire-500 hover:border-wire-500"
+                      }`}
+                    >
+                      <div className="text-base mb-1">📸</div>
+                      <div className="font-bold text-[11px] capitalize">{angle} View</div>
+                      <span className="text-[10px]">
+                        {isCaptured ? "✓ Photo Verified" : "Tap to Upload"}
+                      </span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
     </div>
   );
 }

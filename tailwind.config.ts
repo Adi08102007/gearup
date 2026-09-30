@@ -10,25 +10,29 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        brand: {
-          50: "#f0fdf4",
-          100: "#dcfce7",
-          500: "#10b981",
-          600: "#059669",
-          700: "#047857",
+        wire: {
+          50: "#F9FAFB",
+          100: "#F3F4F6",
+          200: "#E5E7EB",
+          300: "#D1D5DB",
+          400: "#9CA3AF",
+          500: "#6B7280",
+          600: "#4B5563",
+          700: "#374151",
+          800: "#1F2937",
+          850: "#172033",
+          900: "#111827",
+          950: "#020617",
         },
-        emergency: {
-          50: "#fef2f2",
-          500: "#ef4444",
-          600: "#dc2626",
-          700: "#b91c1c",
+        status: {
+          avail: "#16A34A",
+          busy: "#D97706",
+          offline: "#6B7280",
+          emerg: "#DC2626",
         },
-        tow: {
-          50: "#fffbeb",
-          500: "#f59e0b",
-          600: "#d97706",
-          700: "#b45309",
-        }
+      },
+      fontFamily: {
+        mono: ["ui-monospace", "SFMono-Regular", "Menlo", "Monaco", "Consolas", "monospace"],
       },
     },
   },
